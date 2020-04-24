@@ -181,6 +181,8 @@ class SS13MultiStatus(commands.Cog):
                     embed.add_field(name=f"{k}:",value="`redacted`",inline=False)
         await ctx.send(embed=embed)
 
+    @setmultistatus.command()
+    @commands.guild_only()
     @commands.command()
     async def addserver(self, ctx, name: str, ip: str, port: int, embedurl: str):
         """
@@ -189,12 +191,14 @@ class SS13MultiStatus(commands.Cog):
         table = await self.config.guild(ctx.guild).mysql_table()
 
         try:
-            query = f"INSERT INTO `{table}` (`name`, `ip`, `port`, `embedurl`) VALUES ('{name}', '{ip}', '{port}', '{embedurl})'"
-            await self.query_database(ctx, query)
-            await ctx.send(f"{name.title()} added.")
+            query = f"INSERT INTO {table} (name, ip, port, embedurl, propername) VALUES ('{name}', '{ip}', '{port}', '{embedurl}', '{name}')"
+            await self.modify_database(ctx, query)
+            await ctx.send(f"{name} added.")
         except:
             raise
 
+    @setmultistatus.command()        
+    @commands.guild_only()
     @commands.command()
     async def removeserver(self, ctx, name: str):
         """
@@ -202,16 +206,17 @@ class SS13MultiStatus(commands.Cog):
         """
         table = await self.config.guild(ctx.guild).mysql_table()        
         try:
-            query = f"DELETE FROM `{table}` WHERE  `name`='{name}'"
-            await self.query_database(ctx, query)
+            await self.query_database(ctx, f"DELETE FROM `{table}` WHERE  name='{name}'")
             await ctx.send(f"{name.title()} deleted.")
         except:
             raise
 
+    @commands.guild_only()
     @commands.command()
+    @commands.cooldown(1, 5)
     async def listservers(self, ctx, searchterm = "%"):
         """
-        Gets the complete list of servers from the database, allowing you to specify which server If there's less than 10 
+        Gets the complete list of servers from the database, allowing you to specify which server. If there's less than 10, it shows playercounts and additional details.
         """
 
         table = await self.config.guild(ctx.guild).mysql_table()
@@ -253,7 +258,7 @@ class SS13MultiStatus(commands.Cog):
         table = await self.config.guild(ctx.guild).mysql_table()
 
         try:
-            query = f"SELECT ip, port, embedurl FROM {table} WHERE name='{name}'"
+            query = f"SELECT ip, port, embedurl, propername FROM {table} WHERE name LIKE \"%{name}%\""
             query = await self.query_database(ctx, query)
 
 
@@ -269,6 +274,7 @@ class SS13MultiStatus(commands.Cog):
             raise
         
     @commands.command()
+    @commands.guild_only()    
     @commands.cooldown(1, 5)
     async def check(self, ctx, server: str):
         """
@@ -276,6 +282,10 @@ class SS13MultiStatus(commands.Cog):
         """
         async with ctx.typing():
             serv_info = await self.server_search(ctx, name=server)
+        if not serv_info:
+            ctx.send(f"Server not found!.")
+            return
+
         port = serv_info['port']
         msg = await self.config.guild(ctx.guild).offline_message()
         server_url = serv_info['embedurl']
@@ -303,7 +313,7 @@ class SS13MultiStatus(commands.Cog):
 
             #Might make the embed configurable at a later date
 
-            embed=discord.Embed(title=f"{server.title()}'s status:", color=0x26eaea)
+            embed=discord.Embed(title=f"{serv_info['propername']}'s status:", color=0x26eaea)
             embed.add_field(name="Map", value=mapname, inline=True)
             embed.add_field(name="Security Level", value=str.title(*data['security_level']), inline=True)
             if  "shuttle_mode" in data:
@@ -406,3 +416,31 @@ class SS13MultiStatus(commands.Cog):
                 cursor.close()  
             if conn is not None:
                 conn.close()
+
+    async def modify_database(self, ctx, query: str):
+        # Database options loaded from the config
+        db = await self.config.guild(ctx.guild).mysql_db()
+        db_host = socket.gethostbyname(await self.config.guild(ctx.guild).mysql_host())
+        db_port = await self.config.guild(ctx.guild).mysql_port()
+        db_user = await self.config.guild(ctx.guild).mysql_user()
+        db_pass = await self.config.guild(ctx.guild).mysql_password()
+
+        cursor = None # Since the cursor/conn variables can't actually be closed if the connection isn't properly established we set a None type here
+        conn = None # ^
+
+        try:
+            # Establish a connection with the database and pull the relevant data
+            conn = mysql.connector.connect(host=db_host,port=db_port,database=db,user=db_user,password=db_pass, connect_timeout=5)
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(query)
+
+            return
+        
+        except:
+            raise 
+
+        finally:
+            if cursor is not None:
+                cursor.close()  
+            if conn is not None:
+                conn.close()        
