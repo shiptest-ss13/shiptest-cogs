@@ -51,7 +51,8 @@ class SS13MultiStatus(commands.Cog):
         self.config.register_global(**default_global)
         self.svr_chk_task = self.bot.loop.create_task(self.player_cache_loop())
 
-    @commands.guild_only()
+
+
     @commands.group()
     @checks.admin_or_permissions(administrator=True)
     async def setmultistatus(self,ctx): 
@@ -219,8 +220,8 @@ class SS13MultiStatus(commands.Cog):
         table = await self.config.mysql_table()
         query = f"INSERT INTO {table} (name, ip, port, embedurl, propername) VALUES ('{name}', '{byondip}', {port}, '{embedurl}', '{name.title()}')"
         try:
-            info = await self.modify_database(ctx, query)
-            result = await self.query_database(ctx, f"SELECT * FROM {table} where name=\"{name}\"")
+            info = await self.modify_database(query)
+            result = await self.query_database(f"SELECT * FROM {table} where name=\"{name}\"")
             if not result:
                 await ctx.send(f"{name.title()} could not be added. Query: {query} | Result: {info}")
             else:    
@@ -236,8 +237,8 @@ class SS13MultiStatus(commands.Cog):
         table = await self.config.mysql_table()       
         query = f"DELETE FROM {table} WHERE  name=\"{name}\""
         try:
-            info = await self.modify_database(ctx, query)
-            result = await self.query_database(ctx, f"SELECT * FROM {table} where name=\"{name}\"")            
+            info = await self.modify_database(query)
+            result = await self.query_database(f"SELECT * FROM {table} where name=\"{name}\"")            
             if result:
                 await ctx.send(f"{name.title()} could not be removed. Query: {query} | Result: {info}")
             else:    
@@ -245,9 +246,15 @@ class SS13MultiStatus(commands.Cog):
         except:
             raise
 
-    @commands.guild_only()
+    @setmultistatus.command()
+    async def refresh(self, ctx):
+        """
+        Reloads the current pop cache manually.
+        """
+        await ctx.send("Reloading cache...")
+        await self.player_cache_loop()
+
     @commands.command()
-    @commands.cooldown(1, 10)
     async def listservers(self, ctx, searchterm = "%"):
         """
         Gets the complete list of servers from the database, allowing you to specify which server. If there's less than 10, it shows playercounts and additional details.
@@ -255,26 +262,21 @@ class SS13MultiStatus(commands.Cog):
 
         table = await self.config.mysql_table()
 
-        query = f"SELECT name, ip, port, embedurl, propername FROM {table} WHERE name OR propername LIKE \"%{searchterm}%\""
+        query = f"SELECT * FROM {table} WHERE name OR propername LIKE \"%{searchterm}%\""
         message = await ctx.send("Getting servers...")
 
         try:
-            async with ctx.typing():
-                rows = await self.query_database(ctx, query)
+            rows = await self.query_database(query)
             if not rows:
                 embed=discord.Embed(description=f"No servers found!", color=0xf1d592)
                 return await message.edit(content=None,embed=embed)
             # Parse the data into individual fields within an embeded message in Discord for ease of viewing
             embed=discord.Embed(title=f"Server list:", color=0xf1d592)
             for row in rows:
-                if((len(rows) <= 10) | (searchterm == "%%%")): #if you REALLY need to see the population of ALL servers. (NOT A GOOD IDEA)
-                    try:
-                        playercount = await self.clean_check_players(row['ip'], row['port'])
-                    except:
-                        playercount = "N/A"
-                    embed.add_field(name=f'{row["propername"]} | ({row["name"]}) - {playercount} Players',value=f"IP: {row['ip']}:{row['port']} Embed: {row['embedurl']}", inline = False)
+                if((len(rows) <= 10) | (searchterm == "%%%")): #if you REALLY need to see the population of ALL servers. (NOT A GOOD IDEA) nevermind, it's all cached now so it's all good
+                    embed.add_field(name=f'{row["propername"]} | ({row["name"]}) - {row["cachedpop"]} Players',value=f"IP: {row['ip']}:{row['port']} Embed: {row['embedurl']}", inline = False)
                 else:
-                    embed.add_field(name=f'{row["propername"]} | ({row["name"]})',value=f"{row['embedurl']}", inline = False)
+                    embed.add_field(name=f'{row["propername"]} | ({row["name"]}) - {row["cachedpop"]} Players',value=f"{row['embedurl']}", inline = False)
             await message.edit(content=None,embed=embed)
 
         except mysql.connector.Error as err:
@@ -293,7 +295,7 @@ class SS13MultiStatus(commands.Cog):
 
         try:
             query = f"SELECT * FROM {table} WHERE name OR propername LIKE \"%{name}%\""
-            query = await self.query_database(ctx, query)
+            query = await self.query_database(query)
 
 
             results = {}
@@ -307,13 +309,12 @@ class SS13MultiStatus(commands.Cog):
         except:
             raise
         
-    @commands.command()
-    @commands.guild_only()    
-    @commands.cooldown(2, 5)
+    @commands.command()  
     async def check(self, ctx, server: str):
         """
         Gets the status and round details for a specified server
         """
+        table = await self.config.mysql_table()
         async with ctx.typing():
             serv_info = await self.server_search(ctx, name=server)
         if not serv_info:
@@ -326,8 +327,9 @@ class SS13MultiStatus(commands.Cog):
         server_ip = serv_info['ip']
         try:
             cleanip = socket.gethostbyname(server_ip)
-            data = await self.query_server(ctx, cleanip, port)
-        except TypeError:
+            data = await self.query_server(cleanip, port)
+            await self.modify_database(f"UPDATE `{table}` SET `cachedpop`='{int(*data['players'])}' WHERE `name`='{serv_info['name']}'") #Might as well cache it since we got it
+        except:
             await ctx.send(f"Failed to get the server's status. Check that you have fully configured this cog using `{ctx.prefix}setmultistatus`.")
             return 
 
@@ -367,12 +369,12 @@ class SS13MultiStatus(commands.Cog):
             except(discord.DiscordException, AttributeError):
                 self.statusmsg = await ctx.send(embed=embed)
 
-    async def clean_check_players(self, game_server:str, game_port:int) -> dict:
+    async def clean_check_players(self, game_server:str, game_port:int) -> int:
         cleanip = socket.gethostbyname(game_server)
         data = await self.query_server(cleanip, game_port)
         return int(*data['players'])
 
-    async def query_server(self, game_server:str, game_port:int, querystr="?status", attempt = 1) -> dict:
+    async def query_server(self, game_server:str, game_port:int, querystr="?status", attempt = 0) -> dict:
         """
         Queries the server for information
         """
@@ -418,10 +420,10 @@ class SS13MultiStatus(commands.Cog):
         except:
             max_attempts = await self.config.retries()    
             if(attempt <= max_attempts): #Attempt to reconnect
-                #await ctx.send(f"Failed to get the server's status. Retrying (attempt {attempt + 1} of {max_attempts})...") #For debug purposes
+                await asyncio.sleep(5)
                 return await self.query_server(game_server, game_port, querystr, attempt + 1)
             else:
-                return None    
+                return 0
 
         finally:
             conn.close()
@@ -485,25 +487,22 @@ class SS13MultiStatus(commands.Cog):
                 conn.close()        
 
     async def player_cache_loop(self):
-        check_time = 50
+        table = await self.config.mysql_table()        
+        check_time = 100
         now = datetime.utcnow()
         toggle = await self.config.cache_toggle()
+
         while self == self.bot.get_cog("SS13MultiStatus"):
             log.debug("Starting server checks")            
-            query = f"SELECT name, ip, port FROM {table}"
 
             if(toggle is False):
                 pass
-
             else:
+                query = f"SELECT name, ip, port FROM {table}"            
                 rows = await self.query_database(query)
-                if not rows:
-                    return
-                # Parse the data into individual fields within an embeded message in Discord for ease of viewing
-                embed=discord.Embed(title=f"Server list:", color=0xf1d592)
                 for row in rows:
                     cache_pop = await self.clean_check_players(row['ip'], row['port'])
-                    cache_query = f"INSERT INTO {table} (cachedpop) VALUES ('{cache_pop}') WHERE name=\"{row['name']}\""
+                    cache_query = f"UPDATE `{table}` SET `cachedpop`='{cache_pop}' WHERE `name`='{row['name']}'"
                     await self.modify_database(cache_query)
 
             now = datetime.utcnow()
