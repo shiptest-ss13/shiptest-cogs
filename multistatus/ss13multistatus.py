@@ -22,7 +22,7 @@ from redbot.core import commands, checks, Config
 from redbot.core.utils.chat_formatting import pagify, box
 from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
 
-__version__ = "0.0.1"
+__version__ = "0.0.3"
 __author__ = "MarkSuckerberg with Crossedfall's code"
 
 
@@ -33,8 +33,9 @@ class SS13MultiStatus(commands.Cog):
         self.bot = bot
         self.config = Config.get_conf(self, 3257143194, force_registration=True)
 
-        default_guild = {
-            "offline_message": "Currently offline",            
+        default_guild = { 
+            "offline_message": "Currently offline",    
+            "timeout": 10,       
             "mysql_table": "multistatus",
             "mysql_host": "127.0.0.1",
             "mysql_port": 3306,
@@ -152,6 +153,18 @@ class SS13MultiStatus(commands.Cog):
             await ctx.send("There was a problem setting your custom offline message. Please check your entry and try again.")
         
     @setmultistatus.command()
+    async def timeout(self, ctx, seconds: int):
+        """
+        Sets the timeout duration for status checks
+        """
+        try:
+            await self.config.timeout.set(seconds)
+            await ctx.send(f"Timeout duration set to: `{seconds} seconds`")
+        except(ValueError, KeyError, AttributeError):
+            await ctx.send("There was a problem setting the timeout duration. Please check your input and try again.")
+
+
+    @setmultistatus.command()
     async def current(self,ctx):
         """
         Gets the current settings for the notes database
@@ -168,20 +181,21 @@ class SS13MultiStatus(commands.Cog):
                     embed.add_field(name=f"{k}:",value="`redacted`",inline=False)
         await ctx.send(embed=embed)
 
-    @setmultistatus.command()
-    async def addserver(self, ctx, name: str, ip: int, port: int, embedurl: str):
+    @commands.command()
+    async def addserver(self, ctx, name: str, ip: str, port: int, embedurl: str):
         """
         Adds a checkable server to the database.
         """ 
         table = await self.config.guild(ctx.guild).mysql_table()
 
         try:
-            query = f"INSERT INTO `{table}` (`name`, `ip`, `port`, `embedurl`), VALUES ('{name}', '{ip}', '{port}', '{embedurl})'"
+            query = f"INSERT INTO `{table}` (`name`, `ip`, `port`, `embedurl`) VALUES ('{name}', '{ip}', '{port}', '{embedurl})'"
+            await self.query_database(ctx, query)
+            await ctx.send(f"{name.title()} added.")
         except:
             raise
 
-    @setmultistatus.command()
-    @checks.is_owner()
+    @commands.command()
     async def removeserver(self, ctx, name: str):
         """
         Removes a server from the database.
@@ -189,18 +203,20 @@ class SS13MultiStatus(commands.Cog):
         table = await self.config.guild(ctx.guild).mysql_table()        
         try:
             query = f"DELETE FROM `{table}` WHERE  `name`='{name}'"
+            await self.query_database(ctx, query)
+            await ctx.send(f"{name.title()} deleted.")
         except:
             raise
 
     @commands.command()
-    async def listservers(self, ctx):
+    async def listservers(self, ctx, searchterm = "%"):
         """
-        Gets the complete list of servers from the database.
+        Gets the complete list of servers from the database, allowing you to specify which server If there's less than 10 
         """
 
         table = await self.config.guild(ctx.guild).mysql_table()
 
-        query = f"SELECT name, ip, port, embedurl FROM {table}"
+        query = f"SELECT name, ip, port, embedurl, propername FROM {table} WHERE name OR propername LIKE \"%{searchterm}%\""
         message = await ctx.send("Getting servers...")
 
         try:
@@ -210,23 +226,18 @@ class SS13MultiStatus(commands.Cog):
                 return await message.edit(content=None,embed=embed)
             # Parse the data into individual fields within an embeded message in Discord for ease of viewing
             notes = ""
-            temp_embeds = []
-            embeds = []
+            embed=discord.Embed(title=f"Server list:", color=0xf1d592)
             for row in rows:
-                notes += f"\n[{row['name']} - IP {ipaddress.IPv4Address(row['ip'])}:{row['port']}] Embed: {row['embedurl']}"
-            for note in pagify(notes):
-                embed = discord.Embed(description=box(note, lang="asciidoc"), color=0xf1d592)
-                temp_embeds.append(embed)
-            max_i = len(temp_embeds)
-            i = 1
-            for embed in temp_embeds:
-                embed.set_author(name=f"Server list")
-                embed.set_footer(text=f"Page {i}/{max_i}")
-                embeds.append(embed)
-                i += 1
-            await message.delete()
-            await menu(ctx, embeds, DEFAULT_CONTROLS)
-        
+                if((len(rows) < 10) | (searchterm == "%%%")): #if you REALLY need to see the population of ALL servers. (NOT A GOOD IDEA)
+                    try:
+                        playercount = await self.clean_check_players(ctx, row['ip'], row['port'])
+                    except:
+                        playercount = "N/A"
+                    embed.add_field(name=f'{row["propername"]} | ({row["name"]}) - {playercount} Players',value=f"IP: {row['ip']}:{row['port']} Embed: {row['embedurl']}")
+                else:
+                    embed.add_field(name=f'{row["propername"]} | ({row["name"]})',value=f"{row['embedurl']}")
+            await message.edit(content=None,embed=embed)
+
         except mysql.connector.Error as err:
             embed=discord.Embed(title=f"Error looking up servers!", description=f"{format(err)}", color=0xff0000)
             await message.edit(content=None,embed=embed)
@@ -235,7 +246,6 @@ class SS13MultiStatus(commands.Cog):
             await message.edit(content="`mysql-connector` requirement not found! Please install this requirement using `pip install mysql-connector`.")
     
 
-    @commands.command()
     async def server_search(self, ctx, name = None) -> dict:
         """
         Runs a database query to check for the server's IP, port, and such.
@@ -252,11 +262,8 @@ class SS13MultiStatus(commands.Cog):
                 query = query[0] # Checks to see if a player was found, if the list is empty nothing was found so we return the empty dict.
             except IndexError:
                 return results
-            results['ip'] = ipaddress.IPv4Address(query['ip']) #IP's are stored as a 32 bit integer, converting it for readability
-            results['port'] = query['port']
-            results['embedurl'] = query['embedurl']
 
-            return results
+            return query
 
         except:
             raise
@@ -270,11 +277,12 @@ class SS13MultiStatus(commands.Cog):
         async with ctx.typing():
             serv_info = await self.server_search(ctx, name=server)
         port = serv_info['port']
-        msg = await self.config.offline_message()
+        msg = await self.config.guild(ctx.guild).offline_message()
         server_url = serv_info['embedurl']
+        server_ip = serv_info['ip']
         try:
-            server = socket.gethostbyname(serv_info['ip'])
-            data = await self.query_server(server, port)
+            cleanip = socket.gethostbyname(server_ip)
+            data = await self.query_server(ctx, cleanip, port)
         except TypeError:
             await ctx.send(f"Failed to get the server's status. Check that you have fully configured this cog using `{ctx.prefix}setmultistatus`.")
             return 
@@ -316,7 +324,12 @@ class SS13MultiStatus(commands.Cog):
             except(discord.DiscordException, AttributeError):
                 self.statusmsg = await ctx.send(embed=embed)
 
-    async def query_server(self, game_server:str, game_port:int, querystr="?status" ) -> dict:
+    async def clean_check_players(self, ctx, game_server:str, game_port:int) -> dict:
+        cleanip = socket.gethostbyname(game_server)
+        data = await self.query_server(ctx, cleanip, game_port)
+        return int(*data['players'])
+
+    async def query_server(self, ctx, game_server:str, game_port:int, querystr="?status" ) -> dict:
         """
         Queries the server for information
         """
@@ -324,7 +337,7 @@ class SS13MultiStatus(commands.Cog):
 
         try:
             query = b"\x00\x83" + struct.pack('>H', len(querystr) + 6) + b"\x00\x00\x00\x00\x00" + querystr.encode() + b"\x00" #Creates a packet for byond according to TG's standard
-            conn.settimeout(await self.config.timeout()) #Byond is slow, timeout set relatively high to account for any latency
+            conn.settimeout(await self.config.guild(ctx.guild).timeout()) #Byond is slow, timeout set relatively high to account for any latency
             conn.connect((game_server, game_port)) 
 
             conn.sendall(query)
@@ -364,3 +377,32 @@ class SS13MultiStatus(commands.Cog):
 
         finally:
             conn.close()
+
+    async def query_database(self, ctx, query: str):
+        # Database options loaded from the config
+        db = await self.config.guild(ctx.guild).mysql_db()
+        db_host = socket.gethostbyname(await self.config.guild(ctx.guild).mysql_host())
+        db_port = await self.config.guild(ctx.guild).mysql_port()
+        db_user = await self.config.guild(ctx.guild).mysql_user()
+        db_pass = await self.config.guild(ctx.guild).mysql_password()
+
+        cursor = None # Since the cursor/conn variables can't actually be closed if the connection isn't properly established we set a None type here
+        conn = None # ^
+
+        try:
+            # Establish a connection with the database and pull the relevant data
+            conn = mysql.connector.connect(host=db_host,port=db_port,database=db,user=db_user,password=db_pass, connect_timeout=5)
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(query)
+            rows = cursor.fetchall()
+
+            return rows
+        
+        except:
+            raise 
+
+        finally:
+            if cursor is not None:
+                cursor.close()  
+            if conn is not None:
+                conn.close()
