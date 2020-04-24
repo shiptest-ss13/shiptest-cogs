@@ -1,0 +1,15 @@
+{
+    "author": ["Important code by Crossedfall (Crossedfall#1001), horrible shitcode additions by MarkSuckerberg"],
+    "install_msg": "Please ensure that the listen port (defaults to `8081`) is allowed through your firewall to enable new round and admin notifications. Please note that all configurable options are owner only.\nsee the [readme](https://github.com/crossedfall/crossed-cogs#status) for detailed setup instructions.",
+    "name": "SS13 Multi-server Status Check",
+    "short": "Pulls information from multiple different servers' current SS13 rounds",
+    "description": "Checks the current status of one of many SS13 servers' rounds and pulls information about the number of players, the game-mode, and round duration.",
+    "permissions" : ["Manage Messages", "Embed Links"],
+    "tags": [
+        "Space Station 13",
+        "Game",
+        "Administration",
+        "Utility",
+        "SS13"
+    ]
+}
