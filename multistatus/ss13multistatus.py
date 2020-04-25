@@ -251,8 +251,13 @@ class SS13MultiStatus(commands.Cog):
         """
         Reloads the current pop cache manually.
         """
-        await ctx.send("Reloading cache...")
-        await self.player_cache_loop()
+        message = await ctx.send("Reloading cache...")
+        try:
+            await self.player_cache_loop()
+            await message.edit("Cache reloaded successfully.")
+        except:
+            await message.edit("Cache reload failed!")
+            raise
 
     @commands.command()
     async def listservers(self, ctx, searchterm = "%"):
@@ -328,10 +333,10 @@ class SS13MultiStatus(commands.Cog):
         try:
             cleanip = socket.gethostbyname(server_ip)
             data = await self.query_server(cleanip, port)
-            await self.modify_database(f"UPDATE `{table}` SET `cachedpop`='{int(*data['players'])}' WHERE `name`='{serv_info['name']}'") #Might as well cache it since we got it
+            await self.modify_database(f"UPDATE `{table}` SET `cachedpop`='{['players'][0]}' WHERE `name`='{serv_info['name']}'") #Might as well cache it since we got it
         except:
             await ctx.send(f"Failed to get the server's status. Check that you have fully configured this cog using `{ctx.prefix}setmultistatus`.")
-            return 
+            raise
 
         if not data: #Server is not responding, send the offline message
             embed=discord.Embed(title="__Server Status:__", description=f"{msg}", color=0xff0000)
@@ -358,8 +363,8 @@ class SS13MultiStatus(commands.Cog):
                     embed.add_field(name="Shuttle Timer", value=time.strftime('%M:%S', time.gmtime(int(*data['shuttle_timer']))), inline=True)
             else:
                 embed.add_field(name="Shuttle Status", value="Refueling", inline=True)
-            embed.add_field(name="Players", value=int(*data['players']), inline=True)
-            embed.add_field(name="Admins", value=int(*data['admins']), inline=True)
+            embed.add_field(name="Players", value=data['players'][0], inline=True)
+            embed.add_field(name="Admins", value=data['admins'][0], inline=True)
             embed.add_field(name="Round Duration", value=duration, inline=True)
             embed.add_field(name="Server Link:", value=f"{server_url}", inline=False)
 
@@ -372,7 +377,7 @@ class SS13MultiStatus(commands.Cog):
     async def clean_check_players(self, game_server:str, game_port:int) -> int:
         cleanip = socket.gethostbyname(game_server)
         data = await self.query_server(cleanip, game_port)
-        return int(*data['players'])
+        return data['players'][0]
 
     async def query_server(self, game_server:str, game_port:int, querystr="?status", attempt = 0) -> dict:
         """
