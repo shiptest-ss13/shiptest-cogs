@@ -211,7 +211,7 @@ class SS13MultiStatus(commands.Cog):
                 embedurl = f"<byond://{ip}>"
                 byondip = (ip.split(":"))[0]
                 port = int((ip.split(":"))[1]) #this too
-        except (TypeError):
+        except (TypeError, IndexError):
             await ctx.send(f"{ip} is not a valid IP address! Please use either the raw IP (not the web redirect, and make sure it includes the port) or the byond URL!")
             return
 
@@ -254,11 +254,34 @@ class SS13MultiStatus(commands.Cog):
         message = await ctx.send("Reloading cache...")
         try:
             await self.player_cache_loop()
-            await message.edit("Cache reloaded successfully.")
+            await message.edit(content="Cache reloaded successfully.")
         except:
-            await message.edit("Cache reload failed!")
+            await message.edit(content="Cache reload failed!")
             raise
 
+
+    async def server_search(self, ctx, name = None) -> dict:
+        """
+        Runs a database query to check for the server's IP, port, and such.
+        """
+        table = await self.config.mysql_table()
+
+        try:
+            query = f"SELECT * FROM {table} WHERE name OR propername LIKE \"%{name}%\" ORDER BY `cachedpop` DESC"
+            query = await self.query_database(query)
+
+
+            results = {}
+            try:
+                query = query[0] # Checks to see if a player was found, if the list is empty nothing was found so we return the empty dict.
+            except IndexError:
+                return results
+
+            return query
+
+        except:
+            raise
+        
     @commands.command()
     async def listservers(self, ctx, searchterm = "%"):
         """
@@ -282,8 +305,8 @@ class SS13MultiStatus(commands.Cog):
                     embed.add_field(name=f'{row["propername"]} | ({row["name"]}) - {row["cachedpop"]} Players',value=f"IP: {row['ip']}:{row['port']} Embed: {row['embedurl']}", inline = False)
                 else:
                     embed.add_field(name=f'{row["propername"]} | ({row["name"]}) - {row["cachedpop"]} Players',value=f"{row['embedurl']}", inline = False)
-            await message.edit(content=None,embed=embed)
-
+            embed.set_footer(text="Accuracy not guaranteed.")
+            await message.edit(content=None,embed=embed)        
         except mysql.connector.Error as err:
             embed=discord.Embed(title=f"Error looking up servers!", description=f"{format(err)}", color=0xff0000)
             await message.edit(content=None,embed=embed)
@@ -292,28 +315,6 @@ class SS13MultiStatus(commands.Cog):
             await message.edit(content="`mysql-connector` requirement not found! Please install this requirement using `pip install mysql-connector`.")
     
 
-    async def server_search(self, ctx, name = None) -> dict:
-        """
-        Runs a database query to check for the server's IP, port, and such.
-        """
-        table = await self.config.mysql_table()
-
-        try:
-            query = f"SELECT * FROM {table} WHERE name OR propername LIKE \"%{name}%\""
-            query = await self.query_database(query)
-
-
-            results = {}
-            try:
-                query = query[0] # Checks to see if a player was found, if the list is empty nothing was found so we return the empty dict.
-            except IndexError:
-                return results
-
-            return query
-
-        except:
-            raise
-        
     @commands.command()  
     async def check(self, ctx, server: str):
         """
@@ -330,10 +331,11 @@ class SS13MultiStatus(commands.Cog):
         msg = await self.config.offline_message()
         server_url = serv_info['embedurl']
         server_ip = serv_info['ip']
+        col = discord.Color(value=int(serv_info['color'], 16))
+
         try:
             cleanip = socket.gethostbyname(server_ip)
             data = await self.query_server(cleanip, port)
-            await self.modify_database(f"UPDATE `{table}` SET `cachedpop`='{['players'][0]}' WHERE `name`='{serv_info['name']}'") #Might as well cache it since we got it
         except:
             await ctx.send(f"Failed to get the server's status. Check that you have fully configured this cog using `{ctx.prefix}setmultistatus`.")
             raise
@@ -341,38 +343,166 @@ class SS13MultiStatus(commands.Cog):
         if not data: #Server is not responding, send the offline message
             embed=discord.Embed(title="__Server Status:__", description=f"{msg}", color=0xff0000)
             await ctx.send(embed=embed)
-
         else:
-            #Reported time is in seconds, we need to convert that to be easily understood
-            duration = int(*data['round_duration'])
-            duration = time.strftime('%H:%M', time.gmtime(duration))
-            #Format long map names
-            mapname = str.title(*data['map_name'])
-            mapname = '\n'.join(textwrap.wrap(mapname,25))
-            col = discord.Color(value=int(serv_info['color'], 16))
-
-            #Might make the embed configurable at a later date
-
-            embed=discord.Embed(title=f"{serv_info['propername']}'s status:", color=col)
-            embed.add_field(name="Map", value=mapname, inline=True)
-            embed.add_field(name="Security Level", value=str.title(*data['security_level']), inline=True)
-            if  "shuttle_mode" in data:
-                if ("docked" or "call") not in data['shuttle_mode']:
-                    embed.add_field(name="Shuttle Status", value=str.title(*data['shuttle_mode']), inline=True)
+            try:
+                await self.modify_database(f"UPDATE `{table}` SET `cachedpop`='{data['players'][0]}' WHERE `name`='{serv_info['name']}'") #Might as well cache it since we got it
+                #Reported time is in seconds, we need to convert that to be easily understood
+                if("round_duration" in data):
+                    duration = int(*data['round_duration'])
                 else:
-                    embed.add_field(name="Shuttle Timer", value=time.strftime('%M:%S', time.gmtime(int(*data['shuttle_timer']))), inline=True)
-            else:
-                embed.add_field(name="Shuttle Status", value="Refueling", inline=True)
-            embed.add_field(name="Players", value=data['players'][0], inline=True)
-            embed.add_field(name="Admins", value=data['admins'][0], inline=True)
-            embed.add_field(name="Round Duration", value=duration, inline=True)
-            embed.add_field(name="Server Link:", value=f"{server_url}", inline=False)
+                    duration = int(*data['roundduration'])    
+                duration = time.strftime('%H:%M', time.gmtime(duration))
+                #Format long map names
+                mapname = str.title(*data['map_name'])
+                mapname = '\n'.join(textwrap.wrap(mapname,25))
+
+                #Might make the embed configurable at a later date
+
+                embed=discord.Embed(title=f"{serv_info['propername']}'s status:", color=col)
+                embed.add_field(name="Map", value=mapname, inline=True)
+                embed.add_field(name="Security Level", value=str.title(*data['security_level']), inline=True)
+                if  "shuttle_mode" in data:
+                    if ("docked" or "call") not in data['shuttle_mode']:
+                        embed.add_field(name="Shuttle Status", value=str.title(*data['shuttle_mode']), inline=True)
+                    else:
+                        embed.add_field(name="Shuttle Timer", value=time.strftime('%M:%S', time.gmtime(int(*data['shuttle_timer']))), inline=True)
+                else:
+                    embed.add_field(name="Shuttle Status", value="Refueling", inline=True)
+                embed.add_field(name="Players", value=data['players'][0], inline=True)
+                embed.add_field(name="Admins", value=data['admins'][0], inline=True)
+                embed.add_field(name="Round Duration", value=duration, inline=True)
+                embed.add_field(name="Server Link:", value=f"{server_url}", inline=False)
+
+            except: #That failed, let's send a baby version of it
+                embed=discord.Embed(title=f"{serv_info['propername']}'s status:", color=col)
+                embed.add_field(name="Players", value=data['players'][0], inline=True)
+                embed.add_field(name="Mode", value=str(data['mode']).split("'")[1], inline=True)
+
+                if("round_duration" in data):
+                    embed.add_field(name="Round Duration", value=str(data['round_duration']), inline=True)
+                elif("roundduration" in data):
+                    embed.add_field(name="Round Duration", value=str(data['roundduration']), inline=True)
+
+                if("round_duration" in data):
+                    embed.add_field(name="Round Duration", value=str(data['round_duration']), inline=True)
+                elif("roundduration" in data):
+                    embed.add_field(name="Round Duration", value=str(data['roundduration']), inline=True)
+
+                embed.add_field(name="Server Link:", value=f"{server_url}", inline=False)
+                embed.set_footer(text="Limited information available.")
 
             try:
                 await self.statusmsg.delete()
                 self.statusmsg = await ctx.send(embed=embed)
             except(discord.DiscordException, AttributeError):
-                self.statusmsg = await ctx.send(embed=embed)
+                self.statusmsg = await ctx.send(embed=embed)                
+
+    @commands.command()
+    async def getattribs(self, ctx, server:str):
+        """
+        Gets the public players in a server.
+        """
+        async with ctx.typing():
+            serv_info = await self.server_search(ctx, name=server)
+        if not serv_info:
+            await ctx.send("Server not found!")
+            return
+
+        port = serv_info['port']
+        msg = await self.config.offline_message()
+        server_url = serv_info['embedurl']
+        server_ip = serv_info['ip']
+        col = discord.Color(value=int(serv_info['color'], 16))
+
+        try:
+            cleanip = socket.gethostbyname(server_ip)
+            data = await self.query_server(cleanip, port)
+        except:
+            await ctx.send(f"Failed to get the server's status. Check that you have fully configured this cog using `{ctx.prefix}setmultistatus`.")
+            raise        
+
+        attribs = []
+
+        if data:
+            for row in data:
+                attribs.append(row)
+            await ctx.send(attribs)    
+
+    @commands.command()
+    async def findplayer(self, ctx, ckey:str):
+        """
+        Finds the location of a ckey. It's not creepy, I swear!
+        """
+        async with ctx.typing():
+            rows = await self.server_search(ctx)
+
+        for row in rows:
+            await ctx.send(row)
+            playerlist = await self.players(ctx, row, False)
+            if(len(playerlist)):
+                await ctx.send(playerlist)
+                if(ckey in playerlist):
+                    await ctx.send(f"Player {ckey} found on {row['propername']}!")
+                    return
+
+        await ctx.send(f"Player {ckey} not found.")
+
+
+
+    @commands.command()
+    async def players(self, ctx, server:str, embed = True):
+        """
+        Gets the players from most servers.
+        """
+        async with ctx.typing():
+            serv_info = await self.server_search(ctx, name=server)
+        if not serv_info:
+            await ctx.send("Server not found!")
+            return
+
+        port = serv_info['port']
+        server_ip = socket.gethostbyname(serv_info['ip'])
+        col = discord.Color(value=int(serv_info['color'], 16))
+        players = []
+        try:
+            data = await self.query_server(server_ip,port,"?whoIs") #Try getting the Whois first
+        except:
+            await ctx.send(f"Failed to get the server's playercount.")
+            raise
+
+        if (len(data) & ("players" in data)):
+            players = [i for i in data['players']]
+
+        else: #If that doesn't work, then 
+            try:
+                data = await self.query_server(server_ip, port)
+            except:
+                await ctx.send(f"Failed to get the server's playercount.")
+                raise        
+
+            players = []
+
+            if data:
+                for row in data:
+                    if((not row.find("player")) | (row.find("client"))): #Don't ask me why there's a not, but this checks for
+                        playername = (str(data[row]).split("'"))[1] #Splits the return value (['name']) into three parts, and takes the part with just the name
+                        if(playername.isdigit()): #There's deffos a better way to do this
+                            continue
+                        players.append(playername)
+            else:
+                await ctx.send(f"Failed to get playercount.")            
+
+        if(embed):
+            if(not len(players)): #If neither worked, send this embed
+                embed = discord.Embed(title=f"__Current Players__ (0): ", description="No players currently online or server does not support this command.", color=col)
+            else: #If one DID work, then put the players list into an embed
+                embed = discord.Embed(title=f"__Current Players__ ({len(players)}): ", description=f'\n'.join(map(str,players)), color=col)
+
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send(players)
+            return players    
+
 
     async def clean_check_players(self, game_server:str, game_port:int) -> int:
         cleanip = socket.gethostbyname(game_server)
@@ -398,7 +528,7 @@ class SS13MultiStatus(commands.Cog):
 
             return parsed_data
             """
-            +----------------+--------+
+            +----------------+--------+ - NOT ACCURATE FOR ALL SERVERS!!!
             | Reported Items | Return |
             +----------------+--------+
             | Version        | str    |
