@@ -479,6 +479,9 @@ class SS13Status(commands.Cog):
         Queries the server for information
         """
 
+        server = self.config.server()
+        port = self.config.game_port()
+
         message = {"query": querystr}
 
         if(await self.config.comms_key()):
@@ -491,7 +494,7 @@ class SS13Status(commands.Cog):
 
         message = json.dumps(message, separators=(",", ":"))
 
-        reader, writer = await asyncio.open_connection(self.config.server(), self.config.game_port())            
+        reader, writer = await asyncio.open_connection(server, port)            
         query = b"\x00\x83"
         query += struct.pack('>H', len(message) + 6)
         query += b"\x00\x00\x00\x00\x00"
