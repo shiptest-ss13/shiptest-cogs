@@ -371,7 +371,8 @@ class SS13Status(commands.Cog):
         server_url = await self.config.server_url()
         try:
             server = socket.gethostbyname(await self.config.server())
-            await self.topic_query_server(game_server=server, game_port=port, querystr="?comms_console", params={"message": message, "message_sender": sender}, needsauth=True)
+            result = await self.topic_query_server(game_server=server, game_port=port, querystr="?comms_console", params={"message": message, "message_sender": sender}, needsauth=True)
+            ctx.send(f"Result: [result]")
         except TypeError:
             await ctx.send(f"Failed to send message. Make sure the server is properly configured.")
             return 
