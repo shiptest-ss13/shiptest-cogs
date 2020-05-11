@@ -479,7 +479,7 @@ class SS13Status(commands.Cog):
         Queries the server for information
         """
 
-        server = socket.gethostbyname(await self.config.server())
+        server = await self.config.server()
         port = await self.config.game_port()
 
         message = {"query": querystr}
