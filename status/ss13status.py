@@ -366,12 +366,8 @@ class SS13Status(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 5)
     async def ccannounce(self, ctx, message:str, sender="Central Command"):
-        port = await self.config.game_port()        
-        msg = await self.config.offline_message()
-        server_url = await self.config.server_url()
         try:
-            server = socket.gethostbyname(await self.config.server())
-            result = await self.topic_query_server(game_server=server, game_port=port, querystr="?comms_console", params={"message": message, "message_sender": sender}, needsauth=True)
+            result = await self.topic_query_server(querystr="?comms_console", params={"message": message, "message_sender": sender})
             ctx.send(f"Result: [result]")
         except TypeError:
             await ctx.send(f"Failed to send message. Make sure the server is properly configured.")
@@ -482,15 +478,14 @@ class SS13Status(commands.Cog):
         finally:
             conn.close()
 
-    async def topic_query_server(self, game_server:str, game_port:int, querystr="?status", params=None, attempt = 0, needsauth=False): #I could combine this with the previous def but I'm too scared to mess with it
+    async def topic_query_server(self, querystr="?status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
         Queries the server for information
         """
-        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 
         message = {"query": querystr}
 
-        if(needsauth):
+        if(await self.config.comms_key()):
             message["auth"] = await self.config.comms_key()
 
         if(params):
@@ -499,23 +494,47 @@ class SS13Status(commands.Cog):
         message = json.dumps(message, separators=(",", ":"))
 
         try:
-            query = b"\x00\x83" + struct.pack('>H', len(message) + 6) + b"\x00\x00\x00\x00\x00" + message.encode() + b"\x00" #Creates a packet for byond according to TG's standard
-            conn.settimeout(await self.config.timeout()) #Byond is slow, timeout set relatively high to account for any latency
-            conn.connect((game_server, game_port)) 
+            reader, writer = await asyncio.open_connection(self.config.server(),
+                                                           self.config.game_port())            
+            query = b"\x00\x83"
+            query += struct.pack('>H', len(message) + 6)
+            query += b"\x00\x00\x00\x00\x00"
+            query += message.encode()
+            query += b"\x00" #Creates a packet for byond according to TG's standard
 
-            conn.sendall(query)
+            writer.write(query)
 
-            data = conn.recv(4096) #Minimum number should be 4096, anything less will lose data
+            data = b''
+            while True:
+                buffer = await reader.read(1024)
+                data += buffer
+                if len(buffer) < 1024:
+                    break
 
-            parsed_data = urllib.parse.parse_qs(data[5:-1].decode())
+            writer.close()
+        except Exception as err:
+            log.error("Generic exception while querying server: {}".format(err))
 
-            return parsed_data
-            
-        except (ConnectionRefusedError, socket.gaierror, socket.timeout):
-            return None #Server is likely offline
+        size_bytes = struct.unpack(">H", data[2:4])
+        size = size_bytes[0] - 1
 
-        finally:
-            conn.close()
+        index = 5
+        index_end = index + size
+        string = data[5:index_end].decode("utf-8")
+        string = string.replace("\x00", "")
+
+        log.error("Got Answer from Gameserver: %s", string)
+        try:
+            data = json.loads(string)
+        except json.JSONDecodeError as err:
+            log.error("Invalid JSON returned. Error: {}".format(err))
+
+        # Check if we have a statuscode set and if that statuscode is 200, otherwise return the error message
+        if "statuscode" in data and data["statuscode"] != 200:
+            log.error(
+                "Error while executing command on server: {} - {}".format(data["statuscode"], data["response"]))
+
+        return data["data"]
 
     async def data_handler(self, reader, writer):
         ###############
