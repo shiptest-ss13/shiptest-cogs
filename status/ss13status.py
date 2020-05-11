@@ -491,44 +491,43 @@ class SS13Status(commands.Cog):
         if(params):
             message.update(params)
 
+        ctx.send(f"Querying gameserver with message: {message} and params: {params}")
+
         message = json.dumps(message, separators=(",", ":"))
 
+        reader, writer = await asyncio.open_connection(self.config.server(),
+                                                        self.config.game_port())            
+        query = b"\x00\x83"
+        query += struct.pack('>H', len(message) + 6)
+        query += b"\x00\x00\x00\x00\x00"
+        query += message.encode()
+        query += b"\x00" #Creates a packet for byond according to TG's standard
+
+        writer.write(query)
+
+        data = b''
+        while True:
+            buffer = await reader.read(1024)
+            data += buffer
+            if len(buffer) < 1024:
+                break
+
+        writer.close()
+
+        string = urllib.parse.parse_qs(data[5:-1].decode())
+
+        ctx.send("Got Answer from Gameserver: %s", string)
         try:
-            reader, writer = await asyncio.open_connection(self.config.server(),
-                                                           self.config.game_port())            
-            query = b"\x00\x83"
-            query += struct.pack('>H', len(message) + 6)
-            query += b"\x00\x00\x00\x00\x00"
-            query += message.encode()
-            query += b"\x00" #Creates a packet for byond according to TG's standard
+            data = json.loads(string)
+        except json.JSONDecodeError as err:
+            ctx.send("Invalid JSON returned. Error: {}".format(err))
 
-            writer.write(query)
+        # Check if we have a statuscode set and if that statuscode is 200, otherwise return the error message
+        if "statuscode" in data and data["statuscode"] != 200:
+            ctx.send("Error while executing command on server: {} - {}".format(data["statuscode"], data["response"]))
+    
+        return data["data"]
 
-            data = b''
-            while True:
-                buffer = await reader.read(1024)
-                data += buffer
-                if len(buffer) < 1024:
-                    break
-
-            writer.close()
-
-            string = urllib.parse.parse_qs(data[5:-1].decode())
-
-            ctx.send("Got Answer from Gameserver: %s", string)
-            try:
-                data = json.loads(string)
-            except json.JSONDecodeError as err:
-                ctx.send("Invalid JSON returned. Error: {}".format(err))
-
-            # Check if we have a statuscode set and if that statuscode is 200, otherwise return the error message
-            if "statuscode" in data and data["statuscode"] != 200:
-                ctx.send("Error while executing command on server: {} - {}".format(data["statuscode"], data["response"]))
-        
-            return data["data"]
-
-        except Exception as err:
-            ctx.send("Generic exception while querying server: {}".format(err))
 
 
     async def data_handler(self, reader, writer):
