@@ -42,6 +42,7 @@ class SS13Status(commands.Cog):
             "new_round_channel": None,
             "admin_notice_channel": None,
             "mentor_notice_channel": None,
+            "ooc_notice_channel": None,
             "mention_role": None,
             "comms_key": "default_pwd",
             "listen_port": 8081,
@@ -172,6 +173,26 @@ class SS13Status(commands.Cog):
 
         except(ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting the notification channel. Please check your entry and try again.")
+
+
+    @setstatus.command()
+    async def oocchannel(self, ctx, text_channel: discord.TextChannel = None):
+        """
+        Set the text channel for ooc reporting.
+        
+        Use without providing a channel to reset this to None.
+        """
+        try:
+            if text_channel is not None:
+                await self.config.ooc_notice_channel.set(text_channel.id)
+                await ctx.send(f"OOC will be sent to: {text_channel.mention}")
+            else:
+                await self.config.ooc_notice_channel.set(None)
+                await ctx.send("I will no longer send OOC messages.")
+
+        except(ValueError, KeyError, AttributeError):
+            await ctx.send("There was a problem setting the notification channel. Please check your entry and try again.")
+
 
     @setstatus.command()
     async def mentionrole(self, ctx, role: discord.Role = None):
@@ -461,6 +482,7 @@ class SS13Status(commands.Cog):
         ##################
         admin_channel = self.bot.get_channel(await self.config.admin_notice_channel())
         mentor_channel = self.bot.get_channel(await self.config.mentor_notice_channel())
+        ooc_channel = self.bot.get_channel(await self.config.ooc_notice_channel())
         new_round_channel = self.bot.get_channel(await self.config.new_round_channel())
         if admin_channel is not None:
             mention_role = discord.utils.get(admin_channel.guild.roles, id=(await self.config.mention_role()))
@@ -506,7 +528,9 @@ class SS13Status(commands.Cog):
 
                     else:
                         self.newroundmsg = await new_round_channel.send(embed=embed)
-            
+            elif ('announce_channel' in parsed_data) and ('ooc' in parsed_data['announce_channel']) and (ooc_channel is not None):
+                await ooc_channel.send(f"**OOC:** {str(*parsed_data['announce'])}")
+
             elif ('announce_channel' in parsed_data) and ('mentor' in parsed_data['announce_channel']) and (mentor_channel is not None):
                 announce = str(*parsed_data['announce'])
                 ticket = announce.split('): ')
