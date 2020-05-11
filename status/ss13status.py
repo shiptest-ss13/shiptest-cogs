@@ -367,7 +367,7 @@ class SS13Status(commands.Cog):
     @commands.cooldown(1, 5)
     async def ccannounce(self, ctx, message:str, sender="Central Command"):
         result = await self.topic_query_server(ctx, querystr="?comms_console", params={"message": message, "message_sender": sender})
-        ctx.send(f"Result: [result]")
+        await ctx.send(f"Result: [result]")
 
 
     @commands.guild_only()
@@ -484,17 +484,16 @@ class SS13Status(commands.Cog):
 
         message = {"query": querystr}
 
-        if(await self.config.comms_key()):
-            message["auth"] = await self.config.comms_key()
+        message["key"] = await self.config.comms_key()
 
         if(params):
             message.update(params)
 
-        ctx.send(f"Querying gameserver with message: {message} and params: {params}")
+        await ctx.send(f"Querying gameserver with message: {message} and params: {params}")
 
         message = json.dumps(message, separators=(",", ":"))
 
-        reader, writer = await asyncio.open_connection(server, port)            
+        reader, writer = await asyncio.open_connection(str(server), port)            
         query = b"\x00\x83"
         query += struct.pack('>H', len(message) + 6)
         query += b"\x00\x00\x00\x00\x00"
@@ -514,11 +513,11 @@ class SS13Status(commands.Cog):
 
         string = urllib.parse.parse_qs(data[5:-1].decode())
 
-        ctx.send("Got Answer from Gameserver: %s", string)
+        await ctx.send("Got Answer from Gameserver: %s", string)
         try:
             data = json.loads(string)
         except json.JSONDecodeError as err:
-            ctx.send("Invalid JSON returned. Error: {}".format(err))
+            await ctx.send("Invalid JSON returned. Error: {}".format(err))
 
         # Check if we have a statuscode set and if that statuscode is 200, otherwise return the error message
         if "statuscode" in data and data["statuscode"] != 200:
