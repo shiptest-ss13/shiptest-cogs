@@ -513,11 +513,11 @@ class SS13Status(commands.Cog):
 
         string = urllib.parse.parse_qs(data[5:-1].decode())
 
-        await ctx.send("Got Answer from Gameserver: %s", string)
+        await ctx.send(f"Got Answer from Gameserver: {string}")
         try:
             data = json.loads(string)
         except json.JSONDecodeError as err:
-            await ctx.send("Invalid JSON returned. Error: {}".format(err))
+            await ctx.send("Invalid JSON returned.")
 
         # Check if we have a statuscode set and if that statuscode is 200, otherwise return the error message
         if "statuscode" in data and data["statuscode"] != 200:
