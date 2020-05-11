@@ -366,12 +366,8 @@ class SS13Status(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 5)
     async def ccannounce(self, ctx, message:str, sender="Central Command"):
-        try:
-            result = await self.topic_query_server(ctx, querystr="?comms_console", params={"message": message, "message_sender": sender})
-            ctx.send(f"Result: [result]")
-        except TypeError:
-            await ctx.send(f"Failed to send message. Make sure the server is properly configured.")
-            return 
+        result = await self.topic_query_server(ctx, querystr="?comms_console", params={"message": message, "message_sender": sender})
+        ctx.send(f"Result: [result]")
 
 
     @commands.guild_only()
