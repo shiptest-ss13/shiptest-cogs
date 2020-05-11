@@ -514,14 +514,8 @@ class SS13Status(commands.Cog):
             writer.close()
         except Exception as err:
             log.error("Generic exception while querying server: {}".format(err))
-
-        size_bytes = struct.unpack(">H", data[2:4])
-        size = size_bytes[0] - 1
-
-        index = 5
-        index_end = index + size
-        string = data[5:index_end].decode("utf-8")
-        string = string.replace("\x00", "")
+        
+        string = urllib.parse.parse_qs(data[5:-1].decode())
 
         log.error("Got Answer from Gameserver: %s", string)
         try:
