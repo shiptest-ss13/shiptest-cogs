@@ -1,5 +1,6 @@
 #Standard Imports
 import asyncio
+import json
 import ipaddress
 import struct
 import select
@@ -360,6 +361,20 @@ class SS13Status(commands.Cog):
         else:
             await ctx.send(embed=discord.Embed(title="__Current Admins__ (0):", description="No Admins are current online"))
         
+    @commands.guild_only()
+    @checks.admin_or_permissions(administrator=True)
+    @commands.command()
+    @commands.cooldown(1, 5)
+    async def ccannounce(self, ctx, message:str, sender="Central Command"):
+        port = await self.config.game_port()        
+        msg = await self.config.offline_message()
+        server_url = await self.config.server_url()
+        try:
+            server = socket.gethostbyname(await self.config.server())
+            await self.topic_query_server(game_server=server, game_port=port, querystr="?comms_console", params={"message": message, "message_sender": sender}, needsauth=True)
+        except TypeError:
+            await ctx.send(f"Failed to send message. Make sure the server is properly configured.")
+            return 
 
 
     @commands.guild_only()
@@ -459,6 +474,41 @@ class SS13Status(commands.Cog):
             | shuttle_timer  | str    |
             +----------------+--------+
             """ #pylint: disable=unreachable
+            
+        except (ConnectionRefusedError, socket.gaierror, socket.timeout):
+            return None #Server is likely offline
+
+        finally:
+            conn.close()
+
+    async def topic_query_server(self, game_server:str, game_port:int, querystr="?status", params=None, attempt = 0, needsauth=False): #I could combine this with the previous def but I'm too scared to mess with it
+        """
+        Queries the server for information
+        """
+        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+
+        message = {"query": querystr}
+
+        if(needsauth):
+            message["auth"] = await self.config.comms_key()
+
+        if(params):
+            message.update(params)
+
+        message = json.dumps(message, separators=(",", ":"))
+
+        try:
+            query = b"\x00\x83" + struct.pack('>H', len(message) + 6) + b"\x00\x00\x00\x00\x00" + message.encode() + b"\x00" #Creates a packet for byond according to TG's standard
+            conn.settimeout(await self.config.timeout()) #Byond is slow, timeout set relatively high to account for any latency
+            conn.connect((game_server, game_port)) 
+
+            conn.sendall(query)
+
+            data = conn.recv(4096) #Minimum number should be 4096, anything less will lose data
+
+            parsed_data = urllib.parse.parse_qs(data[5:-1].decode())
+
+            return parsed_data
             
         except (ConnectionRefusedError, socket.gaierror, socket.timeout):
             return None #Server is likely offline
