@@ -367,7 +367,7 @@ class SS13Status(commands.Cog):
     @commands.cooldown(1, 5)
     async def ccannounce(self, ctx, message:str, sender="Central Command"):
         try:
-            result = await self.topic_query_server(querystr="?comms_console", params={"message": message, "message_sender": sender})
+            result = await self.topic_query_server(ctx, querystr="?comms_console", params={"message": message, "message_sender": sender})
             ctx.send(f"Result: [result]")
         except TypeError:
             await ctx.send(f"Failed to send message. Make sure the server is properly configured.")
@@ -478,7 +478,7 @@ class SS13Status(commands.Cog):
         finally:
             conn.close()
 
-    async def topic_query_server(self, querystr="?status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
+    async def topic_query_server(self, ctx, querystr="?status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
         Queries the server for information
         """
@@ -512,23 +512,24 @@ class SS13Status(commands.Cog):
                     break
 
             writer.close()
-        except Exception as err:
-            log.error("Generic exception while querying server: {}".format(err))
+
+            string = urllib.parse.parse_qs(data[5:-1].decode())
+
+            ctx.send("Got Answer from Gameserver: %s", string)
+            try:
+                data = json.loads(string)
+            except json.JSONDecodeError as err:
+                ctx.send("Invalid JSON returned. Error: {}".format(err))
+
+            # Check if we have a statuscode set and if that statuscode is 200, otherwise return the error message
+            if "statuscode" in data and data["statuscode"] != 200:
+                ctx.send("Error while executing command on server: {} - {}".format(data["statuscode"], data["response"]))
         
-        string = urllib.parse.parse_qs(data[5:-1].decode())
+            return data["data"]
 
-        log.error("Got Answer from Gameserver: %s", string)
-        try:
-            data = json.loads(string)
-        except json.JSONDecodeError as err:
-            log.error("Invalid JSON returned. Error: {}".format(err))
+        except Exception as err:
+            ctx.send("Generic exception while querying server: {}".format(err))
 
-        # Check if we have a statuscode set and if that statuscode is 200, otherwise return the error message
-        if "statuscode" in data and data["statuscode"] != 200:
-            log.error(
-                "Error while executing command on server: {} - {}".format(data["statuscode"], data["response"]))
-
-        return data["data"]
 
     async def data_handler(self, reader, writer):
         ###############
