@@ -538,14 +538,12 @@ class SS13Status(commands.Cog):
         port = await self.config.game_port()
 
         message = {}
+        message["keyword"] = querystr        
         message["message_sender"] = "Central Command"
         message["message"] = "Test Message"
         message["source"] = "Discord"
-        message["key"] = await self.config.comms_key()
-        message["keyword"] = querystr
-
-        if(params):
-            message.update(params)
+        if(await self.config.comms_key()):
+            message["key"] = await self.config.comms_key()
 
         message = json.dumps(message, separators=("&", "="))
 
