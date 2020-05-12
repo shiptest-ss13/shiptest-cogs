@@ -360,57 +360,6 @@ class SS13Status(commands.Cog):
                 await ctx.send("Unable to determine who is administrating! Please check the world topic to ensure it is correctly configured.")
         else:
             await ctx.send(embed=discord.Embed(title="__Current Admins__ (0):", description="No Admins are current online"))
-        
-    @commands.guild_only()
-    @checks.admin_or_permissions(administrator=True)
-    @commands.command()
-    @commands.cooldown(1, 5)
-    async def ccannounce(self, ctx):
-        result = await self.topic_query_server(ctx)
-        await ctx.send(f"Result: [result]")
-
-    @commands.guild_only()
-    @checks.admin_or_permissions(administrator=True)   
-    @commands.command()
-    @commands.cooldown(1, 5)
-    async def server_query(self, ctx, message:str):
-        """
-        Gets the current server status and round details
-        """
-        """
-        Queries the server for information
-        """
-
-        server = await self.config.server()
-        port = await self.config.game_port()
-
-        reader, writer = await asyncio.open_connection(server, port)            
-        query = b"\x00\x83"
-        query += struct.pack('>H', len(message) + 6)
-        query += b"\x00\x00\x00\x00\x00"
-        query += message.encode()
-        query += b"\x00" #Creates a packet for byond according to TG's standard
-
-        writer.write(query)
-
-        data = b''
-        while True:
-            buffer = await reader.read(1024)
-            data += buffer
-            if len(buffer) < 1024:
-                break
-
-        writer.close()
-
-        size_bytes = struct.unpack(">H", data[2:4])
-        size = size_bytes[0] - 1
-
-        index = 5
-        index_end = index + size
-        string = data[5:index_end].decode("utf-8")
-        string = string.replace("\x00", "")
-
-        await ctx.send(f"Got Answer from Gameserver: {string}")
 
     @commands.guild_only()
     @commands.command()
@@ -516,60 +465,6 @@ class SS13Status(commands.Cog):
         finally:
             conn.close()
 
-    async def topic_query_server(self, ctx, querystr="Comms_Console", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
-        """
-        Queries the server for information
-        """
-
-        server = await self.config.server()
-        port = await self.config.game_port()
-
-        message = {}
-        message["message_sender"] = "Margh"
-        message["message"] = "Test_Message"
-        message["source"] = "Discord"
-        if(await self.config.comms_key()):
-            message["key"] = await self.config.comms_key()
-
-        message = json.dumps(message, separators=("&", "="))
-
-        message = message.replace("{", "")
-        message = message.replace("}", "")
-        message = message.replace("\"", "")
-
-        message = f"?Comms_Console={message}"
-
-        await ctx.send(f"Querying gameserver with message: {message}")
-
-        reader, writer = await asyncio.open_connection(server, port)            
-        query = b"\x00\x83"
-        query += struct.pack('>H', len(message) + 6)
-        query += b"\x00\x00\x00\x00\x00"
-        query += message.encode()
-        query += b"\x00" #Creates a packet for byond according to TG's standard
-
-        writer.write(query)
-
-        data = b''
-        while True:
-            buffer = await reader.read(1024)
-            data += buffer
-            if len(buffer) < 1024:
-                break
-
-        writer.close()
-
-        size_bytes = struct.unpack(">H", data[2:4])
-        size = size_bytes[0] - 1
-
-        index = 5
-        index_end = index + size
-        string = data[5:index_end].decode("utf-8")
-        string = string.replace("\x00", "")
-
-        await ctx.send(f"Got Answer from Gameserver: {string}")
-
-        return data["data"]
 
     async def data_handler(self, reader, writer):
         ###############

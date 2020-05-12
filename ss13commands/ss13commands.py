@@ -126,7 +126,13 @@ class SS13Commands(commands.Cog):
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def namecheck(self, ctx, target:str):
-        await self.topic_query_server(ctx, querystr=f"namecheck={target}")
+        info = await self.topic_query_server(ctx, querystr=f"namecheck={target}")
+        await ctx.send(info)
+
+    @commands.guild_only()
+    @commands.command()
+    async def kek(self, ctx):
+        await ctx.send("kek")
 
     @commands.guild_only()
     @commands.command()
@@ -146,7 +152,8 @@ class SS13Commands(commands.Cog):
         message["sender"] = ctx.author.mention #Coz why not
         message["source"] = "Discord"
 
-        message.update(params)
+        if(params):
+            message.update(params)
 
         if(await self.config.comms_key()): #Little risky but mnehhh
             message["key"] = await self.config.comms_key()
@@ -159,7 +166,7 @@ class SS13Commands(commands.Cog):
 
         message = f"?{querystr}&{message}"
 
-        await ctx.send(f"Querying gameserver with message: {message}")
+        await log.info(f"Querying gameserver with message: {message}")
 
         reader, writer = await asyncio.open_connection(server, port)            
         query = b"\x00\x83"
@@ -187,6 +194,6 @@ class SS13Commands(commands.Cog):
         string = data[5:index_end].decode("utf-8")
         string = string.replace("\x00", "")
 
-        await ctx.send(f"Got Answer from Gameserver: {string}")
+        await log.info(f"Got Answer from Gameserver: {string}")
         return string
 
