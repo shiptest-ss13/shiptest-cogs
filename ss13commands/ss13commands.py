@@ -114,7 +114,7 @@ class SS13Commands(commands.Cog):
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def send_ccannounce(self, ctx, message:str, sender="Central Command"):
-        await self.topic_query_server(ctx, querystr="Comms_Console", params={"message": message, "message_sender": sender})
+        await self.topic_query_server(ctx, querystr="Comms_Console=nothing", params={"message": message, "message_sender": sender})
 
     @commands.guild_only()
     @commands.command()
@@ -157,7 +157,7 @@ class SS13Commands(commands.Cog):
         message = message.replace("}", "")
         message = message.replace("\"", "")
 
-        message = f"?{querystr}{message}"
+        message = f"?{querystr}&{message}"
 
         await ctx.send(f"Querying gameserver with message: {message}")
 
