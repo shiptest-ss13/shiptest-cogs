@@ -412,12 +412,6 @@ class SS13Status(commands.Cog):
 
         await ctx.send(f"Got Answer from Gameserver: {string}")
 
-        # Check if we have a statuscode set and if that statuscode is 200, otherwise return the error message
-        if "statuscode" in data and data["statuscode"] != 200:
-            ctx.send("Error while executing command on server: {} - {}".format(data["statuscode"], data["response"]))
-
-
-
     @commands.guild_only()
     @commands.command()
     @commands.cooldown(1, 5)
@@ -573,15 +567,9 @@ class SS13Status(commands.Cog):
         string = data[5:index_end].decode("utf-8")
         string = string.replace("\x00", "")
 
-        await ctx.send(f"Got Answer from Gameserver: {string}/{data['data']}")
+        await ctx.send(f"Got Answer from Gameserver: {string}")
 
-        # Check if we have a statuscode set and if that statuscode is 200, otherwise return the error message
-        if "statuscode" in data and data["statuscode"] != 200:
-            ctx.send("Error while executing command on server: {} - {}".format(data["statuscode"], data["response"]))
-    
         return data["data"]
-
-
 
     async def data_handler(self, reader, writer):
         ###############
