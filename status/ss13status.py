@@ -547,9 +547,9 @@ class SS13Status(commands.Cog):
         if(params):
             message.update(params)
 
-        await ctx.send(f"Querying gameserver with message: {message} and params: {params}")
-
         message = json.dumps(message, separators=("&", "="))
+
+        await ctx.send(f"Querying gameserver with message: ?{message}")
 
         message = f"?{message}"
 
