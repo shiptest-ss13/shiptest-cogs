@@ -160,7 +160,7 @@ class SS13Commands(commands.Cog):
     @commands.guild_only()
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def restart(self, ctx, target:str):
+    async def restart_server(self, ctx, target:str):
         """
         Restarts the linked SS13 server if there are no admins online.
         """
