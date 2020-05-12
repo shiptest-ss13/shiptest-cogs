@@ -511,7 +511,7 @@ class SS13Status(commands.Cog):
         message = json.dumps(message, separators=(",", ":"))
 
         try:
-            query = b"\x00\x83" + struct.pack('>H', len(message) + 6) + b"\x00\x00\x00\x00\x00" + message.encode() + b"\x00" #Creates a packet for byond according to TG's standard
+            query = b"\x00\x83" + struct.pack('>H', len(message) + 6) + b"\x00\x00\x00\x00\x00" + bytes(message, "utf-8") + b"\x00" #Creates a packet for byond according to TG's standard
             conn.settimeout(await self.config.timeout()) #Byond is slow, timeout set relatively high to account for any latency
             conn.connect((game_server, game_port)) 
 
@@ -552,7 +552,7 @@ class SS13Status(commands.Cog):
         query = b"\x00\x83"
         query += struct.pack('>H', len(message) + 6)
         query += b"\x00\x00\x00\x00\x00"
-        query += message.encode()
+        query += bytes(message, "utf-8")
         query += b"\x00" #Creates a packet for byond according to TG's standard
 
         writer.write(query)
