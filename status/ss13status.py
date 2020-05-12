@@ -524,40 +524,6 @@ class SS13Status(commands.Cog):
         finally:
             conn.close()
 
-    async def unsafe_query_server(self, game_server:str, game_port:int, querystr="?status", params=None):
-        """
-        Queries the server for information
-        """
-        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-
-        message = {"query": querystr}
-
-        message["key"] = await self.config.comms_key()
-
-        if(params):
-            message.update(params)
-
-        message = json.dumps(message, separators=(",", ":"))
-
-        try:
-            query = b"\x00\x83" + struct.pack('>H', len(message) + 6) + b"\x00\x00\x00\x00\x00" + bytes(message, "utf-8") + b"\x00" #Creates a packet for byond according to TG's standard
-            conn.settimeout(await self.config.timeout()) #Byond is slow, timeout set relatively high to account for any latency
-            conn.connect((game_server, game_port)) 
-
-            conn.sendall(query)
-
-            data = conn.recv(4096) #Minimum number should be 4096, anything less will lose data
-
-            parsed_data = urllib.parse.parse_qs(data[5:-1].decode())
-
-            return parsed_data
-            
-        except (ConnectionRefusedError, socket.gaierror, socket.timeout):
-            return None #Server is likely offline
-
-        finally:
-            conn.close()
-
     async def topic_query_server(self, ctx, querystr="Comms_Console", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
         Queries the server for information
@@ -567,8 +533,8 @@ class SS13Status(commands.Cog):
         port = await self.config.game_port()
 
         message = {}
-        message["message_sender"] = "Central Command"
-        message["message"] = "Test Message"
+        message["message_sender"] = "Margh"
+        message["message"] = "Test_Message"
         message["source"] = "Discord"
         if(await self.config.comms_key()):
             message["key"] = await self.config.comms_key()
@@ -579,7 +545,7 @@ class SS13Status(commands.Cog):
         message = message.replace("}", "")
         message = message.replace("\"", "")
 
-        message = f"?Comms_Console={message}"
+        message = f"?Comms_Console=[{message}]"
 
         await ctx.send(f"Querying gameserver with message: {message}")
 
