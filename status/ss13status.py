@@ -542,7 +542,7 @@ class SS13Status(commands.Cog):
         message["message"] = "Test Message"
         message["source"] = "Discord"
         message["key"] = await self.config.comms_key()
-        message += querystr
+        message["keyword"] = querystr
 
         if(params):
             message.update(params)
