@@ -152,7 +152,7 @@ class SS13Commands(commands.Cog):
         message["sender"] = ctx.author.mention #Coz why not
         message["source"] = "Discord"
 
-        if(params):
+        if(params != None):
             message.update(params)
 
         if(await self.config.comms_key()): #Little risky but mnehhh
