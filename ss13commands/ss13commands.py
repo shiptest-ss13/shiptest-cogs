@@ -107,19 +107,31 @@ class SS13Commands(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
-    async def send_ooc(self, ctx, message:str):
-        await self.topic_query_server(ctx, querystr="ooc_send", params={"message": message})
+    async def ooc(self, ctx, message:str):
+        data = await self.topic_query_server(ctx, querystr="ooc_send", params={"message": message})
+        if(data):
+            await ctx.send(data)
+
+    @commands.guild_only()
+    @commands.command()
+    async def manifest(self, ctx, message:str):
+        data = {}
+        data = await self.topic_query_server(ctx, querystr="manifest", params={"message": message})
+        embed=discord.Embed(color=0x26eaea)
+        for department in data:
+            entries = [i for i in data[f'{department}']]
+            embed.add_field(name=f"{department}",value=f'\n'.join(map(str,entries)))
 
     @commands.guild_only()
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def send_ccannounce(self, ctx, message:str, sender="Central Command"):
+    async def ccannounce(self, ctx, message:str, sender="Central Command"):
         await self.topic_query_server(ctx, querystr="Comms_Console=nothing", params={"message": message, "message_sender": sender})
 
     @commands.guild_only()
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def send_ahelp(self, ctx, target:str, msg:str):
+    async def ahelp(self, ctx, target:str, msg:str):
         await self.topic_query_server(ctx, querystr=f"adminmsg={target}", params={"msg": msg})
 
     @commands.guild_only()
@@ -152,7 +164,7 @@ class SS13Commands(commands.Cog):
         message["sender"] = ctx.author.mention #Coz why not
         message["source"] = "Discord"
 
-        if(params != None):
+        if(params):
             message.update(params)
 
         if(await self.config.comms_key()): #Little risky but mnehhh
@@ -166,7 +178,7 @@ class SS13Commands(commands.Cog):
 
         message = f"?{querystr}&{message}"
 
-        await log.info(f"Querying gameserver with message: {message}")
+        log.info(f"Querying gameserver with message: {message}")
 
         reader, writer = await asyncio.open_connection(server, port)            
         query = b"\x00\x83"
@@ -194,6 +206,6 @@ class SS13Commands(commands.Cog):
         string = data[5:index_end].decode("utf-8")
         string = string.replace("\x00", "")
 
-        await log.info(f"Got Answer from Gameserver: {string}")
+        log.info(f"Got Answer from Gameserver: {string}")
         return string
 
