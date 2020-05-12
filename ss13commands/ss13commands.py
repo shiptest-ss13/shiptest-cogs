@@ -114,6 +114,7 @@ class SS13Commands(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
+    @commands.cooldown(1, 10)
     async def manifest(self, ctx, message:str):
         data = {}
         data = await self.topic_query_server(ctx, querystr="manifest", params={"message": message})
@@ -139,6 +140,13 @@ class SS13Commands(commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def namecheck(self, ctx, target:str):
         info = await self.topic_query_server(ctx, querystr=f"namecheck={target}")
+        await ctx.send(info)
+
+    @commands.guild_only()
+    @commands.command()
+    @checks.admin_or_permissions(administrator=True)
+    async def restart(self, ctx, target:str):
+        info = await self.topic_query_server(ctx, querystr=f"restart")
         await ctx.send(info)
 
     @commands.guild_only()
