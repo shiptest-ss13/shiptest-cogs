@@ -538,7 +538,6 @@ class SS13Status(commands.Cog):
         port = await self.config.game_port()
 
         message = {}
-        message["keyword"] = querystr        
         message["message_sender"] = "Central Command"
         message["message"] = "Test Message"
         message["source"] = "Discord"
@@ -551,7 +550,9 @@ class SS13Status(commands.Cog):
         message = message.replace("}", "")
         message = message.replace("\"", "")
 
-        await ctx.send(f"Querying gameserver with message: ?{message}")
+        message = f"?Comms_Console&{message}"
+
+        await ctx.send(f"Querying gameserver with message: {message}")
 
         message = f"?{message}"
 
