@@ -508,6 +508,8 @@ class SS13Status(commands.Cog):
         if(params):
             message.update(params)
 
+        message = json.dumps(message, separators=(",", ":"))
+
         try:
             query = b"\x00\x83" + struct.pack('>H', len(message) + 6) + b"\x00\x00\x00\x00\x00" + message.encode() + b"\x00" #Creates a packet for byond according to TG's standard
             conn.settimeout(await self.config.timeout()) #Byond is slow, timeout set relatively high to account for any latency
