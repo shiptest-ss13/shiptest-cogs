@@ -555,7 +555,7 @@ class SS13Status(commands.Cog):
         query = b"\x00\x83"
         query += struct.pack('>H', len(message) + 6)
         query += b"\x00\x00\x00\x00\x00"
-        query += f"{bytes(message, 'utf-8')}"
+        query += bytes(f"?{message}", "utf-8")
         query += b"\x00" #Creates a packet for byond according to TG's standard
 
         writer.write(query)
