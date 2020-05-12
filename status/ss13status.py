@@ -549,6 +549,10 @@ class SS13Status(commands.Cog):
 
         message = json.dumps(message, separators=("&", "="))
 
+        message.replace("{", "")
+        message.replace("}", "")
+        message.replace("\"", "")
+
         await ctx.send(f"Querying gameserver with message: ?{message}")
 
         message = f"?{message}"
