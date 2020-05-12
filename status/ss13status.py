@@ -551,11 +551,13 @@ class SS13Status(commands.Cog):
 
         message = json.dumps(message, separators=("&", "="))
 
+        message = f"?{message}"
+
         reader, writer = await asyncio.open_connection(server, port)            
         query = b"\x00\x83"
         query += struct.pack('>H', len(message) + 6)
         query += b"\x00\x00\x00\x00\x00"
-        query += bytes(f"?{message}", "utf-8")
+        query += message.encode()
         query += b"\x00" #Creates a packet for byond according to TG's standard
 
         writer.write(query)
