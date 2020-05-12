@@ -550,7 +550,7 @@ class SS13Status(commands.Cog):
         message = message.replace("}", "")
         message = message.replace("\"", "")
 
-        message = f"?Comms_Console&{message}"
+        message = f"?Comms_Console={message}"
 
         await ctx.send(f"Querying gameserver with message: {message}")
 
