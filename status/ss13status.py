@@ -369,6 +369,27 @@ class SS13Status(commands.Cog):
         result = await self.topic_query_server(ctx, querystr="?comms_console", params={"message": message, "message_sender": sender})
         await ctx.send(f"Result: [result]")
 
+    @commands.guild_only()
+    @checks.admin_or_permissions(administrator=True)   
+    @commands.command()
+    @commands.cooldown(1, 5)
+    async def server_query(self, ctx, query:str):
+        """
+        Gets the current server status and round details
+        """
+        port = await self.config.game_port()        
+        msg = await self.config.offline_message()
+        server_url = await self.config.server_url()
+        try:
+            server = socket.gethostbyname(await self.config.server())
+            data = await self.unsafe_query_server(server, port, query)
+        except TypeError:
+            await ctx.send(f"Failed to get the server's status. Check that you have fully configured this cog using `{ctx.prefix}setstatus`.")
+            raise
+
+        await ctx.send(data)
+
+
 
     @commands.guild_only()
     @commands.command()
@@ -467,6 +488,38 @@ class SS13Status(commands.Cog):
             | shuttle_timer  | str    |
             +----------------+--------+
             """ #pylint: disable=unreachable
+            
+        except (ConnectionRefusedError, socket.gaierror, socket.timeout):
+            return None #Server is likely offline
+
+        finally:
+            conn.close()
+
+    async def unsafe_query_server(self, game_server:str, game_port:int, querystr="?status", params=None):
+        """
+        Queries the server for information
+        """
+        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+
+        message = {"query": querystr}
+
+        message["key"] = await self.config.comms_key()
+
+        if(params):
+            message.update(params)
+
+        try:
+            query = b"\x00\x83" + struct.pack('>H', len(message) + 6) + b"\x00\x00\x00\x00\x00" + message.encode() + b"\x00" #Creates a packet for byond according to TG's standard
+            conn.settimeout(await self.config.timeout()) #Byond is slow, timeout set relatively high to account for any latency
+            conn.connect((game_server, game_port)) 
+
+            conn.sendall(query)
+
+            data = conn.recv(4096) #Minimum number should be 4096, anything less will lose data
+
+            parsed_data = urllib.parse.parse_qs(data[5:-1].decode())
+
+            return parsed_data
             
         except (ConnectionRefusedError, socket.gaierror, socket.timeout):
             return None #Server is likely offline
