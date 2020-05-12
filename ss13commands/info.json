@@ -1,6 +1,6 @@
 {
     "author": ["Mark Suckerberg"],
-    "install_msg": "Please ensure that the listen port (defaults to `8081`) is allowed through your firewall to enable new round and admin notifications. Please note that all configurable options are owner only.\nsee the [readme](https://github.com/crossedfall/crossed-cogs#status) for detailed setup instructions.",
+    "install_msg": "Please note that all configurable options are owner only.",
     "name": "SS13 Messaging Commands",
     "short": "Allows you to run World/Topic() commands with discord commands.",
     "description": "Allows you to run World/Topic() commands with discord commands.",

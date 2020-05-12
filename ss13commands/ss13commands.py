@@ -132,7 +132,7 @@ class SS13Commands(commands.Cog):
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def verify(self, ctx, target:str, msg:str):
-        await self.topic_query_server(ctx, querystr=f"adminmsg={target}", params={"msg": msg})
+        await self.topic_query_server(ctx, querystr=f"verify={target}")
 
     async def topic_query_server(self, ctx, querystr="status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
@@ -143,7 +143,7 @@ class SS13Commands(commands.Cog):
         port = await self.config.game_port()
 
         message = {}
-        message["sender"] = ctx.author #Coz why not
+        message["sender"] = ctx.author.mention #Coz why not
         message["source"] = "Discord"
 
         message.update(params)
