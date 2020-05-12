@@ -373,21 +373,50 @@ class SS13Status(commands.Cog):
     @checks.admin_or_permissions(administrator=True)   
     @commands.command()
     @commands.cooldown(1, 5)
-    async def server_query(self, ctx, query:str):
+    async def server_query(self, ctx, message:str):
         """
         Gets the current server status and round details
         """
-        port = await self.config.game_port()        
-        msg = await self.config.offline_message()
-        server_url = await self.config.server_url()
-        try:
-            server = socket.gethostbyname(await self.config.server())
-            data = await self.unsafe_query_server(server, port, query)
-        except TypeError:
-            await ctx.send(f"Failed to get the server's status. Check that you have fully configured this cog using `{ctx.prefix}setstatus`.")
-            raise
+        """
+        Queries the server for information
+        """
 
-        await ctx.send(data)
+        server = await self.config.server()
+        port = await self.config.game_port()
+
+        reader, writer = await asyncio.open_connection(server, port)            
+        query = b"\x00\x83"
+        query += struct.pack('>H', len(message) + 6)
+        query += b"\x00\x00\x00\x00\x00"
+        query += message.encode()
+        query += b"\x00" #Creates a packet for byond according to TG's standard
+
+        writer.write(query)
+
+        data = b''
+        while True:
+            buffer = await reader.read(1024)
+            data += buffer
+            if len(buffer) < 1024:
+                break
+
+        writer.close()
+
+        size_bytes = struct.unpack(">H", data[2:4])
+        size = size_bytes[0] - 1
+
+        index = 5
+        index_end = index + size
+        string = data[5:index_end].decode("utf-8")
+        string = string.replace("\x00", "")
+
+        await ctx.send(f"Got Answer from Gameserver: {string}/{data['data']}")
+
+        # Check if we have a statuscode set and if that statuscode is 200, otherwise return the error message
+        if "statuscode" in data and data["statuscode"] != 200:
+            ctx.send("Error while executing command on server: {} - {}".format(data["statuscode"], data["response"]))
+    
+        await ctx.send(data["data"])
 
 
 
@@ -554,8 +583,6 @@ class SS13Status(commands.Cog):
 
         await ctx.send(f"Querying gameserver with message: {message}")
 
-        message = f"?{message}"
-
         reader, writer = await asyncio.open_connection(server, port)            
         query = b"\x00\x83"
         query += struct.pack('>H', len(message) + 6)
@@ -582,11 +609,7 @@ class SS13Status(commands.Cog):
         string = data[5:index_end].decode("utf-8")
         string = string.replace("\x00", "")
 
-        await ctx.send(f"Got Answer from Gameserver: {string}")
-        try:
-            data = json.loads(string)
-        except json.JSONDecodeError as err:
-            await ctx.send("Invalid JSON returned.")
+        await ctx.send(f"Got Answer from Gameserver: {string}/{data['data']}")
 
         # Check if we have a statuscode set and if that statuscode is 200, otherwise return the error message
         if "statuscode" in data and data["statuscode"] != 200:
