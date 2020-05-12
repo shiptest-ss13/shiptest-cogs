@@ -108,6 +108,9 @@ class SS13Commands(commands.Cog):
     @commands.guild_only()
     @commands.command()
     async def ooc(self, ctx, message:str):
+        """
+        Sends a message to the linked SS13 server's OOC chat.
+        """
         data = await self.topic_query_server(ctx, querystr="ooc_send", params={"message": message})
         if(data):
             await ctx.send(data)
@@ -116,6 +119,9 @@ class SS13Commands(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 10)
     async def manifest(self, ctx, message:str):
+        """
+        Displays the current crew manifest of the linked SS13 server.
+        """
         data = {}
         data = await self.topic_query_server(ctx, querystr="manifest", params={"message": message})
         embed=discord.Embed(color=0x26eaea)
@@ -127,18 +133,27 @@ class SS13Commands(commands.Cog):
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def ccannounce(self, ctx, message:str, sender="Central Command"):
+        """
+        Sends a specified announcement to the linked SS13 server.
+        """
         await self.topic_query_server(ctx, querystr="Comms_Console=nothing", params={"message": message, "message_sender": sender})
 
     @commands.guild_only()
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def ahelp(self, ctx, target:str, msg:str):
+        """
+        Sends an adminhelp to the specified CKEY.
+        """
         await self.topic_query_server(ctx, querystr=f"adminmsg={target}", params={"msg": msg})
 
     @commands.guild_only()
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def namecheck(self, ctx, target:str):
+        """
+        Checks the specified CKEY or player name for information.
+        """
         info = await self.topic_query_server(ctx, querystr=f"namecheck={target}")
         await ctx.send(info)
 
@@ -146,18 +161,27 @@ class SS13Commands(commands.Cog):
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def restart(self, ctx, target:str):
+        """
+        Restarts the linked SS13 server if there are no admins online.
+        """
         info = await self.topic_query_server(ctx, querystr=f"restart")
         await ctx.send(info)
 
     @commands.guild_only()
     @commands.command()
     async def kek(self, ctx):
+        """
+        Kek.
+        """
         await ctx.send("kek")
 
     @commands.guild_only()
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
     async def verify(self, ctx, target:str, msg:str):
+        """
+        Work in progress command, sets sender's Discord nickname to their CKEY if they respon in game.
+        """
         await self.topic_query_server(ctx, querystr=f"verify={target}")
 
     async def topic_query_server(self, ctx, querystr="status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
