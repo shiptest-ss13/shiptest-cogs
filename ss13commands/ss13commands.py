@@ -125,7 +125,7 @@ class SS13Commands(commands.Cog):
     @commands.guild_only()
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def send_ahelp(self, ctx, target:str):
+    async def namecheck(self, ctx, target:str):
         await self.topic_query_server(ctx, querystr=f"namecheck={target}")
 
     @commands.guild_only()
@@ -143,7 +143,7 @@ class SS13Commands(commands.Cog):
         port = await self.config.game_port()
 
         message = {}
-        message["sender"] = await ctx.author #Coz why not
+        message["sender"] = ctx.author #Coz why not
         message["source"] = "Discord"
 
         message.update(params)
