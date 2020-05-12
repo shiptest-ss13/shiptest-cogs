@@ -365,8 +365,8 @@ class SS13Status(commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     @commands.command()
     @commands.cooldown(1, 5)
-    async def ccannounce(self, ctx, message:str, sender="Central Command"):
-        result = await self.topic_query_server(ctx, querystr="?comms_console", params={"message": message, "message_sender": sender})
+    async def ccannounce(self, ctx):
+        result = await self.topic_query_server(ctx)
         await ctx.send(f"Result: [result]")
 
     @commands.guild_only()
@@ -529,7 +529,7 @@ class SS13Status(commands.Cog):
         finally:
             conn.close()
 
-    async def topic_query_server(self, ctx, querystr="?status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
+    async def topic_query_server(self, ctx, querystr="Comms_Console", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
         Queries the server for information
         """
@@ -537,22 +537,25 @@ class SS13Status(commands.Cog):
         server = await self.config.server()
         port = await self.config.game_port()
 
-        message = {"query": querystr}
-
+        message = {}
+        message["message_sender"] = "Central Command"
+        message["message"] = "Test Message"
+        message["source"] = "Discord"
         message["key"] = await self.config.comms_key()
+        message += querystr
 
         if(params):
             message.update(params)
 
         await ctx.send(f"Querying gameserver with message: {message} and params: {params}")
 
-        message = json.dumps(message, separators=(",", ":"))
+        message = json.dumps(message, separators=("&", "="))
 
         reader, writer = await asyncio.open_connection(server, port)            
         query = b"\x00\x83"
         query += struct.pack('>H', len(message) + 6)
         query += b"\x00\x00\x00\x00\x00"
-        query += bytes(message, "utf-8")
+        query += f"{bytes(message, 'utf-8')}"
         query += b"\x00" #Creates a packet for byond according to TG's standard
 
         writer.write(query)
