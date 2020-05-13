@@ -106,8 +106,10 @@ class SS13Commands(commands.Cog):
             await self.config.ooc_toggle.set(toggle)
             if toggle is True:
                 await ctx.send(f"I will now relay OOC to the SS13 server.")
+                await self.topic_query_server(ctx, querystr="ooc_send", params={"message": "The discord OOC relay has been enabled.", "sender": "Administrator"})
             else:
                 await ctx.send("I will no longer relay OOC to the SS13 server.")
+                await self.topic_query_server(ctx, querystr="ooc_send", params={"message": "The discord OOC relay has been disabled.", "sender": "Administrator"})
         except(ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem toggling the OOC relay. Please try again or contact a coder.")
 
