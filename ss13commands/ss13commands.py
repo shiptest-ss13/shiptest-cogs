@@ -209,13 +209,7 @@ class SS13Commands(commands.Cog):
         """
         info = await self.topic_query_server(ctx, querystr=f"namecheck={target}")
         if(info):
-            name = info.split("(")[0]
-            realname = (info.split(") ")[0]).split("(")[1]
-            ckeyinfo = info.split(") ")[1] #this is hacky as hell and I hate myself for it
-            embed = discord.Embed(name=f"Results for {target}:")
-            embed.add_field("Name:", name)
-            embed.add_field("Real name:", realname)
-            embed.add_field("Ckey:", ckeyinfo)
+            embed = discord.Embed(name=f"Results for {target}:" description=info)
             #TODO: Split recieved data into different embed fields
             await ctx.send(embed)
 
