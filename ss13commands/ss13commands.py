@@ -125,6 +125,11 @@ class SS13Commands(commands.Cog):
         """
         data = {}
         data = await self.topic_query_server(ctx, querystr="manifest", params={"message": message})
+
+        await ctx.send(data)
+
+        return
+
         embed=discord.Embed(color=0x26eaea)
         for department in data:
             entries = [i for i in data[f'{department}']]
