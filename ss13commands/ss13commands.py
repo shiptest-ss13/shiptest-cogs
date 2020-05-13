@@ -194,7 +194,7 @@ class SS13Commands(commands.Cog):
         port = await self.config.game_port()
 
         message = {}
-        message["sender"] = ctx.author.name #Coz why not
+        message["sender"] = ctx.author.display_name #Coz why not
         message["source"] = "Discord"
 
         if(params):
