@@ -35,6 +35,7 @@ class SS13Commands(commands.Cog):
             "game_port": None,
             "server_url": "byond://127.0.0.1:7777", 
             "comms_key": "default_pwd",
+            "ooc_notice_channel": None,
             "ooc_toggle": True,
         }
 
@@ -114,6 +115,24 @@ class SS13Commands(commands.Cog):
             await ctx.send("There was a problem toggling the OOC relay. Please try again or contact a coder.")
 
     @setss13.command()
+    async def oocchannel(self, ctx, text_channel: discord.TextChannel = None):
+        """
+        Set the text channel for ooc reporting.
+        
+        Use without providing a channel to reset this to None.
+        """
+        try:
+            if text_channel is not None:
+                await self.config.ooc_notice_channel.set(text_channel.id)
+                await ctx.send(f"OOC will be sent to: {text_channel.mention}")
+            else:
+                await self.config.ooc_notice_channel.set(None)
+                await ctx.send("I will no longer send OOC messages.")
+
+        except(ValueError, KeyError, AttributeError):
+            await ctx.send("There was a problem setting the notification channel. Please check your entry and try again.")
+
+    @setss13.command()
     async def current(self, ctx):
         """
         Lists the current settings
@@ -147,12 +166,12 @@ class SS13Commands(commands.Cog):
     @commands.guild_only()
     @commands.command()
     @commands.cooldown(1, 10)
-    async def manifest(self, ctx, message:str):
+    async def manifest(self, ctx):
         """
         Displays the current crew manifest of the linked SS13 server.
         """
         data = {}
-        data = await self.topic_query_server(ctx, querystr="manifest", params={"message": message})
+        data = await self.topic_query_server(ctx, querystr="manifest")
 
         await ctx.send(data)
 
@@ -194,11 +213,11 @@ class SS13Commands(commands.Cog):
     @commands.guild_only()
     @commands.command()
     @checks.admin_or_permissions(administrator=True)
-    async def restart_server(self, ctx, target:str):
+    async def restart_server(self, ctx, hard = False):
         """
         Restarts the linked SS13 server if there are no admins online.
         """
-        info = await self.topic_query_server(ctx, querystr=f"restart")
+        info = await self.topic_query_server(ctx, querystr=f"restart", params={"hard": int(hard)})
         await ctx.send(info)
 
     @commands.guild_only()
@@ -217,6 +236,19 @@ class SS13Commands(commands.Cog):
         Work in progress command, sets sender's Discord nickname to their CKEY if they respon in game.
         """
         await self.topic_query_server(ctx, querystr=f"verify={target}")
+
+    @commands.Cog.listener()
+    async def ooc_check(self, ctx, message: discord.Message):
+        """
+        Handles Messages sent in the OOC channel.
+        """        
+        await self._load_event.wait()
+        if(message.channel != await self.config.ooc_notice_channel):
+            return
+        if(message.author == self.bot.user):
+            return
+        await self.ooc(ctx, message)    
+
 
     async def topic_query_server(self, ctx, querystr="status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
