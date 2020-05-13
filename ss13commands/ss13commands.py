@@ -208,7 +208,16 @@ class SS13Commands(commands.Cog):
         Checks the specified CKEY or player name for information.
         """
         info = await self.topic_query_server(ctx, querystr=f"namecheck={target}")
-        await ctx.send(info)
+        if(info):
+            name = info.split("(")[0]
+            realname = (info.split(") ")[0]).split("(")[1]
+            ckeyinfo = info.split(") ")[1] #this is hacky as hell and I hate myself for it
+            embed = discord.Embed(name=f"Results for {target}:")
+            embed.add_field("Name:", name)
+            embed.add_field("Real name:", realname)
+            embed.add_field("Ckey:", ckeyinfo)
+            #TODO: Split recieved data into different embed fields
+            await ctx.send(embed)
 
     @commands.guild_only()
     @commands.command()
@@ -218,7 +227,8 @@ class SS13Commands(commands.Cog):
         Restarts the linked SS13 server if there are no admins online.
         """
         info = await self.topic_query_server(ctx, querystr=f"restart", params={"hard": int(hard)})
-        await ctx.send(info)
+        if(info):
+            await ctx.send(info)
 
     @commands.guild_only()
     @commands.command()
