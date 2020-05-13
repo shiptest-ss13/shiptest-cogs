@@ -111,6 +111,7 @@ class SS13Commands(commands.Cog):
         """
         Sends a message to the linked SS13 server's OOC chat.
         """
+        message = message.replace("@", "")
         data = await self.topic_query_server(ctx, querystr="ooc_send", params={"message": message})
         if(data):
             await ctx.send(data)

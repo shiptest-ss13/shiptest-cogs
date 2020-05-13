@@ -529,7 +529,9 @@ class SS13Status(commands.Cog):
                     else:
                         self.newroundmsg = await new_round_channel.send(embed=embed)
             elif ('announce_channel' in parsed_data) and ('ooc' in parsed_data['announce_channel']) and (ooc_channel is not None):
-                await ooc_channel.send(f"**OOC:** {str(*parsed_data['announce'])}")
+                message = str(*parsed_data['announce'])
+                message = message.replace("@", "")
+                await ooc_channel.send(f"**OOC:** {message}")
 
             elif ('announce_channel' in parsed_data) and ('mentor' in parsed_data['announce_channel']) and (mentor_channel is not None):
                 announce = str(*parsed_data['announce'])
