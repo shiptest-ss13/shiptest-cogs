@@ -209,7 +209,7 @@ class SS13Commands(commands.Cog):
         """
         info = await self.topic_query_server(ctx, querystr=f"namecheck={target}")
         if(info):
-            embed = discord.Embed(name=f"Results for {target}:", description=info)
+            embed = discord.Embed(name=f"Results for {target}:", description=str(info))
             #TODO: Split recieved data into different embed fields
             await ctx.send(embed)
 
