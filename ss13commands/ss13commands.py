@@ -35,6 +35,7 @@ class SS13Commands(commands.Cog):
             "game_port": None,
             "server_url": "byond://127.0.0.1:7777", 
             "comms_key": "default_pwd",
+            "ooc_toggle": True,
         }
 
         self.config.register_global(**default_global)
@@ -90,6 +91,27 @@ class SS13Commands(commands.Cog):
             await ctx.send("There was a problem setting your communications key. Please check your entry and try again.")
 
     @setss13.command()
+    async def toggleooc(self, ctx, toggle:bool = None):
+        """
+        OOC relay toggle
+
+        With this enabled, OOC will be relayed to the connected SS13 server with the [P]ooc command.
+        """
+
+        if toggle is None:
+            toggle = await self.config.ooc_toggle()
+            toggle = not toggle
+
+        try:
+            await self.config.ooc_toggle.set(toggle)
+            if toggle is True:
+                await ctx.send(f"I will now relay OOC to the SS13 server.")
+            else:
+                await ctx.send("I will no longer relay OOC to the SS13 server.")
+        except(ValueError, KeyError, AttributeError):
+            await ctx.send("There was a problem toggling the OOC relay. Please try again or contact a coder.")
+
+    @setss13.command()
     async def current(self, ctx):
         """
         Lists the current settings
@@ -111,10 +133,14 @@ class SS13Commands(commands.Cog):
         """
         Sends a message to the linked SS13 server's OOC chat.
         """
-        message = message.replace("@", "")
-        data = await self.topic_query_server(ctx, querystr="ooc_send", params={"message": message})
-        if(data):
-            await ctx.send(data)
+        if(await self.config.ooc_toggle()):
+            message = message.replace("@", "")
+            data = await self.topic_query_server(ctx, querystr="ooc_send", params={"message": message})
+            if(data):
+                await ctx.send(data)
+        else:
+            await ctx.send("The Discord OOC relay has been disabled.")        
+
 
     @commands.guild_only()
     @commands.command()
