@@ -248,6 +248,7 @@ class SS13Commands(commands.Cog):
         if(message.author == self.bot.user):
             return
         await self.ooc(message.channel, message.content)
+        message.delete(2)
 
     async def topic_query_server(self, ctx, querystr="status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
