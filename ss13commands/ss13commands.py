@@ -244,7 +244,7 @@ class SS13Commands(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if(message.channel.id == await self.config.ooc_notice_channel()):
-            if((message.author == self.bot.user) and (message.content.beginswith("**OOC:**"))):
+            if((message.author == self.bot.user) and (message.content.startswith("**OOC:**"))):
                 return
             if(await self.config.ooc_toggle()):
                 data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": message.content})
@@ -258,7 +258,7 @@ class SS13Commands(commands.Cog):
             return
         if(message.content.lower().endswith("when")):
             await message.channel.send("When ~~you~~ Mark codes it.")
-        elif(message.content.beginswith("marg")):
+        elif(message.content.startswith("marg")):
             await message.channel.send("marg")    
 
     async def topic_query_server(self, querystr="status", sender="Discord", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
