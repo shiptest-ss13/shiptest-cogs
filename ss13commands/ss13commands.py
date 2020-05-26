@@ -107,10 +107,10 @@ class SS13Commands(commands.Cog):
             await self.config.ooc_toggle.set(toggle)
             if toggle is True:
                 await ctx.send(f"I will now relay OOC to the SS13 server.")
-                await self.topic_query_server(ctx, querystr="ooc_send", params={"message": "The discord OOC relay has been enabled.", "sender": "Administrator"})
+                await self.topic_query_server(querystr="ooc_send", sender=ctx.author.displayname, params={"message": "The discord OOC relay has been enabled.", "sender": "Administrator"})
             else:
                 await ctx.send("I will no longer relay OOC to the SS13 server.")
-                await self.topic_query_server(ctx, querystr="ooc_send", params={"message": "The discord OOC relay has been disabled.", "sender": "Administrator"})
+                await self.topic_query_server(querystr="ooc_send", sender=ctx.author.displayname, params={"message": "The discord OOC relay has been disabled.", "sender": "Administrator"})
         except(ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem toggling the OOC relay. Please try again or contact a coder.")
 
@@ -157,7 +157,7 @@ class SS13Commands(commands.Cog):
         if(await self.config.ooc_toggle()):
             message = " ".join(args)
             message = message.strip("@")
-            data = await self.topic_query_server(ctx, querystr="ooc_send", params={"message": message})
+            data = await self.topic_query_server(querystr="ooc_send", sender=ctx.author.displayname, params={"message": message})
             if(data):
                 await ctx.send(data)
         else:
@@ -172,7 +172,7 @@ class SS13Commands(commands.Cog):
         Displays the current crew manifest of the linked SS13 server.
         """
         data = {}
-        data = await self.topic_query_server(ctx, querystr="manifest")
+        data = await self.topic_query_server(querystr="manifest", sender=ctx.author.displayname)
 
         await ctx.send(data)
 
@@ -190,7 +190,7 @@ class SS13Commands(commands.Cog):
         """
         Sends a specified announcement to the linked SS13 server.
         """
-        await self.topic_query_server(ctx, querystr="Comms_Console=nothing", params={"message": message, "message_sender": sender})
+        await self.topic_query_server(querystr="Comms_Console=nothing", sender=ctx.author.displayname, params={"message": message, "message_sender": sender})
 
     @commands.guild_only()
     @commands.command()
@@ -199,7 +199,7 @@ class SS13Commands(commands.Cog):
         """
         Sends an adminhelp to the specified CKEY.
         """
-        await self.topic_query_server(ctx, querystr=f"adminmsg={target}", params={"msg": msg})
+        await self.topic_query_server(querystr=f"adminmsg={target}", sender=ctx.author.displayname, params={"msg": msg})
 
     @commands.guild_only()
     @commands.command()
@@ -208,7 +208,7 @@ class SS13Commands(commands.Cog):
         """
         Checks the specified CKEY or player name for information.
         """
-        info = await self.topic_query_server(ctx, querystr=f"namecheck={target}")
+        info = await self.topic_query_server(querystr=f"namecheck={target}")
         if(info):
             #TODO: Split recieved data into different embed fields
             await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"{info}"))
@@ -220,7 +220,7 @@ class SS13Commands(commands.Cog):
         """
         Restarts the linked SS13 server if there are no admins online.
         """
-        info = await self.topic_query_server(ctx, querystr=f"restart", params={"hard": int(hard)})
+        info = await self.topic_query_server(querystr=f"restart", sender=ctx.author.displayname, params={"hard": int(hard)})
         if(info):
             await ctx.send(info)
 
@@ -239,7 +239,7 @@ class SS13Commands(commands.Cog):
         """
         Work in progress command, sets sender's Discord nickname to their CKEY if they respon in game.
         """
-        await self.topic_query_server(ctx, querystr=f"verify={target}")
+        await self.topic_query_server(querystr=f"verify={target}", sender=ctx.author.displayname)
 
     @commands.Cog.listener()
     async def on_message(self, ctx, message: discord.Message):
@@ -247,10 +247,16 @@ class SS13Commands(commands.Cog):
             if(message.author == self.bot.user):
                 return
             await message.channel.send("message sent")
-            await self.ooc(ctx, message.content)
-            message.delete(2)
+            if(await self.config.ooc_toggle()):
+                data = await self.topic_query_server(querystr="ooc_send", sender=message.author.displayname, params={"message": message})
+                if(data):
+                    await message.channel.send(data)
+            else:
+                replymsg = await ctx.send("The Discord OOC relay has been disabled.")
+                replymsg.delete(1)
+            message.delete()
 
-    async def topic_query_server(self, ctx, querystr="status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
+    async def topic_query_server(self, querystr="status", sender="Discord", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
         Queries the server for information
         """
@@ -259,7 +265,7 @@ class SS13Commands(commands.Cog):
         port = await self.config.game_port()
 
         message = {}
-        message["sender"] = ctx.author.display_name #Coz why not
+        message["sender"] = sender
         message["source"] = "Discord"
 
         if(params):
