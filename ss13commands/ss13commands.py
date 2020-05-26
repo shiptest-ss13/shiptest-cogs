@@ -243,13 +243,9 @@ class SS13Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if(message.author == self.bot.user):
-            return
-        if(message.content.lower().endswith("when")):
-            await message.channel.send("When ~~you~~ Mark codes it.")
-        elif(message.content.beginswith("marg")):
-            await message.channel.send("marg")
         if(message.channel.id == await self.config.ooc_notice_channel()):
+            if(message.author == self.bot.user and message.content.beginswith("**OOC:**")):
+                return
             if(await self.config.ooc_toggle()):
                 data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": message.content})
                 if(data):
@@ -258,6 +254,12 @@ class SS13Commands(commands.Cog):
                 replymsg = await message.channel.send("The Discord OOC relay has been disabled.")
                 await replymsg.delete(2)
             await message.delete()
+        if(message.author == self.bot.user):
+            return
+        if(message.content.lower().endswith("when")):
+            await message.channel.send("When ~~you~~ Mark codes it.")
+        elif(message.content.beginswith("marg")):
+            await message.channel.send("marg")    
 
     async def topic_query_server(self, querystr="status", sender="Discord", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
