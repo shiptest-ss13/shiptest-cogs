@@ -150,7 +150,7 @@ class SS13Commands(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
-    async def ooc(self, ctx, message:str):
+    async def ooc(self, ctx, *args):
         """
         Sends a message to the linked SS13 server's OOC chat.
         """
@@ -241,17 +241,12 @@ class SS13Commands(commands.Cog):
         await self.topic_query_server(ctx, querystr=f"verify={target}")
 
     @commands.Cog.listener()
-    async def ooc_check(self, ctx, message: discord.Message):
-        """
-        Handles Messages sent in the OOC channel.
-        """        
-        await self._load_event.wait()
+    async def on_message(self, message: discord.Message):
         if(message.channel != await self.config.ooc_notice_channel):
             return
         if(message.author == self.bot.user):
             return
-        await self.ooc(ctx, message)    
-
+        await self.ooc(message.channel, message.content)
 
     async def topic_query_server(self, ctx, querystr="status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
