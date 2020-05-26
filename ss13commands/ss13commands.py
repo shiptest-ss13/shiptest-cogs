@@ -246,7 +246,6 @@ class SS13Commands(commands.Cog):
         if(message.channel.id == await self.config.ooc_notice_channel()):
             if(message.author == self.bot.user):
                 return
-            await message.channel.send("message sent")
             if(await self.config.ooc_toggle()):
                 data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": message.content})
                 if(data):
