@@ -243,13 +243,12 @@ class SS13Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if(not (message.channel.id in await self.config.ooc_notice_channel)):
-            return
-        if(message.author == self.bot.user):
-            return
-        await message.channel.send("message sent")
-        await self.ooc(message.channel, message.content)
-        message.delete(2)
+        if(message.channel.id == await self.config.ooc_notice_channel):
+            if(message.author == self.bot.user):
+                return
+            await message.channel.send("message sent")
+            await self.ooc(message.channel, message.content)
+            message.delete(2)
 
     async def topic_query_server(self, ctx, querystr="status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
