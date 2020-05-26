@@ -247,6 +247,7 @@ class SS13Commands(commands.Cog):
             return
         if(message.author == self.bot.user):
             return
+        await message.channel.send("message sent")    
         await self.ooc(message.channel, message.content)
         message.delete(2)
 
