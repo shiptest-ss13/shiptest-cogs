@@ -161,7 +161,7 @@ class SS13Commands(commands.Cog):
             if(data):
                 await ctx.send(data)
         else:
-            await ctx.send("The Discord OOC relay has been disabled.")        
+            await ctx.send("The Discord OOC relay has been disabled.")
 
 
     @commands.guild_only()
@@ -242,12 +242,12 @@ class SS13Commands(commands.Cog):
         await self.topic_query_server(ctx, querystr=f"verify={target}")
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
+    async def on_message(self, ctx, message: discord.Message):
         if(message.channel.id == await self.config.ooc_notice_channel()):
             if(message.author == self.bot.user):
                 return
             await message.channel.send("message sent")
-            await self.ooc(message.channel, message.content)
+            await self.ooc(ctx, message.content)
             message.delete(2)
 
     async def topic_query_server(self, ctx, querystr="status", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
