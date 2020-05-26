@@ -253,8 +253,8 @@ class SS13Commands(commands.Cog):
                     await message.channel.send(data)
             else:
                 replymsg = await message.channel.send("The Discord OOC relay has been disabled.")
-                replymsg.delete(1)
-            message.delete()
+                await replymsg.delete(2)
+            await message.delete()
 
     async def topic_query_server(self, querystr="status", sender="Discord", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
