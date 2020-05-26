@@ -248,11 +248,11 @@ class SS13Commands(commands.Cog):
                 return
             await message.channel.send("message sent")
             if(await self.config.ooc_toggle()):
-                data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": message})
+                data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": message.content})
                 if(data):
                     await message.channel.send(data)
             else:
-                replymsg = await ctx.send("The Discord OOC relay has been disabled.")
+                replymsg = await message.channel.send("The Discord OOC relay has been disabled.")
                 replymsg.delete(1)
             message.delete()
 
