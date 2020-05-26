@@ -243,7 +243,7 @@ class SS13Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if(message.channel != await self.config.ooc_notice_channel):
+        if(message.channel.id != await self.config.ooc_notice_channel):
             return
         if(message.author == self.bot.user):
             return
