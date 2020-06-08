@@ -18,10 +18,10 @@ import discord
 from redbot.core import commands, checks, Config, utils
 import json
 
-__version__ = "1.1.0"
-__author__ = "Crossedfall"
+__version__ = "1.2"
+__author__ = "Mark Suckerberg"
 
-log = logging.getLogger("red.SS13Status")
+log = logging.getLogger("red.SS13Commands")
 
 class SS13Commands(commands.Cog):
 
@@ -37,6 +37,7 @@ class SS13Commands(commands.Cog):
             "comms_key": "default_pwd",
             "ooc_notice_channel": None,
             "ooc_toggle": True,
+            "github_url": None,
         }
 
         self.config.register_global(**default_global)
@@ -90,6 +91,18 @@ class SS13Commands(commands.Cog):
         
         except(ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting your communications key. Please check your entry and try again.")
+
+    @setss13.command()
+    async def github(self, ctx, url: str):
+        """
+        Set the github URL for the server
+        """
+        try:
+            await self.config.github_url.set(url)
+            await ctx.send("Github URL set.")
+        
+        except(ValueError, KeyError, AttributeError):
+            await ctx.send("There was a problem setting your github URL. Please check your entry and try again.")
 
     @setss13.command()
     async def toggleooc(self, ctx, toggle:bool = None):
@@ -257,9 +270,13 @@ class SS13Commands(commands.Cog):
         if(message.author == self.bot.user):
             return
         if(message.content.lower().endswith("when")):
-            await message.channel.send("When ~~you~~ Mark codes it.")
-        elif(message.content.startswith("marg")):
-            await message.channel.send("marg")    
+            await message.channel.send("When you code it.")
+        elif(message.content.lower().startswith("marg")):
+            await message.channel.send("marg")
+        elif(message.content.lower().startswith("gh#")):
+            issuenum = message.content.strip("gh#")
+            if(issuenum.isdigit()):
+                await message.channel.send(f"{await self.config.github_url()}/{issuenum}")
 
     async def topic_query_server(self, querystr="status", sender="Discord", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
