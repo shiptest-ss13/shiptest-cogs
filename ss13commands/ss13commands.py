@@ -275,8 +275,9 @@ class SS13Commands(commands.Cog):
             await message.channel.send("marg")
         elif(message.content.lower().startswith("gh#")):
             issuenum = message.content.strip("gh#")
+            issuenum = issuenum.strip()
             if(issuenum.isdigit()):
-                await message.channel.send(f"{await self.config.github_url()}/{issuenum}")
+                await message.channel.send(f"{await self.config.github_url()}/pulls/{issuenum}")
 
     async def topic_query_server(self, querystr="status", sender="Discord", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
