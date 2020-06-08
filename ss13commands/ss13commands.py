@@ -37,7 +37,6 @@ class SS13Commands(commands.Cog):
             "comms_key": "default_pwd",
             "ooc_notice_channel": None,
             "ooc_toggle": True,
-            "github_url": None,
         }
 
         self.config.register_global(**default_global)
@@ -91,18 +90,6 @@ class SS13Commands(commands.Cog):
         
         except(ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting your communications key. Please check your entry and try again.")
-
-    @setss13.command()
-    async def github(self, ctx, url: str):
-        """
-        Set the github URL for the server
-        """
-        try:
-            await self.config.github_url.set(url)
-            await ctx.send("Github URL set.")
-        
-        except(ValueError, KeyError, AttributeError):
-            await ctx.send("There was a problem setting your github URL. Please check your entry and try again.")
 
     @setss13.command()
     async def toggleooc(self, ctx, toggle:bool = None):
@@ -273,11 +260,6 @@ class SS13Commands(commands.Cog):
             await message.channel.send("When you code it.")
         elif(message.content.lower().startswith("marg")):
             await message.channel.send("marg")
-        elif(message.content.lower().startswith("gh#")):
-            issuenum = message.content.strip("gh#")
-            issuenum = issuenum.strip()
-            if(issuenum.isdigit()):
-                await message.channel.send(f"{await self.config.github_url()}/pull/{issuenum}")
 
     async def topic_query_server(self, querystr="status", sender="Discord", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
