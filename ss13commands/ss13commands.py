@@ -237,14 +237,14 @@ class SS13Commands(commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def verify(self, ctx, target:str, msg:str):
         """
-        Work in progress command, sets sender's Discord nickname to their CKEY if they respon in game.
+        Work in progress command, sets sender's Discord nickname to their CKEY if they respond in game.
         """
         await self.topic_query_server(querystr=f"verify={target}", sender=ctx.author.display_name)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if(message.channel.id == await self.config.ooc_notice_channel()):
-            if((message.author == self.bot.user) and (message.content.startswith("**OOC:**"))):
+            if((message.author == self.bot.user) and (message.content.startswith("**OOC:**") or (message.content == "The Discord OOC relay has been disabled.")):
                 return
             if(await self.config.ooc_toggle()):
                 data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": message.content})
