@@ -244,7 +244,7 @@ class SS13Commands(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if(message.channel.id == await self.config.ooc_notice_channel()):
-            if((message.author == self.bot.user) and (message.content.startswith("**OOC:**") or (message.content == "The Discord OOC relay has been disabled.")):
+            if((message.author == self.bot.user) and (message.content.startswith("**OOC:**")) or (message.content == "The Discord OOC relay has been disabled.")):
                 return
             if(await self.config.ooc_toggle()):
                 data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": message.content})
