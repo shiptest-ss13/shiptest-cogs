@@ -173,7 +173,9 @@ class SS13Commands(commands.Cog):
         """
         data = await self.topic_query_server(querystr="manifest", sender=ctx.author.display_name)
 
-        await ctx.send(data)
+        parsed_data = urllib.parse.parse_qs(data[5:-1].decode())
+
+        await ctx.send(parsed_data)
 
         if(data):
             embed=discord.Embed(title="__Crew Manifest:__", color=0x26eaea)
