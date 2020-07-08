@@ -177,10 +177,10 @@ class SS13Commands(commands.Cog):
 
         await ctx.send(parsed_data)
 
-        if(data):
+        if(parsed_data):
             embed=discord.Embed(title="__Crew Manifest:__", color=0x26eaea)
             for department in data:
-                entries = [i for i in data[department]]
+                entries = [i for i in parsed_data[department]]
                 embed.add_field(name=f"{department}",value=f'\n'.join(map(str,entries)))
         else:
             embed=discord.Embed(title="__Crew Manifest:__", description="No crewmembers found!", color=0x26eaea)
