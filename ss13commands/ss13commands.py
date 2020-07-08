@@ -175,13 +175,11 @@ class SS13Commands(commands.Cog):
 
         data = urllib.parse.parse_qs(string[5:-1])
 
-        await ctx.send(data)
-
         if(data):
             embed=discord.Embed(title="__Crew Manifest:__", color=0x26eaea)
             for department in data:
                 entries = [i for i in data[department]]
-                embed.add_field(name=f"{department}",value=f'\n'.join(map(str,entries)))
+                embed.add_field(name=f"{department}",value=f'\n'.join(map(str,entries)),inline=False)
         else:
             embed=discord.Embed(title="__Crew Manifest:__", description="No crewmembers found!", color=0x26eaea)
         await ctx.send(embed=embed)
