@@ -173,10 +173,7 @@ class SS13Commands(commands.Cog):
         """
         string = await self.topic_query_server(querystr="manifest", sender=ctx.author.display_name)
 
-        try:
-            data = json.loads(string)
-        except json.JSONDecodeError as err:
-            raise
+        data = urllib.parse.parse_qs(string[5:-1])
 
         await ctx.send(data)
 
