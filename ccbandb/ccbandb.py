@@ -63,8 +63,8 @@ class CCBanDB(BaseCog):
 
         try:
             dburl = await self.config.guild(ctx.guild).bandb()
-            rows = requests.get(f"{dburl}/{ckey}")
-            rows = json.dumps(rows.json())
+            request = requests.get(f"{dburl}/{ckey}")
+            rows = request.json()
             if(not rows):
                 embed=discord.Embed(description=f"No notes found for: {str(ckey).title()}", color=0xf1d592)
                 return await message.edit(content=None,embed=embed)
