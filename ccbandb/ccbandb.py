@@ -82,7 +82,7 @@ class CCBanDB(BaseCog):
                 notes += f"[{row['bannedOn']} | {row['type']} banned by {row['bannedBy']}]\n{row['reason']}"
                 if(row['type'] == "Job"):
                     notes += "\nJobs: "
-                    notes += " ,".join(map(str, row['jobs']))
+                    notes += ", ".join(map(str, row['jobs']))
             for note in pagify(notes):
                 embed = discord.Embed(description=box(note, lang="asciidoc"), color=0xf1d592)
                 temp_embeds.append(embed)
