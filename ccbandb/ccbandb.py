@@ -39,7 +39,7 @@ class CCBanDB(BaseCog):
     @checks.admin_or_permissions(administrator=True)
     async def bandb(self, ctx, ban_db = ""):
         """
-        Sets or displays the current global ban API. (Defaults to the Centcom ban DB found here: <https://centcom.melonmesa.com/ban/search>)
+        Sets or displays the current global ban API. (Defaults to the Centcom ban DB found here: https://centcom.melonmesa.com/ban/search)
         """
         if(ban_db):
             try:
@@ -66,7 +66,7 @@ class CCBanDB(BaseCog):
             request = requests.get(f"{dburl}/{ckey}")
             rows = request.json()
             if(not rows):
-                embed=discord.Embed(description=f"No notes found for: {str(ckey).title()}", color=0xf1d592)
+                embed=discord.Embed(description=f"No bans found for: {str(ckey).title()}", color=0xf1d592)
                 return await message.edit(content=None,embed=embed)
             # Parse the data into individual fields within an embeded message in Discord for ease of viewing
             notes = ""
@@ -75,10 +75,15 @@ class CCBanDB(BaseCog):
             embeds = []
             for row in rows:
                 total += 1
-                expiration = "Permanent"
+                expiration = "Never" #defaults to perma, will set it to proper date if applicable
                 if('expires' in row):
                     expiration = row['expires']
-                notes += f"\n[Server: {row['sourceName']} ({row['sourceRoleplayLevel']}) - Expires: {expiration}]\n[{row['bannedOn']} | {row['type']} by {row['bannedBy']}]\n{row['reason']}"
+                    expiration = replace("T", " ") #too lazy to find out why it's doing this luhmayo
+                notes += f"\n[Server: {row['sourceName']} ({row['sourceRoleplayLevel']}) - Expires: {expiration}]\n"
+                notes += f"[{row['bannedOn']} | {row['type']} by {row['bannedBy']}]\n{row['reason']}"
+                if(row['type'] == "job"):
+                    notes += "\nJobs:"
+                    notes += " ,".join(map(str, row['jobs']))
             for note in pagify(notes):
                 embed = discord.Embed(description=box(note, lang="asciidoc"), color=0xf1d592)
                 temp_embeds.append(embed)
