@@ -78,11 +78,11 @@ class CCBanDB(BaseCog):
                 expiration = "Never" #defaults to perma, will set it to proper date if applicable
                 if('expires' in row):
                     expiration = row['expires']
-                    expiration = replace("T", " ") #too lazy to find out why it's doing this luhmayo
+                    expiration = expiration.replace("T", " ") #too lazy to find out why it's doing this luhmayo
                 notes += f"\n[Server: {row['sourceName']} ({row['sourceRoleplayLevel']}) - Expires: {expiration}]\n"
                 notes += f"[{row['bannedOn']} | {row['type']} by {row['bannedBy']}]\n{row['reason']}"
                 if(row['type'] == "job"):
-                    notes += "\nJobs:"
+                    notes += "\nJobs: "
                     notes += " ,".join(map(str, row['jobs']))
             for note in pagify(notes):
                 embed = discord.Embed(description=box(note, lang="asciidoc"), color=0xf1d592)
