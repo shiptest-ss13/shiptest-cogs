@@ -1,0 +1,14 @@
+{
+    "author": ["Mark Suckerberg (Mark Suckerberg #2182)"],
+    "install_msg": "",
+    "name": "SS13 Centcom Global Ban Database Cog",
+    "short": "Obtains bans from a configurable public ban database, notably the Centcom global ban DB.",
+    "description": "Obtains bans from a configurable public ban database, notably the Centcom global ban DB.",
+    "tags": [
+        "Space Station 13",
+        "Game",
+        "Administration",
+        "Utility",
+        "SS13"
+    ]
+}
