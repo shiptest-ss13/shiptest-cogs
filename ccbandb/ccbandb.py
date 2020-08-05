@@ -92,6 +92,6 @@ class CCBanDB(BaseCog):
             await message.delete()
             await menu(ctx, embeds, DEFAULT_CONTROLS)
         
-        except requests.Error as err:
+        except requests.exceptions.Timeout as err:
             embed=discord.Embed(title=f"Error looking up bans for: {ckey}", description=f"{format(err)}", color=0xff0000)
             await message.edit(content=None,embed=embed)
