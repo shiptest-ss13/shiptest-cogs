@@ -222,6 +222,7 @@ class SS13Commands(commands.Cog):
         Restarts the linked SS13 server if there are no admins online.
         """
         info = await self.topic_query_server(querystr=f"restart", sender=ctx.author.display_name, params={"hard": int(hard)})
+        await ctx.send("Restarting...")
         if(info):
             await ctx.send(info)
 
@@ -257,7 +258,9 @@ class SS13Commands(commands.Cog):
             await message.delete()
         if(message.author == self.bot.user):
             return
-        if(message.content.lower().endswith("when")):
+        if(message.content.lower().endswith("based on what?")):
+            await message.channel.send("https://youtu.be/LrNu-SuFF_o")
+        elif(message.content.lower().endswith("when")):
             await message.channel.send("When you code it.")
         elif(message.content.lower().startswith("marg")):
             await message.channel.send("marg")
