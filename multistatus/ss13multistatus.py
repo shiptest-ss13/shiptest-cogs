@@ -587,12 +587,11 @@ class SS13MultiStatus(commands.Cog):
             """ #pylint: disable=unreachable
 
         except:
-            max_attempts = await self.config.retries()    
+            max_attempts = await self.config.retries()
             if(attempt <= max_attempts): #Attempt to reconnect
                 return await self.query_server(game_server, game_port, querystr, attempt + 1)
             else:
-                raise
-                return 0
+                return None
 
         finally:
             conn.close()
