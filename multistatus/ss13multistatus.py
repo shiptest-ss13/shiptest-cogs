@@ -9,6 +9,7 @@ import time
 import textwrap
 from datetime import datetime
 import logging
+import aiomysql
 import mysql.connector
 import ipaddress
 import re
@@ -26,7 +27,7 @@ from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
 __version__ = "0.0.3"
 __author__ = "MarkSuckerberg with Crossedfall's code"
 
-log = logging.getLogger("red.SS13Status")
+log = logging.getLogger("red.SS13MultiStatus")
 
 BaseCog = getattr(commands, "Cog", object)
 
@@ -604,26 +605,24 @@ class SS13MultiStatus(commands.Cog):
         db_user = await self.config.mysql_user()
         db_pass = await self.config.mysql_password()
 
-        cursor = None # Since the cursor/conn variables can't actually be closed if the connection isn't properly established we set a None type here
-        conn = None # ^
+        pool = None # Since the pool variables can't actually be closed if the connection isn't properly established we set a None type here
 
         try:
             # Establish a connection with the database and pull the relevant data
-            conn = mysql.connector.connect(host=db_host,port=db_port,database=db,user=db_user,password=db_pass, connect_timeout=5)
-            cursor = conn.cursor(dictionary=True)
-            cursor.execute(query)
-            rows = cursor.fetchall()
-
-            return rows
-        
+            pool = await aiomysql.create_pool(host=db_host,port=db_port,db=db,user=db_user,password=db_pass, connect_timeout=5)
+            async with pool.acquire() as conn:
+                async with conn.cursor(aiomysql.DictCursor) as cur:
+                    await cur.execute(query)
+                    rows = cur.fetchall()
+                    return rows.result()
+            
         except:
             raise 
 
         finally:
-            if cursor is not None:
-                cursor.close()  
-            if conn is not None:
-                conn.close()
+            if pool is not None:
+                pool.close()
+                await pool.wait_closed()
 
     async def modify_database(self, query: str):
         # Database options loaded from the config
@@ -633,26 +632,25 @@ class SS13MultiStatus(commands.Cog):
         db_user = await self.config.mysql_user()
         db_pass = await self.config.mysql_password()
 
-        cursor = None # Since the cursor/conn variables can't actually be closed if the connection isn't properly established we set a None type here
-        conn = None # ^
+        pool = None # Since the pool variables can't actually be closed if the connection isn't properly established we set a None type here
 
         try:
             # Establish a connection with the database and pull the relevant data
-            conn = mysql.connector.connect(host=db_host,port=db_port,database=db,user=db_user,password=db_pass, connect_timeout=5)
-            info = conn.cmd_query(query)
-        
-            conn.commit()
-
-            return info
-
+            pool = await aiomysql.create_pool(host=db_host,port=db_port,db=db,user=db_user,password=db_pass, connect_timeout=5)
+            async with pool.acquire() as conn:
+                async with conn.cursor(aiomysql.DictCursor) as cur:
+                    info = await cur.execute(query)
+                    await conn.commit()
+                    return info
+            
         except:
-            raise
+            raise 
 
         finally:
-            if cursor is not None:
-                cursor.close()  
-            if conn is not None:
-                conn.close()        
+            if pool is not None:
+                pool.close()
+                await pool.wait_closed()
+
 
     async def player_cache_loop(self):
         table = await self.config.mysql_table()        
