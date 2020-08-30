@@ -52,8 +52,6 @@ class SS13MultiStatus(commands.Cog):
         self.config.register_global(**default_global)
         self.svr_chk_task = self.bot.loop.create_task(self.player_cache_loop())
 
-
-
     @commands.group()
     @checks.admin_or_permissions(administrator=True)
     async def setmultistatus(self,ctx): 
@@ -541,6 +539,8 @@ class SS13MultiStatus(commands.Cog):
     async def clean_check_players(self, game_server:str, game_port:int) -> int:
         cleanip = socket.gethostbyname(game_server)
         data = await self.query_server(cleanip, game_port)
+        if(not data):
+            return 0
         return data['players'][0]
 
     async def query_server(self, game_server:str, game_port:int, querystr="?status", attempt = 0) -> dict:
