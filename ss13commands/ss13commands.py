@@ -258,11 +258,7 @@ class SS13Commands(commands.Cog):
             await message.delete()
         if(message.author == self.bot.user):
             return
-        if(message.content.lower().endswith("based")):
-            await message.channel.send("Based on what?")
-        elif(message.content.lower().endswith("based on what?")):
-            await message.channel.send("https://youtu.be/LrNu-SuFF_o")
-        elif(message.content.lower().endswith("when")):
+        if(message.content.lower().endswith("when")):
             await message.channel.send("When you code it.")
         elif(message.content.lower().startswith("marg")):
             await message.channel.send("marg")
