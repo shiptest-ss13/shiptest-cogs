@@ -273,7 +273,8 @@ class VerifyCkey(commands.Cog):
                         roles_list = []
                         for role in roles_dict.keys():
                             roles_list.append(guild.get_role(int(role)))
-                        await member.add_roles(*roles_list, reason="Verified user")        
+                        await member.add_roles(*roles_list, reason="Verified user")
+                        await member.edit(nick=ckey, reason="Verified user") #mark edit
                         await self.config.verified_users.set(users)
                         embed=discord.Embed(title=f"Welcome, {ckey.title()}!", description=f"I've added the following roles to you in Discord: **{humanize_list(list(roles_dict.values()))}**", color=0x77dd77)
                         embed.set_footer(text="Remember to read our rules and act accordingly. Enjoy your stay!")

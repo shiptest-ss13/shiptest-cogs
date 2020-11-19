@@ -249,13 +249,12 @@ class SS13Commands(commands.Cog):
             if((message.author == self.bot.user) and (message.content.startswith("**OOC:**")) or (message.content == "The Discord OOC relay has been disabled.")):
                 return
             if(await self.config.ooc_toggle()):
-                data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": message.content})
+                data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": message.content}, needskey=False)
                 if(data):
                     await message.channel.send(data)
             else:
                 replymsg = await message.channel.send("The Discord OOC relay has been disabled.")
                 await replymsg.delete(2)
-            await message.delete()
         if(message.author == self.bot.user):
             return
         if(message.content.lower().endswith("when")):
@@ -263,7 +262,7 @@ class SS13Commands(commands.Cog):
         elif(message.content.lower().startswith("marg")):
             await message.channel.send("marg")
 
-    async def topic_query_server(self, querystr="status", sender="Discord", params=None): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
+    async def topic_query_server(self, querystr="status", sender="Discord", params=None, needskey=True): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
         Queries the server for information
         """
@@ -278,7 +277,7 @@ class SS13Commands(commands.Cog):
         if(params):
             message.update(params)
 
-        if(await self.config.comms_key()): #Little risky but mnehhh
+        if(await self.config.comms_key() and needskey): #Little risky but mnehhh
             message["key"] = await self.config.comms_key()
 
         message = json.dumps(message, separators=("&", "=")) #This is just how SS13 (at least /tg/) seperates attributes
