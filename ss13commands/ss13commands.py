@@ -18,7 +18,7 @@ import discord
 from redbot.core import commands, checks, Config, utils
 import json
 
-__version__ = "1.2"
+__version__ = "1.2.2"
 __author__ = "Mark Suckerberg"
 
 log = logging.getLogger("red.SS13Commands")
