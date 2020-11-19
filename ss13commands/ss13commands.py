@@ -234,15 +234,6 @@ class SS13Commands(commands.Cog):
         """
         await ctx.send("kek")
 
-    @commands.guild_only()
-    @commands.command()
-    @checks.admin_or_permissions(administrator=True)
-    async def verify(self, ctx, target:str, msg:str):
-        """
-        Work in progress command, sets sender's Discord nickname to their CKEY if they respond in game.
-        """
-        await self.topic_query_server(querystr=f"verify={target}", sender=ctx.author.display_name)
-
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if(message.channel.id == await self.config.ooc_notice_channel()):
