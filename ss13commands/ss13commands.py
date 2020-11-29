@@ -157,7 +157,7 @@ class SS13Commands(commands.Cog):
         if(await self.config.ooc_toggle()):
             message = " ".join(args)
             message = message.strip("@")
-            data = await self.topic_query_server(querystr="ooc_send", sender=ctx.author.display_name, params={"message": str(message, encoding="utf-32")})
+            data = await self.topic_query_server(querystr="ooc_send", sender=ctx.author.display_name, params={"message": message})
             if(data):
                 await ctx.send(data)
         else:
@@ -240,7 +240,7 @@ class SS13Commands(commands.Cog):
             if((message.author == self.bot.user) and (message.content.startswith("**OOC:**")) or (message.content == "The Discord OOC relay has been disabled.")):
                 return
             if(await self.config.ooc_toggle()):
-                data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": str(message.content, encoding="utf-32")})
+                data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": message.content})
                 if(data):
                     await message.channel.send(data)
             else:
