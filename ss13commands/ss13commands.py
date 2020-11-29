@@ -281,11 +281,11 @@ class SS13Commands(commands.Cog):
 
         log.info(f"Querying gameserver with message: {message}")
 
-        reader, writer = await asyncio.open_connection(server, port)            
+        reader, writer = await asyncio.open_connection(server, port)
         query = b"\x00\x83"
         query += struct.pack('>H', len(message) + 6)
         query += b"\x00\x00\x00\x00\x00"
-        query += message.encode()
+        query += message.encode("utf-16")
         query += b"\x00" #Creates a packet for byond according to TG's standard
 
         writer.write(query)

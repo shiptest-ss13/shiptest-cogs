@@ -473,7 +473,7 @@ class SS13Status(commands.Cog):
         data = await reader.read(10000)
         msg = data.decode()
         msg = msg.split(" ")[1] #Drop the 'GET'
-        parsed_data = urllib.parse.parse_qs(msg[2:len(msg)]) #Drop the leading ?/ and make the text readable
+        parsed_data = urllib.parse.parse_qs(msg[2:len(msg)], encoding = "utf-16") #Drop the leading ?/ and make the text readable
 
         writer.close()
         
