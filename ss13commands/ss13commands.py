@@ -276,6 +276,7 @@ class SS13Commands(commands.Cog):
         message = message.replace("{", "")
         message = message.replace("}", "")
         message = message.replace("\"", "")
+        message = str(message, encoding="utf-16")
 
         message = f"?{querystr}&{message}"
 
