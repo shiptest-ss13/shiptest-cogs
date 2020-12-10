@@ -10,7 +10,6 @@ import time
 import textwrap
 from datetime import datetime
 import logging
-import re
 
 #Discord Imports
 import discord
@@ -241,13 +240,7 @@ class SS13Commands(commands.Cog):
             if((message.author == self.bot.user) and (message.content.startswith("**OOC:**")) or (message.content == "The Discord OOC relay has been disabled.")):
                 return
             if(await self.config.ooc_toggle()):
-                sanitized_content = message.content
-                if(len(message.mentions)):
-                    sanitized_content = re.sub("<@[^>]+>", f"@{message.mentions[0].display_name}", sanitized_content)
-                elif(len(message.role_mentions)):
-                    sanitized_content = re.sub("<@[^>]+>", f"@{message.role_mentions[0].name}", sanitized_content)
-                sanitized_content = re.sub("<#[^>]+>", f"#{message.channel_mentions()[0].name}", sanitized_content)
-                data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": sanitized_content})
+                data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": message.content})
                 if(data):
                     await message.channel.send(data)
             else:
