@@ -234,6 +234,17 @@ class SS13Commands(commands.Cog):
         """
         await ctx.send("kek")
 
+    @commands.guild_only()
+    @commands.command()
+    async def join(self, ctx):
+        """
+        Sends an embedded join link to the server.
+        """
+        server = await self.config.server()
+        port = await self.config.game_port()
+        embed = discord.embed(title="__Join:__", description=f"<byond://{server}:{port}>")
+        await ctx.send(embed)
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if(message.channel.id == await self.config.ooc_notice_channel()):
