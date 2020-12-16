@@ -243,7 +243,7 @@ class SS13Commands(commands.Cog):
         server = await self.config.server()
         port = await self.config.game_port()
         embed = discord.Embed(title="__Join:__", description=f"<byond://{server}:{port}>")
-        await ctx.send(embed)
+        await ctx.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
