@@ -529,9 +529,25 @@ class SS13Status(commands.Cog):
                         self.newroundmsg = await new_round_channel.send(embed=embed)
             elif ('announce_channel' in parsed_data) and ('ooc' in parsed_data['announce_channel']) and (ooc_channel is not None):
                 message = str(*parsed_data['announce'])
-                message = parser.unescape(message)
                 message = message.replace("@", "")
                 await ooc_channel.send(f"**OOC:** {message}")
+
+            elif ('announce_channel' in parsed_data) and ('roundend' in parsed_data['announce_channel']) and (ooc_channel is not None):
+                round_id = str(*parsed_data['announce'])
+                mode = str(*parsed_data['mode'])
+                players = str(*parsed_data['players'])
+                survivors = str(*parsed_data['survivors'])
+                escapees = str(*parsed_data['escapees'])
+                integrity = str(*parsed_data['integrity'])
+                first_death = str(*parsed_data['first_death'])
+
+                roundend_embed = discord.Embed(title=f"Roundend Report - Round #{round_id}")
+                roundend_embed.add_field("Game Mode", mode)
+                roundend_embed.add_field("Station Integrity", integrity)
+                roundend_embed.add_field("Players", f"Total Population: {players}\nSurvivors: {survivors} ({survivors/players*100}% Survival Rate)\nEscapees: {escapees} ({escapees/players*100}% Escape Rate)")
+                roundend_embed.add_field("First Death", first_death)
+
+                await ooc_channel.send(embed=roundend_embed)
 
             elif ('announce_channel' in parsed_data) and ('mentor' in parsed_data['announce_channel']) and (mentor_channel is not None):
                 announce = str(*parsed_data['announce'])
