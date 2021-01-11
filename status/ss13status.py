@@ -490,8 +490,11 @@ class SS13Status(commands.Cog):
         parser = htmlparser.HTMLParser()
 
         if ('key' in parsed_data) and (comms_key in parsed_data['key']): #Check to ensure that we're only serving messages from our game
-            if ('serverStart' in parsed_data) or ('announce_channel' in parsed_data and 'newround' in parsed_data['announce_channel']) and (new_round_channel is not None):
-                embed = discord.Embed(title=str(*parsed_data['announce']) or "Starting new round!", description=f"<{byondurl}>", color=0x8080ff)
+            if (('serverStart' in parsed_data) or ('announce_channel' in parsed_data and 'newround' in parsed_data['announce_channel'])) and (new_round_channel is not None):
+                if parsed_data['announce']:
+                    embed = discord.Embed(title=str(*parsed_data['announce']), description=f"<{byondurl}>", color=0x8080ff)
+                else:
+                    embed = discord.Embed(title="Starting new round!", description=f"<{byondurl}>", color=0x8080ff)
 
                 if ('roundID' in parsed_data):
                     self.roundID = parsed_data['roundID'][0]
