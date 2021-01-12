@@ -404,7 +404,7 @@ class SS13Status(commands.Cog):
             else:
                 embed.add_field(name="Shuttle Status", value="Refueling", inline=True)
             if "mining_map_name" in data:
-                embed.add_field(name="Shuttle Status", value=str.title(*data['mining_map_name']), inline=True)
+                embed.add_field(name="Mining Map", value=str.title(*data['mining_map_name']), inline=True)
             embed.add_field(name="Players", value=players, inline=True)
             embed.add_field(name="Admins", value=int(*data['admins']), inline=True)
             embed.add_field(name="Round Duration", value=duration, inline=True)
