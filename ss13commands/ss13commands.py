@@ -237,10 +237,12 @@ class SS13Commands(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
-    async def deathgasp(self, ctx, user: discord.Member = ctx.author):
+    async def deathgasp(self, ctx, user: discord.Member = None):
         """
         Give up life and succumb to death.
         """
+        if not user:
+            user = ctx.author
         await ctx.send(f"{user.display_name} seizes up and falls limp, their eyes dead and lifeless...")
 
     @commands.guild_only()
