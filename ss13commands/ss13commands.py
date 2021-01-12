@@ -237,6 +237,14 @@ class SS13Commands(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
+    async def deathgasp(self, ctx, user: discord.Member = ctx.author):
+        """
+        Give up life and succumb to death.
+        """
+        await ctx.send(f"{user.display_name} seizes up and falls limp, their eyes dead and lifeless...")
+
+    @commands.guild_only()
+    @commands.command()
     async def join(self, ctx):
         """
         Sends an embedded join link to the server.
