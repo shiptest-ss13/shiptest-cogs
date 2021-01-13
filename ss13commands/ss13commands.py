@@ -271,9 +271,15 @@ class SS13Commands(commands.Cog):
                 await replymsg.delete(2)
         if(message.author == self.bot.user):
             return
-        if(message.content.lower().endswith("when")):
-            await message.channel.send("When you code it.")
-        elif(message.content.lower().startswith("marg")):
+        content = message.content.lower()
+        if(content.endswith("when")):
+            if("sprite" in content):
+                await message.channel.send("When you sprite it.")
+            elif("map" in content):
+                await message.channel.send("When you map it.")
+            else:
+                await message.channel.send("When you code it.")
+        elif("marg" in content):
             await message.channel.send("marg")
 
     async def topic_query_server(self, querystr="status", sender="Discord", params=None, needskey=True): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
