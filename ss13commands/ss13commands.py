@@ -10,6 +10,7 @@ import time
 import textwrap
 from datetime import datetime
 import logging
+from random import randint
 
 #Discord Imports
 import discord
@@ -251,9 +252,8 @@ class SS13Commands(commands.Cog):
         """
         Sends an embedded join link to the server.
         """
-        server = await self.config.server()
-        port = await self.config.game_port()
-        embed = discord.Embed(title="__Join:__", description=f"<byond://{server}:{port}>")
+        server_url = await self.config.server_url()
+        embed = discord.Embed(title="__Join:__", description=f"<{server_url}>")
         await ctx.send(embed=embed)
 
     @commands.Cog.listener()
@@ -280,7 +280,16 @@ class SS13Commands(commands.Cog):
             else:
                 await message.channel.send("When you code it.")
         elif("marg" in content):
-            await message.channel.send("marg")
+            if(randint(1, 10) > 8):
+                await message.channel.send("marg")
+        elif("based" in content): #Kill me
+            random_int = randint(1, 100)
+            if(random_int > 95):
+                await message.channel.send("Unbased.")
+            elif(random_int > 90):
+                await message.channel.send("Cringe.")
+            elif(random_int > 80):
+                await message.channel.send("Based on what?")
 
     async def topic_query_server(self, querystr="status", sender="Discord", params=None, needskey=True): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
