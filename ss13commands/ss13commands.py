@@ -92,7 +92,7 @@ class SS13Commands(commands.Cog):
         except(ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting your communications key. Please check your entry and try again.")
 
-    @setstatus.command()
+    @setss13.command()
     async def byondurl(self, ctx, url: str):
         """
         Set the byond URL for your server (For embeds)
