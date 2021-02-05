@@ -315,7 +315,7 @@ class SS13MultiStatus(commands.Cog):
     
 
     @commands.command(aliases=['status'])  
-    async def check(self, ctx, server: str):
+    async def servercheck(self, ctx, server: str):
         """
         Gets the status and round details for a specified server
         """
@@ -490,7 +490,7 @@ class SS13MultiStatus(commands.Cog):
 
 
     @commands.command()
-    async def players(self, ctx, server:str, raw = False):
+    async def serverplayers(self, ctx, server:str, raw = False):
         """
         Gets the players from most servers.
         """
