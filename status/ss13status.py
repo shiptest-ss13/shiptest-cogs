@@ -389,6 +389,7 @@ class SS13Status(commands.Cog):
             players = int(*data['players'])
 
             #Might make the embed configurable at a later date
+            embed=discord.Embed(color=0x26eaea)
             embed.add_field(name="Players", value=players, inline=True)
             embed.add_field(name="Admins", value=int(*data['admins']), inline=True)
             embed.add_field(name="Round Duration", value=duration, inline=True)
@@ -436,6 +437,7 @@ class SS13Status(commands.Cog):
             | revision_date  | date   |
             | admins         | int    |
             | gamestate      | int    |
+            | map_name       | str    |
             | security_level | str    |
             | round_duration | int    |
             | shuttle_mode   | str    |
