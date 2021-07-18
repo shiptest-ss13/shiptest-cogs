@@ -386,9 +386,7 @@ class SS13Status(commands.Cog):
             #Reported time is in seconds, we need to convert that to be easily understood
             duration = int(*data['round_duration'])
             duration = time.strftime('%H:%M', time.gmtime(duration))
-            players = int(*data['players']) 
-            #Format long map names
-            mapname = '\n'.join(textwrap.wrap(mapname,25))
+            players = int(*data['players'])
 
             #Might make the embed configurable at a later date
             embed.add_field(name="Players", value=players, inline=True)
