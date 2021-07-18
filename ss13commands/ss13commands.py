@@ -242,14 +242,6 @@ class SS13Commands(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
-    async def kek(self, ctx):
-        """
-        Kek.
-        """
-        await ctx.send("kek")
-
-    @commands.guild_only()
-    @commands.command()
     async def deathgasp(self, ctx, user: discord.Member = None):
         """
         Give up life and succumb to death.
@@ -267,41 +259,6 @@ class SS13Commands(commands.Cog):
         server_url = await self.config.server_url()
         embed = discord.Embed(title="__Join:__", description=f"<{server_url}>")
         await ctx.send(embed=embed)
-
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
-        if(message.channel.id == await self.config.ooc_notice_channel()):
-            if((message.author == self.bot.user) and (message.content.startswith("**OOC:**")) or (message.content == "The Discord OOC relay has been disabled.")):
-                return
-            if(await self.config.ooc_toggle()):
-                to_send = htmlparser.unescape(message.content)
-                data = await self.topic_query_server(querystr="ooc_send", sender=message.author.display_name, params={"message": to_send})
-                if(data):
-                    await message.channel.send(data)
-            else:
-                replymsg = await message.channel.send("The Discord OOC relay has been disabled.")
-                await replymsg.delete(2)
-        if(message.author == self.bot.user):
-            return
-        content = message.content.lower()
-        if(content.endswith("when")):
-            if("sprite" in content):
-                await message.channel.send("When you sprite it.")
-            elif("map" in content):
-                await message.channel.send("When you map it.")
-            else:
-                await message.channel.send("When you code it.")
-        elif("marg" in content):
-            if(randint(1, 10) > 8):
-                await message.channel.send("marg")
-        elif("based" in content): #Kill me
-            random_int = randint(1, 100)
-            if(random_int > 95):
-                await message.channel.send("Unbased.")
-            elif(random_int > 90):
-                await message.channel.send("Cringe.")
-            elif(random_int > 80):
-                await message.channel.send("Based on what?")
 
     async def topic_query_server(self, querystr="status", sender="Discord", params=None, needskey=True): #I could combine this with the previous def but I'm too scared to mess with it; credit to Aurora for most of this code
         """
