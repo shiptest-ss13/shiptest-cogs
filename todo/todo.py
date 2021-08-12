@@ -31,6 +31,7 @@ class ToDoCog(BaseCog):
         self.config.register_guild(**default_guild)
         self.loop = asyncio.get_event_loop()
     
+    @commands.command()
     @commands.group()
     async def addtodo(self, ctx):
         """
@@ -38,6 +39,7 @@ class ToDoCog(BaseCog):
         """
         pass
 
+    @commands.guild_only()
     @addtodo.command()
     async def server(self, ctx, task: str):
         author = ctx.message.author
