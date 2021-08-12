@@ -38,9 +38,9 @@ class ToDoCog(BaseCog):
         """
         pass
 
-    @addtodo.command()
     @commands.guild_only()
-    async def server(self, ctx, task:str):
+    @addtodo.command()
+    async def server(self, ctx, task: str):
         author = ctx.message.author
 
         todo_item = {
