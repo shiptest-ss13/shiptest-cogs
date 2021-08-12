@@ -45,7 +45,7 @@ class ToDoCog(BaseCog):
 
         todo_item = {
             "TASK_USER_NAME": author.name,
-            "TASK_TIMESTAMP": int(time.time())
+            "TASK_TIMESTAMP": int(time.time()),
             "TASK_USER_ID": author.id,
             "TASK_INFO": task,
             "TASK_COMPLETED": False
