@@ -69,9 +69,9 @@ class ToDoCog(BaseCog):
         for task in tasks:
             formatted_tasks += (
                 "["
-                "✅" if task["TASK_COMPLETED"] else "❎"
+                "✅" if task['TASK_COMPLETED'] else "❎"
                 " - "
-                f"{task["TASK_INFO"]} ({task["TASK_USER_NAME"]} <t:{task["TASK_TIMESTAMP"]}>)"
+                f"{task['TASK_INFO']} ({task['TASK_USER_NAME']} <t:{task['TASK_TIMESTAMP']}>)"
                 "]\n"
             )
 
