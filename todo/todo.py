@@ -38,7 +38,6 @@ class ToDoCog(BaseCog):
         """
         pass
 
-    @commands.guild_only()
     @addtodo.command()
     async def server(self, ctx, task: str):
         author = ctx.message.author
