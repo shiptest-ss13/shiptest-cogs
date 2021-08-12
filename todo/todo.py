@@ -32,7 +32,7 @@ class ToDoCog(BaseCog):
         self.loop = asyncio.get_event_loop()
     
     @commands.group()
-    async def addtodo(self, ctx):
+    async def addtodo(self, ctx: commands.Contex):
         """
         Adds a todo item to a specific todo list
         """
@@ -40,7 +40,7 @@ class ToDoCog(BaseCog):
 
     @commands.guild_only()
     @addtodo.command()
-    async def server(self, ctx, task: str):
+    async def server(self, ctx: commands.Contex, task: str):
         """
         Adds a todo item to the server-specific todo list.
         """
@@ -62,11 +62,11 @@ class ToDoCog(BaseCog):
             pass
 
     @commands.group()
-    async def listtodo(self, ctx):
+    async def listtodo(self, ctx: commands.Contex):
         pass
 
     @listtodo.command()
-    async def server(self, ctx):
+    async def server(self, ctx: commands.Contex):
         tasks = await self.config.guild.guild_tasks()
         formatted_tasks = []
         for task in tasks:
