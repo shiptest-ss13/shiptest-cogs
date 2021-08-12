@@ -62,7 +62,7 @@ class ToDoCog(BaseCog):
     async def listtodo(self, ctx):
         pass
 
-    @listtodo.commands()
+    @listtodo.command()
     async def server(self, ctx):
         tasks = await self.config.guild.guild_tasks()
         formatted_tasks = []
