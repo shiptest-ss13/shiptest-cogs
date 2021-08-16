@@ -17,9 +17,7 @@ __author__ = "Mark Suckerberg"
 
 log = logging.getLogger("red.ToDoCog")
 
-BaseCog = getattr(commands, "Cog", object)
-
-class ToDoCog(BaseCog):
+class ToDoCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, 3257733194, force_registration=True)
@@ -29,10 +27,9 @@ class ToDoCog(BaseCog):
         }
 
         self.config.register_guild(**default_guild)
-        self.loop = asyncio.get_event_loop()
     
     @commands.group()
-    async def addtodo(self, ctx: commands.Context):
+    async def addtodo(self, ctx):
         """
         Adds a todo item to a specific todo list
         """
@@ -40,7 +37,7 @@ class ToDoCog(BaseCog):
 
     @commands.guild_only()
     @addtodo.command()
-    async def server(self, ctx: commands.Context, task: str):
+    async def server(self, ctx, task: str):
         """
         Adds a todo item to the server-specific todo list.
         """
@@ -62,11 +59,11 @@ class ToDoCog(BaseCog):
             pass
 
     @commands.group()
-    async def listtodo(self, ctx: commands.Context):
+    async def listtodo(self, ctx):
         pass
 
     @listtodo.command()
-    async def server(self, ctx: commands.Context):
+    async def server(self, ctx):
         tasks = await self.config.guild.guild_tasks()
         formatted_tasks = []
         for task in tasks:
