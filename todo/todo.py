@@ -28,17 +28,16 @@ class ToDoCog(commands.Cog):
 
         self.config.register_guild(**default_guild)
     
-    @commands.guild_only()
-    @commands.group()
-    async def addtodo(self, ctx):
-        """
-        Adds a todo item to a specific todo list
-        """
-        pass
+    #@commands.guild_only()
+    #@commands.group()
+    #async def addtodo(self, ctx):
+    #    """
+    #    Adds a todo item to a specific todo list
+    #    """
+    #    pass
 
-    @commands.guild_only()
-    @addtodo.command()
-    async def server(self, ctx, task: str):
+    @commands.command()
+    async def addtodo(self, ctx, task: str):
         """
         Adds a todo item to the server-specific todo list.
         """
@@ -59,12 +58,12 @@ class ToDoCog(commands.Cog):
         except discord.errors.NotFound:
             pass
 
-    @commands.group()
-    async def listtodo(self, ctx):
-        pass
+    #@commands.group()
+    #async def listtodo(self, ctx):
+    #    pass
 
-    @listtodo.command()
-    async def server(self, ctx):
+    @commands.command()
+    async def listtodo(self, ctx):
         tasks = await self.config.guild.guild_tasks()
         formatted_tasks = []
         for task in tasks:
