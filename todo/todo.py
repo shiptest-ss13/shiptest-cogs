@@ -32,7 +32,7 @@ class ToDoCog(BaseCog):
         self.loop = asyncio.get_event_loop()
     
     @commands.group()
-    async def addtodo(self, ctx: commands.Contex):
+    async def addtodo(self, ctx: commands.Context):
         """
         Adds a todo item to a specific todo list
         """
@@ -40,7 +40,7 @@ class ToDoCog(BaseCog):
 
     @commands.guild_only()
     @addtodo.command()
-    async def server(self, ctx: commands.Contex, task: str):
+    async def server(self, ctx: commands.Context, task: str):
         """
         Adds a todo item to the server-specific todo list.
         """
@@ -62,11 +62,11 @@ class ToDoCog(BaseCog):
             pass
 
     @commands.group()
-    async def listtodo(self, ctx: commands.Contex):
+    async def listtodo(self, ctx: commands.Context):
         pass
 
     @listtodo.command()
-    async def server(self, ctx: commands.Contex):
+    async def server(self, ctx: commands.Context):
         tasks = await self.config.guild.guild_tasks()
         formatted_tasks = []
         for task in tasks:
@@ -80,13 +80,13 @@ class ToDoCog(BaseCog):
 
         temp_embeds = []
         embeds = []
-        for ban in pagify(bans_list, ["["]):
+        for ban in pagify(formatted_tasks, ["["]):
             embed = discord.Embed(description=box(ban, lang="asciidoc"), color=0x2b74ab)
             temp_embeds.append(embed)
         max_i = len(temp_embeds)
         i = 1
         for embed in temp_embeds:
-            embed.set_author(name=f"Todo list for guild: | total items: {total}")
+            embed.set_author(name=f"Todo list for guild: | total items: {max_i}")
             embed.set_footer(text=f"Page {i}/{max_i}")
             embeds.append(embed)
             i += 1
