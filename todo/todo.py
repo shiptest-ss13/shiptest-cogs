@@ -28,6 +28,7 @@ class ToDoCog(commands.Cog):
 
         self.config.register_guild(**default_guild)
     
+    @commands.guild_only()
     @commands.group()
     async def addtodo(self, ctx):
         """
