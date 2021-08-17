@@ -82,9 +82,9 @@ class ToDoCog(commands.Cog):
         formatted_tasks = ""
         for task_name in tasks:
             task = tasks[task_name]
+            formatted_tasks += "\n["
+            formatted_tasks += "✅" if task['TASK_COMPLETED'] else "❎"
             formatted_tasks += (
-                "\n["
-                "✅" if task['TASK_COMPLETED'] else "❎"
                 " - "
                 f"{task['TASK_INFO']} ({task['TASK_USER_NAME']} <t:{task['TASK_TIMESTAMP']}>)"
                 "]\n"
