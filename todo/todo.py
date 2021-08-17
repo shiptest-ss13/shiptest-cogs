@@ -47,7 +47,7 @@ class ToDoCog(commands.Cog):
             "TASK_COMPLETED": False
         }
 
-        async with self.config.guild.guild_tasks() as current_tasks:
+        async with self.config.guild(ctx.guild).guild_tasks() as current_tasks:
             current_tasks.append(todo_item)
         try:
             await ctx.message.add_reaction("✅")
@@ -60,7 +60,7 @@ class ToDoCog(commands.Cog):
 
     @commands.command()
     async def listtodo(self, ctx):
-        tasks = await self.config.guild.guild_tasks()
+        tasks = await self.config.guild(ctx.guild).guild_tasks()
         formatted_tasks = []
         for task in tasks:
             formatted_tasks += (
