@@ -95,7 +95,7 @@ class ToDoCog(commands.Cog):
         max_i = len(temp_embeds)
         i = 1
         for embed in temp_embeds:
-            embed.set_author(name=f"Todo list for guild: | total tasks: {len(tasks)}")
+            embed.set_author(name=f"Todo list for {ctx.guild.name}: | Total tasks: {len(tasks)}")
             embed.set_footer(text=f"Page {i}/{max_i}")
             embeds.append(embed)
             i += 1
