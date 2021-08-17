@@ -53,7 +53,7 @@ class ToDoCog(commands.Cog):
             if task in current_tasks:
                 ctx.send("Cannot add duplicate tasks.")
                 pass
-            current_tasks[task] = todo_item
+            current_tasks.append(todo_item)
         try:
             await ctx.message.add_reaction("✅")
         except discord.errors.NotFound:
