@@ -19,7 +19,7 @@ class ToDoCog(commands.Cog):
         self.config = Config.get_conf(self, 3257733194, force_registration=True)
 
         default_guild = {
-            "guild_tasks": []
+            "guild_tasks": {}
         }
 
         self.config.register_guild(**default_guild)
@@ -48,7 +48,7 @@ class ToDoCog(commands.Cog):
         }
 
         async with self.config.guild(ctx.guild).guild_tasks() as current_tasks:
-            current_tasks.append(todo_item)
+            current_tasks[task] = todo_item
         try:
             await ctx.message.add_reaction("✅")
         except discord.errors.NotFound:
@@ -57,6 +57,12 @@ class ToDoCog(commands.Cog):
     #@commands.group()
     #async def listtodo(self, ctx):
     #    pass
+
+    @commands.command()
+    async def completetask(self, ctx, task: str):
+        async with self.config.guild(ctx.guild).guild_tasks() as current_tasks:
+            current_tasks[task]["TASK_COMPLETED"] = not current_tasks[task]["TASK_COMPLETED"]
+
 
     @commands.command()
     async def listtodo(self, ctx):
@@ -74,7 +80,7 @@ class ToDoCog(commands.Cog):
         temp_embeds = []
         embeds = []
         for ban in pagify(formatted_tasks, ["["]):
-            embed = discord.Embed(description=box(ban, lang="asciidoc"), color=0x2b74ab)
+            embed = discord.Embed(description=ban, color=0x2b74ab)
             temp_embeds.append(embed)
         max_i = len(temp_embeds)
         i = 1
