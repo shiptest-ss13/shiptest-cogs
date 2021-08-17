@@ -17,10 +17,10 @@ __author__ = "Mark Suckerberg"
 class ToDoCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, 3252246194, force_registration=True)
+        self.config = Config.get_conf(self, 3265224694, force_registration=True)
 
         default_guild = {
-            "guild_tasks": {}
+            "guild_tasks": []
         }
 
         self.config.register_guild(**default_guild)
@@ -60,29 +60,27 @@ class ToDoCog(commands.Cog):
             pass
 
     @todo.command()
-    async def complete(self, ctx, *args):
+    async def complete(self, ctx, target:int):
         """
         Marks a todo item completed.
         """
-        task = " ".join(args)
         async with self.config.guild(ctx.guild).guild_tasks() as current_tasks:
-            if task in current_tasks:
-                current_tasks[task]["TASK_COMPLETED"] = not current_tasks[task]["TASK_COMPLETED"]
-                try:
-                    await ctx.message.add_reaction("✅")
-                except discord.errors.NotFound:
-                    pass
-            else:
-                ctx.send("Task " + task + " not found.")
+            if (target > len(current_tasks) or target < 0):
+                ctx.send("Task " + target + " not found.")
+                pass
+            current_tasks[target]["TASK_COMPLETED"] = not current_tasks[target]["TASK_COMPLETED"]
+            try:
+                await ctx.message.add_reaction("✅")
+            except discord.errors.NotFound:
                 pass
 
     @todo.command()
     async def list(self, ctx):
         tasks = await self.config.guild(ctx.guild).guild_tasks()
         formatted_tasks = ""
-        for task_name in tasks:
-            task = tasks[task_name]
-            formatted_tasks += "\n["
+        for task_index in range(0 , len(tasks)):
+            task = tasks[task_index]
+            formatted_tasks += f"\n[{task_index} - "
             formatted_tasks += "✅" if task['TASK_COMPLETED'] else "❎"
             formatted_tasks += (
                 " - "
