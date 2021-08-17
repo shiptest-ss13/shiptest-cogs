@@ -1,21 +1,17 @@
 #Standard Imports
 import asyncio
-import logging
-from typing import Union
 import time
 
 #Discord Imports
 import discord
 
 #Redbot Imports
-from redbot.core import commands, checks, Config
-from redbot.core.utils.chat_formatting import pagify, box, humanize_list, warning
+from redbot.core import commands, Config
+from redbot.core.utils.chat_formatting import pagify, box, humanize_list
 from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
 
 __version__ = "0.1"
 __author__ = "Mark Suckerberg"
-
-log = logging.getLogger("red.ToDoCog")
 
 class ToDoCog(commands.Cog):
     def __init__(self, bot):
