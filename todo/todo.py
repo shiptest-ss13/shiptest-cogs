@@ -87,7 +87,7 @@ class ToDoCog(commands.Cog):
             formatted_tasks += (
                 " - "
                 f"{task['TASK_INFO']} ({task['TASK_USER_NAME']} <t:{task['TASK_TIMESTAMP']}>)"
-                "]\n"
+                "]"
             )
 
         temp_embeds = []
