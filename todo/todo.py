@@ -25,16 +25,15 @@ class ToDoCog(commands.Cog):
 
         self.config.register_guild(**default_guild)
     
-    #@commands.guild_only()
-    #@commands.group()
-    #async def addtodo(self, ctx):
-    #    """
-    #    Adds a todo item to a specific todo list
-    #    """
-    #    pass
+    @commands.group()
+    async def todo(self, ctx):
+        """
+        Adds a todo item to a specific todo list
+        """
+        pass
 
-    @commands.command()
-    async def addtodo(self, ctx, task: str):
+    @todo.command()
+    async def add(self, ctx, task: str):
         """
         Adds a todo item to the server-specific todo list.
         """
@@ -58,33 +57,19 @@ class ToDoCog(commands.Cog):
         except discord.errors.NotFound:
             pass
 
-    #@commands.group()
-    #async def listtodo(self, ctx):
-    #    pass
-
-    @commands.command()
+    @todo.command()
     async def completetask(self, ctx, task: str):
         async with self.config.guild(ctx.guild).guild_tasks() as current_tasks:
             current_tasks[task]["TASK_COMPLETED"] = not current_tasks[task]["TASK_COMPLETED"]
 
-    @commands.command()
-    async def randomtask(self, ctx):
-        tasks = await self.config.guild(ctx.guild).guild_tasks()
-        randomchoice = random.randrange(0, len(tasks))
-        count = 0
-        for i in tasks:
-            count += 1
-            if(i == randomchoice): # kill me
-                ctx.send("You should do: " + tasks[i]["TASK_INFO"])
-
-    @commands.command()
-    async def listtodo(self, ctx):
+    @todo.command()
+    async def list(self, ctx):
         tasks = await self.config.guild(ctx.guild).guild_tasks()
         formatted_tasks = ""
         for task_name in tasks:
             task = tasks[task_name]
             formatted_tasks += (
-                "["
+                "\n["
                 "✅" if task['TASK_COMPLETED'] else "❎"
                 " - "
                 f"{task['TASK_INFO']} ({task['TASK_USER_NAME']} <t:{task['TASK_TIMESTAMP']}>)"
@@ -93,7 +78,7 @@ class ToDoCog(commands.Cog):
 
         temp_embeds = []
         embeds = []
-        for ban in pagify(formatted_tasks, ["["]):
+        for ban in pagify(formatted_tasks, ["\n["]):
             embed = discord.Embed(description=ban, color=0x2b74ab)
             temp_embeds.append(embed)
         max_i = len(temp_embeds)
