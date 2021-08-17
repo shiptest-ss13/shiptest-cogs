@@ -39,6 +39,7 @@ class ToDoCog(commands.Cog):
         """
         task = " ".join(args)
         author = ctx.message.author
+        
 
         todo_item = {
             "TASK_USER_NAME": author.name,
@@ -51,7 +52,7 @@ class ToDoCog(commands.Cog):
         async with self.config.guild(ctx.guild).guild_tasks() as current_tasks:
             if task in current_tasks:
                 ctx.send("Cannot add duplicate tasks.")
-                return
+                pass
             current_tasks[task] = todo_item
         try:
             await ctx.message.add_reaction("✅")
@@ -65,7 +66,15 @@ class ToDoCog(commands.Cog):
         """
         task = " ".join(args)
         async with self.config.guild(ctx.guild).guild_tasks() as current_tasks:
-            current_tasks[task]["TASK_COMPLETED"] = not current_tasks[task]["TASK_COMPLETED"]
+            if task in current_tasks:
+                current_tasks[task]["TASK_COMPLETED"] = not current_tasks[task]["TASK_COMPLETED"]
+                try:
+                    await ctx.message.add_reaction("✅")
+                except discord.errors.NotFound:
+                    pass
+            else:
+                ctx.send("Task " + task + " not found.")
+                pass
 
     @todo.command()
     async def list(self, ctx):
