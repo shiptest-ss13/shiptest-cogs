@@ -61,7 +61,7 @@ class ToDoCog(commands.Cog):
     @commands.command()
     async def listtodo(self, ctx):
         tasks = await self.config.guild(ctx.guild).guild_tasks()
-        formatted_tasks = []
+        formatted_tasks = ""
         for task in tasks:
             formatted_tasks += (
                 "["
