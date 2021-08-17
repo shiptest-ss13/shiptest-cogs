@@ -83,6 +83,9 @@ class ToDoCog(commands.Cog):
     @todo.command()
     async def list(self, ctx):
         tasks = await self.config.guild(ctx.guild).guild_tasks()
+        if(len(tasks > 1)):
+            ctx.send("No tasks found!")
+            pass
         formatted_tasks = ""
         for task_index in range(0 , len(tasks)):
             task = tasks[task_index]
