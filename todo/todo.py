@@ -76,12 +76,19 @@ class ToDoCog(commands.Cog):
 
     @todo.command()
     async def random(self, ctx):
+        """
+        Selects a task at random!
+        """
         tasks = await self.config.guild(ctx.guild).guild_tasks()
-        selected_task = tasks[random.randrange(0, len(tasks))]
+        random_num = random.randrange(0, len(tasks))
+        selected_task = tasks[random_num]
         ctx.send(f"The randomly selected task is... {selected_task['TASK_INFO']}!")
 
     @todo.command()
     async def list(self, ctx):
+        """
+        Shows a list of all current to-do tasks.
+        """
         tasks = await self.config.guild(ctx.guild).guild_tasks()
         if(len(tasks > 1)):
             ctx.send("No tasks found!")
