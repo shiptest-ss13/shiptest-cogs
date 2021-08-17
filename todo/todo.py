@@ -33,10 +33,11 @@ class ToDoCog(commands.Cog):
         pass
 
     @todo.command()
-    async def add(self, ctx, task: str):
+    async def add(self, ctx, *args):
         """
         Adds a todo item to the server-specific todo list.
         """
+        task = " ".join(args)
         author = ctx.message.author
 
         todo_item = {
@@ -58,7 +59,11 @@ class ToDoCog(commands.Cog):
             pass
 
     @todo.command()
-    async def completetask(self, ctx, task: str):
+    async def complete(self, ctx, *args):
+        """
+        Marks a todo item completed.
+        """
+        task = " ".join(args)
         async with self.config.guild(ctx.guild).guild_tasks() as current_tasks:
             current_tasks[task]["TASK_COMPLETED"] = not current_tasks[task]["TASK_COMPLETED"]
 
