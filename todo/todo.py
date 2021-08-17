@@ -83,7 +83,7 @@ class ToDoCog(commands.Cog):
             formatted_tasks += f"\n[{task_index} - "
             formatted_tasks += "✅" if task['TASK_COMPLETED'] else "❎"
             formatted_tasks += (
-                f"{task['TASK_INFO']} ({task['TASK_USER_NAME']} <t:{task['TASK_TIMESTAMP']}>)"
+                f" {task['TASK_INFO']} ({task['TASK_USER_NAME']} <t:{task['TASK_TIMESTAMP']}>)"
                 "]"
             )
 
