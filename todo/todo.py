@@ -103,3 +103,7 @@ class ToDoCog(commands.Cog):
             embeds.append(embed)
             i += 1
         await menu(ctx, embeds, DEFAULT_CONTROLS)
+
+    async def listplain(self, ctx):
+        tasks = await self.config.guild(ctx.guild).guild_tasks()
+        ctx.send(tasks)
