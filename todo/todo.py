@@ -16,7 +16,7 @@ __author__ = "Mark Suckerberg"
 class ToDoCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, 3257733194, force_registration=True)
+        self.config = Config.get_conf(self, 3252246194, force_registration=True)
 
         default_guild = {
             "guild_tasks": {}
@@ -48,6 +48,9 @@ class ToDoCog(commands.Cog):
         }
 
         async with self.config.guild(ctx.guild).guild_tasks() as current_tasks:
+            if task in current_tasks:
+                ctx.send("Cannot add duplicate tasks.")
+                return
             current_tasks[task] = todo_item
         try:
             await ctx.message.add_reaction("✅")
@@ -62,7 +65,6 @@ class ToDoCog(commands.Cog):
     async def completetask(self, ctx, task: str):
         async with self.config.guild(ctx.guild).guild_tasks() as current_tasks:
             current_tasks[task]["TASK_COMPLETED"] = not current_tasks[task]["TASK_COMPLETED"]
-
 
     @commands.command()
     async def listtodo(self, ctx):
