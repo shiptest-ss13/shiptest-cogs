@@ -71,9 +71,9 @@ class ToDoCog(commands.Cog):
     async def randomtask(self, ctx):
         tasks = await self.config.guild(ctx.guild).guild_tasks()
         randomchoice = random.randrange(0, len(tasks))
-        i = 0
+        count = 0
         for i in tasks:
-            i += 1
+            count += 1
             if(i == randomchoice): # kill me
                 ctx.send("You should do: " + tasks[i]["TASK_INFO"])
 
