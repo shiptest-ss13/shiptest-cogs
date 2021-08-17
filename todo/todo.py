@@ -83,7 +83,6 @@ class ToDoCog(commands.Cog):
             formatted_tasks += f"\n[{task_index} - "
             formatted_tasks += "✅" if task['TASK_COMPLETED'] else "❎"
             formatted_tasks += (
-                " - "
                 f"{task['TASK_INFO']} ({task['TASK_USER_NAME']} <t:{task['TASK_TIMESTAMP']}>)"
                 "]"
             )
@@ -96,7 +95,7 @@ class ToDoCog(commands.Cog):
         max_i = len(temp_embeds)
         i = 1
         for embed in temp_embeds:
-            embed.set_author(name=f"Todo list for guild: | total items: {max_i}")
+            embed.set_author(name=f"Todo list for guild: | total tasks: {len(tasks)}")
             embed.set_footer(text=f"Page {i}/{max_i}")
             embeds.append(embed)
             i += 1
