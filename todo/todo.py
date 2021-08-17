@@ -70,7 +70,8 @@ class ToDoCog(commands.Cog):
     async def listtodo(self, ctx):
         tasks = await self.config.guild(ctx.guild).guild_tasks()
         formatted_tasks = ""
-        for task in tasks:
+        for task_name in tasks:
+            task = tasks[task_name]
             formatted_tasks += (
                 "["
                 "✅" if task['TASK_COMPLETED'] else "❎"
