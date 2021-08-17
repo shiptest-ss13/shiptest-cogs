@@ -4,6 +4,7 @@ import time
 
 #Discord Imports
 import discord
+import random
 
 #Redbot Imports
 from redbot.core import commands, Config
@@ -65,6 +66,16 @@ class ToDoCog(commands.Cog):
     async def completetask(self, ctx, task: str):
         async with self.config.guild(ctx.guild).guild_tasks() as current_tasks:
             current_tasks[task]["TASK_COMPLETED"] = not current_tasks[task]["TASK_COMPLETED"]
+
+    @commands.command()
+    async def randomtask(self, ctx):
+        tasks = await self.config.guild(ctx.guild).guild_tasks()
+        randomchoice = random.randrange(0, len(tasks))
+        i = 0
+        for i in tasks:
+            i += 1
+            if(i == randomchoice): # kill me
+                ctx.send("You should do: " + tasks[i]["TASK_INFO"])
 
     @commands.command()
     async def listtodo(self, ctx):
