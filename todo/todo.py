@@ -31,7 +31,6 @@ class ToDoCog(commands.Cog):
         self.config.register_user(**default_user)
     
     @commands.group()
-    @commands.guild_only()
     async def todo(self, ctx):
         """
         Adds a todo item to a specific todo list
