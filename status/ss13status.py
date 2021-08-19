@@ -325,7 +325,8 @@ class SS13Status(commands.Cog):
             
         if data:
             try:
-                players = [i for i in data['players']].sort()
+                players = [i for i in data['players']]
+                players.sort()
 
                 embed = discord.Embed(title=f"__Current Players__ ({len(players)}): ", description=f'\n'.join(map(str,players)))
 
@@ -351,7 +352,8 @@ class SS13Status(commands.Cog):
 
         if data:
             try:
-                admins = [i for i in data['admins']].sort()
+                admins = [i for i in data['admins']]
+                admins.sort()
 
                 embed = discord.Embed(title=f"__Current Admins__ ({len(admins)}): ", description=f'\n'.join(map(str,admins)))
 
