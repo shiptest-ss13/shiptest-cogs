@@ -60,10 +60,11 @@ class GithubPRRetriever(BaseCog):
     async def on_message(self, message: discord.Message):
         if(message.author == self.bot.user):
             return
-        if(not message.content.startswith("gh#")):
+        content = message.content[:]
+        if(not content.startswith("gh#")):
             return
         try:
-            pr = int(message.content.replace("gh#", ""))
+            pr = int(content.replace("gh#", ""))
         except ValueError:
             await message.channel.send("Invalid PR number.")
             return
