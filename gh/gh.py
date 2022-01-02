@@ -16,7 +16,7 @@ __author__ = "Mark Suckerberg"
 
 BaseCog = getattr(commands, "Cog", object)
 
-class GH(BaseCog):
+class GithubPRRetriever(BaseCog):
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, 3257823194, force_registration=True)
@@ -26,7 +26,7 @@ class GH(BaseCog):
         }
         self.config.register_guild(**default_guild)
     
-
+    @commands.command()
     @commands.guild_only()
     @checks.admin_or_permissions(administrator=True)
     async def setrepo(self, ctx, new_repo = ""):
@@ -43,6 +43,7 @@ class GH(BaseCog):
             url = await self.config.guild(ctx.guild).repo()
             await ctx.send(f"The target repo is currently set to: `{url}`")
 
+    @commands.command()
     @commands.guild_only()
     async def gh(self, ctx, *, pr: int):
         """
@@ -64,6 +65,7 @@ class GH(BaseCog):
         try:
             pr = int(message.content.replace("gh#", ""))
         except ValueError:
+            await message.channel.send("Invalid PR number.")
             return
         repo = await self.config.guild(ctx.guild).repo()
         

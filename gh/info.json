@@ -3,6 +3,7 @@
     "name": "Github PR Retriever",
     "short": "Retrieves URL for PR number specified on the repo set.",
     "description": "Retrieves URL for PR number specified on the repo set. Either use the [p]gh or gh# followed by the PR number to activate the cog.",
+    "permissions" : ["Manage Messages", "Embed Links"],
     "tags": [
         "Space Station 13",
         "Game",

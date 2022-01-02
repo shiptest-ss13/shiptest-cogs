@@ -1,4 +1,4 @@
-from .gh import GH
+from .gh import GithubPRRetriever
 
 def setup(bot):
-    bot.add_cog(GH(bot))
+    bot.add_cog(GithubPRRetriever(bot))
