@@ -59,10 +59,10 @@ class GH(BaseCog):
     async def on_message(self, message: discord.Message):
         if(message.author == self.bot.user):
             return
-        if(not content.startswith("gh#")):
+        if(not message.content.startswith("gh#")):
             return
         try:
-            pr = int(content.replace("gh#", ""))
+            pr = int(message.content.replace("gh#", ""))
         except ValueError:
             return
         repo = await self.config.guild(ctx.guild).repo()
