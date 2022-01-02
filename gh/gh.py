@@ -55,24 +55,3 @@ class GithubPRRetriever(BaseCog):
             await ctx.send(url)
         else:
             await ctx.send("No repo has been set for this server. Please use `setrepo` to set one.")
-
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
-        if(message.author == self.bot.user):
-            return
-        content = message.content[:]
-        if(not content.startswith("gh#")):
-            return
-        try:
-            pr = int(content.replace("gh#", ""))
-        except ValueError:
-            await message.channel.send("Invalid PR number.")
-            return
-        repo = await self.config.guild(ctx.guild).repo()
-        
-        #Code to trim gh# and send a message with a link to the PR number requested
-        if(repo):
-            url = f"{repo}/pull/{pr}"
-            await message.channel.send(url)
-        else:   
-            await message.channel.send("No repo has been set for this server. Please use `setrepo` to set one.")
