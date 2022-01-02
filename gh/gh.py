@@ -11,15 +11,12 @@ from redbot.core import commands, checks, Config
 from redbot.core.utils.chat_formatting import pagify, box, humanize_list, warning
 from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
 
-#Util Imports
-from .util import key_to_ckey
-
 __version__ = "1.0.0"
 __author__ = "Mark Suckerberg"
 
 BaseCog = getattr(commands, "Cog", object)
 
-class gH(BaseCog):
+class GH(BaseCog):
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, 3257823194, force_registration=True)
