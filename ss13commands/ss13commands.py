@@ -187,9 +187,8 @@ class SS13Commands(commands.Cog):
         """
         string = await self.topic_query_server(querystr="manifest", sender=ctx.author.display_name)
 
-        data = urllib.parse.parse_qs(string)
-
         if(data):
+            data = urllib.parse.parse_qs(string)
             embed=discord.Embed(title="__Crew Manifest:__", color=0x26eaea)
             for department in data:
                 entries = [i for i in data[department]]
@@ -206,6 +205,7 @@ class SS13Commands(commands.Cog):
         Sends a specified announcement to the linked SS13 server.
         """
         await self.topic_query_server(querystr="Comms_Console=nothing", sender=ctx.author.display_name, params={"message": message, "message_sender": sender})
+        await ctx.send(embed=discord.Embed(title=f"{sender} Update", description=message))
 
     @commands.guild_only()
     @commands.command()
@@ -227,6 +227,8 @@ class SS13Commands(commands.Cog):
         if(info):
             #TODO: Split recieved data into different embed fields
             await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"{info}"))
+        else:
+            await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"No results found.", color=0xff0000))
 
     @commands.guild_only()
     @commands.command()
@@ -288,32 +290,35 @@ class SS13Commands(commands.Cog):
 
         log.info(f"Querying gameserver with message: {message}")
 
-        reader, writer = await asyncio.open_connection(server, port)            
-        query = b"\x00\x83"
-        query += struct.pack('>H', len(message) + 6)
-        query += b"\x00\x00\x00\x00\x00"
-        query += message.encode()
-        query += b"\x00" #Creates a packet for byond according to TG's standard
+        try:
+            reader, writer = await asyncio.open_connection(server, port)            
+            query = b"\x00\x83"
+            query += struct.pack('>H', len(message) + 6)
+            query += b"\x00\x00\x00\x00\x00"
+            query += message.encode()
+            query += b"\x00" #Creates a packet for byond according to TG's standard
 
-        writer.write(query)
+            writer.write(query)
 
-        data = b''
-        while True:
-            buffer = await reader.read(1024)
-            data += buffer
-            if len(buffer) < 1024:
-                break
+            data = b''
+            while True:
+                buffer = await reader.read(1024)
+                data += buffer
+                if len(buffer) < 1024:
+                    break
 
-        writer.close()
+            writer.close()
 
-        size_bytes = struct.unpack(">H", data[2:4])
-        size = size_bytes[0] - 1
+            size_bytes = struct.unpack(">H", data[2:4])
+            size = size_bytes[0] - 1
 
-        index = 5
-        index_end = index + size
-        string = data[5:index_end].decode("utf-8")
-        string = string.replace("\x00", "")
+            index = 5
+            index_end = index + size
+            string = data[5:index_end].decode("utf-8")
+            string = string.replace("\x00", "")
 
-        log.info(f"Got Answer from Gameserver: {string}")
-        return string
+            log.info(f"Got Answer from Gameserver: {string}")
+            return string
 
+        except ConnectionRefusedError:
+            return None #Server is likely offline
