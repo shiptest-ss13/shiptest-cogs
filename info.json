@@ -1,9 +1,9 @@
 {
-    "author" : ["Crossedfall (Crossedfall#1001)"],
+    "author" : ["Crossedfall (Crossedfall#1001), Mark Suckerberg (Mark Suckerberg#3333)"],
     "install_msg" : "Utility cogs for SS13",
-    "name" : "CrossedCogs",
-    "short" : "SS13 cogs",
+    "name" : "Shiptest Cogs",
+    "short" : "SS13 cogs- for use with Shiptest code",
     "requirements": ["mysql-connector-python>=8.0"],
-    "description" : "Notes and Status cogs for SS13 servers",
+    "description" : "Cogs for SS13 servers",
     "tags" : ["Fun", "SS13", "Utility", "Administration"]
 }
