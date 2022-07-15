@@ -3,7 +3,7 @@ from datetime import datetime
 import random
 from sys import stdout
 from threading import Timer
-import time
+from time import time
 import discord
 from redbot.core import commands, Config, checks, utils
 import socket
@@ -118,7 +118,7 @@ class SS13Mon(commands.Cog):
 		servtitle = str(*status["version"])
 		await self.config.guild(guild).last_roundid.set(roundid)
 		duration = int(*status['round_duration'])
-		duration = time.strftime('%H:%M', time.gmtime(duration))
+		duration = strftime('%H:%M', gmtime(duration))
 		player_count = int(*status["players"])
 		time_dilation_avg = float(*status["time_dilation_avg"])
 		players: list[str] = (await self.query_server("localhost", 41372, "?whoIs"))["players"]
