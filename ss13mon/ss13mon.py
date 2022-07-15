@@ -3,7 +3,7 @@ from datetime import datetime
 import random
 from sys import stdout
 from threading import Timer
-from time import time
+import time
 import discord
 from redbot.core import commands, Config, checks, utils
 import socket
