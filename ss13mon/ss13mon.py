@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime
-import datetime
 import random
 from sys import stdout
 from threading import Timer
