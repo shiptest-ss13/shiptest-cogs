@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import datetime
 import random
 from sys import stdout
@@ -104,15 +105,15 @@ class SS13Mon(commands.Cog):
 		port = await cfg.port()
 
 		if(address == None or port == None):
-			return discord.Embed(type="rich", title="FAILED TO GENERATE EMBED", timestamp=datetime.datetime.now(), description="ADDRESS OR PORT NOT SET")
+			return discord.Embed(type="rich", title="FAILED TO GENERATE EMBED", timestamp=datetime.now(), description="ADDRESS OR PORT NOT SET")
 
 		status = await self.query_server(address, port)
 		if(status == None):
 			last_roundid = (await cfg.last_roundid()) or "Unknown"
 			last_title = (await cfg.last_title()) or "Failed to fetch data"
 			last_online = await cfg.last_online() or "Unknown"
-			if(isinstance(last_online, float)): last_online = datetime.datetime.fromtimestamp(last_online)
-			return discord.Embed(type="rich", color=discord.Colour.red(), title=last_title, timestamp=datetime.datetime.now()).add_field(name="Server Offline", value="Last Round: `{}`\nLast Seen: `{}`".format(last_roundid, last_online))
+			if(isinstance(last_online, float)): last_online = datetime.fromtimestamp(last_online)
+			return discord.Embed(type="rich", color=discord.Colour.red(), title=last_title, timestamp=datetime.now()).add_field(name="Server Offline", value="Last Round: `{}`\nLast Seen: `{}`".format(last_roundid, last_online))
 
 		roundid = int(*status["round_id"])
 		servtitle = str(*status["version"])
