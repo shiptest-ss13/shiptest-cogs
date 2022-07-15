@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 from sys import stdout
 from threading import Timer
@@ -117,8 +117,8 @@ class SS13Mon(commands.Cog):
 		roundid = int(*status["round_id"])
 		servtitle = str(*status["version"])
 		await self.config.guild(guild).last_roundid.set(roundid)
-		duration = "{}s".format(str(int(*status['round_duration'])))
-		# duration = str(datetime.timedelta(seconds=duration))
+		duration = int(*status['round_duration'])
+		duration = str(timedelta(seconds=duration))
 		player_count = int(*status["players"])
 		time_dilation_avg = float(*status["time_dilation_avg"])
 		players: list[str] = (await self.query_server("localhost", 41372, "?whoIs"))["players"]
