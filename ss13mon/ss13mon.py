@@ -118,7 +118,7 @@ class SS13Mon(commands.Cog):
 		servtitle = str(*status["version"])
 		await self.config.guild(guild).last_roundid.set(roundid)
 		duration = int(*status['round_duration'])
-		duration = str(datetime.timedelta(seconds=duration))
+		duration = str(timedelta(seconds=duration))
 		player_count = int(*status["players"])
 		time_dilation_avg = float(*status["time_dilation_avg"])
 		players: list[str] = (await self.query_server("localhost", 41372, "?whoIs"))["players"]
