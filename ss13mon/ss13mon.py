@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
+import logging
 import random
 from sys import stdout
 from threading import Timer
@@ -9,6 +10,8 @@ from redbot.core import commands, Config, checks, utils
 import socket
 import struct
 import urllib.parse
+
+log = logging.getLogger("red.ss13mon")
 
 class SS13Mon(commands.Cog):
 	config: Config
@@ -168,30 +171,33 @@ class SS13Mon(commands.Cog):
 			conn.close()
 
 	async def update_guild_message(self, guild: discord.Guild):
-		local_hash = str(random.random())
-		cfg = self.config.guild(guild)
-		await cfg.update_hash.set(local_hash)
+		try:
+			local_hash = str(random.random())
+			cfg = self.config.guild(guild)
+			await cfg.update_hash.set(local_hash)
 
-		channel = await cfg.channel()
-		if(channel == None):
-			return
-		channel: discord.TextChannel = guild.get_channel(channel)
-		if(isinstance(channel, discord.TextChannel) == False):
-			return
+			channel = await cfg.channel()
+			if(channel == None):
+				return
+			channel: discord.TextChannel = guild.get_channel(channel)
+			if(isinstance(channel, discord.TextChannel) == False):
+				return
 
-		message = await cfg.message_id()
-		cached: discord.Message
-		if(message == None):
-			cached = await channel.send("caching initial context")
-			await cfg.message_id.set(cached.id)
-		else:
-			try:
-				cached = await channel.fetch_message(message)
-			except(discord.NotFound):
+			message = await cfg.message_id()
+			cached: discord.Message
+			if(message == None):
 				cached = await channel.send("caching initial context")
 				await cfg.message_id.set(cached.id)
+			else:
+				try:
+					cached = await channel.fetch_message(message)
+				except(discord.NotFound):
+					cached = await channel.send("caching initial context")
+					await cfg.message_id.set(cached.id)
 
-		await cached.edit(content=None, embed=(await self.generate_embed(guild)))
+			await cached.edit(content=None, embed=(await self.generate_embed(guild)))
+		except Exception as err:
+			log.error("Encountered an exception when attempting to update guild message: '{}'".format(str(err)))
 		update_interval = await cfg.update_interval()
 		if(update_interval == None or update_interval == 0):
 			return
