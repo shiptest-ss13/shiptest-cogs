@@ -208,13 +208,13 @@ class SS13Mon(commands.Cog):
 			return
 		
 		if(depth > 5):
-			await self.start_guild_update_loop(guild)
+			self.start_guild_update_loop(guild)
 			return
 
 		try:
 			await self.update_guild_message(guild, depth + 1)
 		except RecursionError:
-			await self.start_guild_update_loop(guild)
+			self.start_guild_update_loop(guild)
 
 	async def delete_message(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
