@@ -170,7 +170,7 @@ class SS13Mon(commands.Cog):
 		finally:
 			conn.close()
 
-	async def update_guild_message(self, guild: discord.Guild):
+	async def update_guild_message(self, guild: discord.Guild, depth = 1):
 		try:
 			local_hash = str(random.random())
 			cfg = self.config.guild(guild)
@@ -206,7 +206,15 @@ class SS13Mon(commands.Cog):
 		actual_hash = await cfg.update_hash()
 		if(actual_hash != local_hash): # command was run again while we were sleeping
 			return
-		await self.update_guild_message(guild)
+		
+		if(depth > 5):
+			await self.start_guild_update_loop(guild)
+			return
+
+		try:
+			await self.update_guild_message(guild, depth + 1)
+		except RecursionError:
+			await self.start_guild_update_loop(guild)
 
 	async def delete_message(self, guild: discord.Guild):
 		cfg = self.config.guild(guild)
