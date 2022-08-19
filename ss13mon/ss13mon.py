@@ -152,6 +152,7 @@ class SS13Mon(commands.Cog):
 
 		field_visi = "Visible Players ({})".format(len(players))
 		value_visi = "```{}```".format(", ".join(players))
+		embbie.add_field(name="Join", value="<byond://{}:{}/>".format(address, port))
 		embbie.add_field(name=field_visi, value=value_visi)
 
 		return embbie
@@ -171,7 +172,7 @@ class SS13Mon(commands.Cog):
 			return discord.Embed(type="rich", color=discord.Colour.red(), title="Auth Server", timestamp=datetime.now()).add_field(name="Auth Server Offline", value="Last Seen: `{}`".format(last_online))
 		await cfg.last_online_auth.set(time())
 
-		return discord.Embed(type="rich", color=discord.Colour.blue(), title="Auth Aserver", timestamp=datetime.now()).add_field(name="Auth Server Online", value="Come authenticate: <byond://{}:{}/>".format(address, port))
+		return discord.Embed(type="rich", color=discord.Colour.blue(), title="Auth server", timestamp=datetime.now()).add_field(name="Join", value="<byond://{}:{}/>".format(address, port))
 
 	async def query_server(self, game_server:str, game_port:int, querystr="?status" ) -> dict:
 		"""
