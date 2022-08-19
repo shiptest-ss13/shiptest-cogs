@@ -115,6 +115,7 @@ class SS13Mon(commands.Cog):
 		cfg = self.config.guild(guild)
 		address = await cfg.address()
 		port = await cfg.port()
+		if(isinstance(port, str)): port = int(port)
 
 		if(address == None or port == None):
 			return discord.Embed(type="rich", title="FAILED TO GENERATE EMBED", timestamp=datetime.now(), description="ADDRESS OR PORT NOT SET")
@@ -159,6 +160,7 @@ class SS13Mon(commands.Cog):
 		cfg = self.config.guild(guild)
 		address = await cfg.address()
 		port = await cfg.port_auth()
+		if(isinstance(port, str)): port = int(port)
 		if(address == None or port == None):
 			return discord.Embed(type="rich", title="FAILED TO GENERATE EMBED", timestamp=datetime.now(), description="ADDRESS OR PORT NOT SET")
 		
@@ -212,6 +214,7 @@ class SS13Mon(commands.Cog):
 			message = await cfg.message_id()
 			cached: discord.Message
 			if(message == None):
+				if(isinstance(message, str)): message = int(message)
 				cached = await channel.send("caching initial context")
 				await cfg.message_id.set(cached.id)
 			else:
@@ -227,6 +230,7 @@ class SS13Mon(commands.Cog):
 				cached_auth = await channel.send("caching initial context")
 				await cfg.message_id_auth.set(cached_auth.id)
 			else:
+				if(isinstance(message_auth, str)): message_auth = int(message_auth)
 				try:
 					cached_auth = await channel.fetch_message(message_auth)
 				except(discord.NotFound):
