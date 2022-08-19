@@ -33,11 +33,14 @@ class SS13Mon(commands.Cog):
 			"channel": None,
 			"address": None,
 			"port": None,
+			"port_auth": None,
 			"message_id": None,
+			"message_id_auth": None,
 			# internal status values
 			"last_roundid": None,
 			"last_title": None,
 			"last_online": None,
+			"last_online_auth": None,
 		}
 		self.config.register_guild(**def_guild)
 		for guild in self.bot.guilds:
@@ -67,8 +70,9 @@ class SS13Mon(commands.Cog):
 		address = await cfg.address()
 		port =  await cfg.port()
 		channel =  await cfg.channel()
+		port_auth = await cfg.port_auth()
 		update_interval =  await cfg.update_interval()
-		await ctx.send("Current Config: ```\naddress: {}\nport: {}\nchannel: {}\nupdate_interval: {}\n```".format(address, port, channel, update_interval))
+		await ctx.send("Current Config: ```\naddress: {}\nport: {}\nauth port: {}\nchannel: {}\nupdate_interval: {}\n```".format(address, port, port_auth, channel, update_interval))
 	
 	@ss13mon.command()
 	async def address(self, ctx: commands.Context, value = None):
@@ -81,6 +85,12 @@ class SS13Mon(commands.Cog):
 		cfg = self.config.guild(ctx.guild)
 		await cfg.port.set(value)
 		await ctx.send("Updated the config entry for port.")
+	
+	@ss13mon.command()
+	async def port_auth(self, ctx: commands.Context, value = None):
+		cfg = self.config.guild(ctx.guild)
+		await cfg.port_auth.set(value)
+		await ctx.send("Updated the config entry for the auth port.")
 	
 	@ss13mon.command()
 	async def channel(self, ctx: commands.Context, value = None):
@@ -144,6 +154,22 @@ class SS13Mon(commands.Cog):
 		embbie.add_field(name=field_visi, value=value_visi)
 
 		return embbie
+	
+	async def generate_auth_embed(self, guild: discord.Guild):
+		cfg = self.config.guild(guild)
+		address = await cfg.address()
+		port = await cfg.port_auth()
+		if(address == None or port == None):
+			return discord.Embed(type="rich", title="FAILED TO GENERATE EMBED", timestamp=datetime.now(), description="ADDRESS OR PORT NOT SET")
+		
+		status = await self.query_server(address, port)
+		if(status == None):
+			last_online = await cfg.last_online_auth() or "Unknown"
+			if(isinstance(last_online, float)): last_online = datetime.fromtimestamp(last_online)
+			return discord.Embed(type="rich", color=discord.Colour.red(), title="Auth Server", timestamp=datetime.now()).add_field(name="Auth Server Offline", value="Last Seen: `{}`".format(last_online))
+		await cfg.last_online_auth.set(time())
+
+		return discord.Embed(type="rich", color=discord.Colour.blue(), title="Auth Aserver", timestamp=datetime.now()).add_field(name="Auth Server Online", value="Come authenticate: <byond://{}:{}/>".format(address, port))
 
 	async def query_server(self, game_server:str, game_port:int, querystr="?status" ) -> dict:
 		"""
@@ -194,8 +220,22 @@ class SS13Mon(commands.Cog):
 				except(discord.NotFound):
 					cached = await channel.send("caching initial context")
 					await cfg.message_id.set(cached.id)
+			
+			message_auth = await cfg.message_id_auth()
+			cached_auth: discord.Message
+			if(message_auth == None):
+				cached_auth = await channel.send("caching initial context")
+				await cfg.message_id_auth.set(cached_auth.id)
+			else:
+				try:
+					cached_auth = await channel.fetch_message(message_auth)
+				except(discord.NotFound):
+					cached_auth = await channel.send("caching initial context")
+					await cfg.message_id_auth.set(cached_auth.id)
 
 			await cached.edit(content=None, embed=(await self.generate_embed(guild)))
+			await cached_auth.edit(content=None, embed=(await self.generate_auth_embed(guild)))
+
 		except Exception as err:
 			log.error("Encountered an exception when attempting to update guild message: '{}'".format(str(err)))
 		update_interval = await cfg.update_interval()
