@@ -118,7 +118,7 @@ class SS13Mon(commands.Cog):
 		if(isinstance(port, str)): port = int(port)
 
 		if(address == None or port == None):
-			return discord.Embed(type="rich", title="FAILED TO GENERATE EMBED", timestamp=datetime.now(), description="ADDRESS OR PORT NOT SET")
+			return discord.Embed(type="rich", title="FAILED TO GENERATE EMBED", timestamp=datetime.utcnow(), description="ADDRESS OR PORT NOT SET")
 
 		status = await self.query_server(address, port)
 		if(status == None):
@@ -126,7 +126,7 @@ class SS13Mon(commands.Cog):
 			last_title = (await cfg.last_title()) or "Failed to fetch data"
 			last_online = await cfg.last_online() or "Unknown"
 			if(isinstance(last_online, float)): last_online = datetime.fromtimestamp(last_online)
-			return discord.Embed(type="rich", color=discord.Colour.red(), title=last_title, timestamp=datetime.now()).add_field(name="Server Offline", value="Last Round: `{}`\nLast Seen: `{}`".format(last_roundid, last_online))
+			return discord.Embed(type="rich", color=discord.Colour.red(), title=last_title, timestamp=datetime.utcnow()).add_field(name="Server Offline", value="Last Round: `{}`\nLast Seen: `{}`".format(last_roundid, last_online))
 
 		roundid = int(*status["round_id"])
 		servtitle = str(*status["version"])
@@ -145,7 +145,7 @@ class SS13Mon(commands.Cog):
 		update_interval = await cfg.update_interval()
 		if(update_interval == None):
 			update_interval = 0
-		embbie: discord.Embed = discord.Embed(type="rich", color=discord.Colour.blue(), title=servtitle, timestamp=datetime.now())
+		embbie: discord.Embed = discord.Embed(type="rich", color=discord.Colour.blue(), title=servtitle, timestamp=datetime.utcnow())
 
 		value_inf = "Round ID: `{}`\nPlayers: `{}`\nDuration: `{}`\nTIDI: `{}%`\nNext Update: `{}`".format(roundid, player_count, duration, time_dilation_avg, ("{}s".format(update_interval), "Disabled")[update_interval == 0])
 		embbie.add_field(name="Server Information", value=value_inf)
@@ -163,16 +163,16 @@ class SS13Mon(commands.Cog):
 		port = await cfg.port_auth()
 		if(isinstance(port, str)): port = int(port)
 		if(address == None or port == None):
-			return discord.Embed(type="rich", title="FAILED TO GENERATE EMBED", timestamp=datetime.now(), description="ADDRESS OR PORT NOT SET")
+			return discord.Embed(type="rich", title="FAILED TO GENERATE EMBED", timestamp=datetime.utcnow(), description="ADDRESS OR PORT NOT SET")
 		
 		status = await self.query_server(address, port)
 		if(status == None):
 			last_online = await cfg.last_online_auth() or "Unknown"
 			if(isinstance(last_online, float)): last_online = datetime.fromtimestamp(last_online)
-			return discord.Embed(type="rich", color=discord.Colour.red(), title="Auth Server", timestamp=datetime.now()).add_field(name="Auth Server Offline", value="Last Seen: `{}`".format(last_online))
+			return discord.Embed(type="rich", color=discord.Colour.red(), title="Auth Server", timestamp=datetime.utcnow()).add_field(name="Auth Server Offline", value="Last Seen: `{}`".format(last_online))
 		await cfg.last_online_auth.set(time())
 
-		return discord.Embed(type="rich", color=discord.Colour.blue(), title="Auth server", timestamp=datetime.now()).add_field(name="Join", value="<byond://{}:{}/>".format(address, port))
+		return discord.Embed(type="rich", color=discord.Colour.blue(), title="Auth server", timestamp=datetime.utcnow()).add_field(name="Join", value="<byond://{}:{}/>".format(address, port))
 
 	async def query_server(self, game_server:str, game_port:int, querystr="?status" ) -> dict:
 		"""
