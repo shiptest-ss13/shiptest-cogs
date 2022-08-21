@@ -135,7 +135,7 @@ class SS13Mon(commands.Cog):
 		duration = str(timedelta(seconds=duration))
 		player_count = int(*status["players"])
 		time_dilation_avg = float(*status["time_dilation_avg"])
-		players: list[str] = (await self.query_server("localhost", 41372, "?whoIs"))["players"]
+		players: list[str] = (await self.query_server("localhost", port, "?whoIs"))["players"]
 		players.sort()
 
 		await cfg.last_roundid.set(roundid)
@@ -147,12 +147,11 @@ class SS13Mon(commands.Cog):
 			update_interval = 0
 		embbie: discord.Embed = discord.Embed(type="rich", color=discord.Colour.blue(), title=servtitle, timestamp=datetime.utcnow())
 
-		value_inf = "Round ID: `{}`\nPlayers: `{}`\nDuration: `{}`\nTIDI: `{}%`\nNext Update: `{}`".format(roundid, player_count, duration, time_dilation_avg, ("{}s".format(update_interval), "Disabled")[update_interval == 0])
+		value_inf = "Round ID: `{}`\nPlayers: `{}`\nDuration: `{}`\nTIDI: `{}%`\nNext Update: `{}`\nJoin: <byond://{}:{}/>".format(roundid, player_count, duration, time_dilation_avg, ("{}s".format(update_interval), "Disabled")[update_interval == 0], address, port)
 		embbie.add_field(name="Server Information", value=value_inf)
 
 		field_visi = "Visible Players ({})".format(len(players))
 		value_visi = "```{}```".format(", ".join(players))
-		embbie.add_field(name="Join", value="<byond://{}:{}/>".format(address, port))
 		embbie.add_field(name=field_visi, value=value_visi)
 
 		return embbie
