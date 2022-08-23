@@ -57,6 +57,11 @@ class TGSLink(commands.Cog):
 		pass
 
 	@tgslink.command()
+	async def address(self, ctx: commands.Context, address):
+		await self.config.guild(ctx.guild).address.set(address)
+		await ctx.reply("Updated address.")
+
+	@tgslink.command()
 	async def launch(self, ctx: commands.Context, instance):
 		if(not (await self.check_logged_in(ctx))): return
 		address = await self.config.guild(ctx.guild).address()
@@ -267,7 +272,7 @@ def tgs_request(address, path = "/", method = "get", token = None, json = None, 
 	if(headers is not None):
 		for key in headers.keys():
 			_headers[key] = headers[key]
-	return make_request("http://{}{}".format(address, path), method, _headers, json)
+	return make_request("{}{}".format(address, path), method, _headers, json)
 
 def tgs_server_info(address, token):
 	return tgs_request(address, "/Administration", token=token)
