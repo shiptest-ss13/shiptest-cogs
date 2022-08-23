@@ -61,7 +61,7 @@ class SS13Mon(commands.Cog):
 		if(not (await self.check_logged_in(ctx))): return
 		address = await self.config.guild(ctx.guild).address()
 		token = await self.config.member(ctx.author).token()
-		resp = tgsapi.tgs_watchdog_start(address, token, instance)
+		resp = tgs_watchdog_start(address, token, instance)
 		if(not resp): await ctx.reply("Failed to launch watchdog")
 		else: await ctx.reply("Requested Watchdog launch")
 
@@ -70,7 +70,7 @@ class SS13Mon(commands.Cog):
 		if(not (await self.check_logged_in(ctx))): return
 		address = await self.config.guild(ctx.guild).address()
 		token = await self.config.member(ctx.author).token()
-		resp = tgsapi.tgs_watchdog_shutdown(address, token, instance)
+		resp = tgs_watchdog_shutdown(address, token, instance)
 		if(not resp): await ctx.reply("Failed to stop watchdog")
 		else: await ctx.reply("Requested Watchdog shutdown")
 
@@ -79,7 +79,7 @@ class SS13Mon(commands.Cog):
 		if(not (await self.check_logged_in(ctx))): return
 		address = await self.config.guild(ctx.guild).address()
 		token = await self.config.member(ctx.author).token()
-		resp = tgsapi.tgs_dm_deploy(address, token, instance)
+		resp = tgs_dm_deploy(address, token, instance)
 		if(not resp): await ctx.reply("Failed to start deployment")
 		else: await ctx.reply("Started deployment")
 
@@ -88,11 +88,11 @@ class SS13Mon(commands.Cog):
 		if(not (await self.check_logged_in(ctx))): return
 		address = await self.config.guild(ctx.guild).address()
 		token = await self.config.member(ctx.author).token()
-		resp = tgsapi.tgs_instances(address, token)
+		resp = tgs_instances(address, token)
 		if(not resp):
 			await ctx.reply("failed to get instance information")
 			return
-		resp: tgsapi.InstanceInformationQuery
+		resp: InstanceInformationQuery
 		
 		str_resp = "```"
 		for instance in resp.content:
@@ -104,7 +104,7 @@ class SS13Mon(commands.Cog):
 	async def login(self, ctx: commands.Context, username, password):
 		address = await self.config.guild(ctx.guild).address()
 
-		resp = tgsapi.tgs_login(address, username, password)
+		resp = tgs_login(address, username, password)
 		if(resp is None):
 			await ctx.reply("Failed to login")
 			try:
