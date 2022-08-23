@@ -46,7 +46,7 @@ class TGSLink(commands.Cog):
 			await ctx.reply("Please log in")
 			return False
 
-		if(not (expires - datetime.now()).total_seconds()):
+		if(not (expires - datetime.utcnow()).total_seconds()):
 			await ctx.reply("Please log in")
 			return False
 
@@ -286,7 +286,7 @@ def tgs_login(address, username, password) -> Tuple[Tuple[str, datetime], None]:
 		print("Failed to run query: {}".format(resp.reason))
 		return None
 	resp = resp.json()
-	return tuple([resp["bearer"], resp["expiresAt"]])
+	return tuple([resp["bearer"], datetime.strptime(resp["expiresAt"], "%Y-%m-%dT%H:%M:%S.%f")])
 
 def tgs_instances(address, token) -> Tuple[InstanceInformationQuery, None]:
 	resp = tgs_request(address, "/Instance/List", token=token)
