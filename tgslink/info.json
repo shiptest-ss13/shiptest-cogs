@@ -1,0 +1,10 @@
+{
+    "author": ["ZephyrTFA"],
+    "name": "/TG/Station Redbot Client",
+    "short": "Allows those with TGS credentials to perform actions in TGS from Discord.",
+    "description": "Allows those with TGS credentials to perform actions in TGS from Discord.",
+    "permissions" : ["Manage Messages"],
+    "tags": [
+        "Utility", "TGS"
+    ]
+}
