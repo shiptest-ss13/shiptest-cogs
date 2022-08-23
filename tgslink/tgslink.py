@@ -9,7 +9,7 @@ import requests
 
 log = logging.getLogger("red.tgslink")
 
-class SS13Mon(commands.Cog):
+class TGSLink(commands.Cog):
 	config: Config
 	login_warned: list
 	login_waiting: dict
