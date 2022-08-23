@@ -115,7 +115,7 @@ class TGSLink(commands.Cog):
 		if(resp is None):
 			await ctx.reply("Failed to login")
 			try:
-				await (await ctx.fetch_message()).delete()
+				await ctx.message.delete()
 			except:
 				await ctx.reply("Failed to delete login message, please delete it manually.")
 			return
@@ -125,7 +125,7 @@ class TGSLink(commands.Cog):
 		await cfg.expiresAt.set(resp[1])
 		await ctx.reply("Logged in")
 		try:
-			await (await ctx.fetch_message()).delete()
+			await ctx.message.delete()
 		except:
 			await ctx.reply("Failed to delete login message, please delete it manually.")
 
