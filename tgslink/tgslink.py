@@ -75,6 +75,15 @@ class SS13Mon(commands.Cog):
 		else: await ctx.reply("Requested Watchdog shutdown")
 
 	@tgslink.command()
+	async def deploy(self, ctx: commands.Context, instance):
+		if(not (await self.check_logged_in(ctx))): return
+		address = await self.config.guild(ctx.guild).address()
+		token = await self.config.member(ctx.author).token()
+		resp = tgsapi.tgs_dm_deploy(address, token, instance)
+		if(not resp): await ctx.reply("Failed to start deployment")
+		else: await ctx.reply("Started deployment")
+
+	@tgslink.command()
 	async def instances(self, ctx: commands.Context):
 		if(not (await self.check_logged_in(ctx))): return
 		address = await self.config.guild(ctx.guild).address()
