@@ -1,4 +1,6 @@
+from cmath import exp
 from datetime import datetime
+from operator import indexOf
 from typing import Tuple
 from redbot.core import commands, Config
 from json import JSONDecoder
@@ -286,7 +288,8 @@ def tgs_login(address, username, password) -> Tuple[Tuple[str, datetime], None]:
 		print("Failed to run query: {}".format(resp.reason))
 		return None
 	resp = resp.json()
-	return tuple([resp["bearer"], datetime.strptime(resp["expiresAt"], "%Y-%m-%dT%H:%M:%S.%f")])
+	expStr = resp["expiresAt"].split(".")[0]
+	return tuple([resp["bearer"], datetime.strptime(expStr, "%Y-%m-%dT%H:%M:%S")])
 
 def tgs_instances(address, token) -> Tuple[InstanceInformationQuery, None]:
 	resp = tgs_request(address, "/Instance/List", token=token)
