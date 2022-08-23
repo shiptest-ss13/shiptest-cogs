@@ -43,12 +43,12 @@ class TGSLink(commands.Cog):
 			await ctx.reply("Please log in")
 			return False
 
-		expires: datetime = await cfg.expiresAt()
+		expires: float = await cfg.expiresAt()
 		if(expires is None):
 			await ctx.reply("Please log in")
 			return False
 
-		if(not (expires - datetime.utcnow()).total_seconds()):
+		if((expires - datetime.utcnow().timestamp()) <= 0):
 			await ctx.reply("Please log in")
 			return False
 
@@ -279,7 +279,7 @@ def tgs_request(address, path = "/", method = "get", token = None, json = None, 
 def tgs_server_info(address, token):
 	return tgs_request(address, "/Administration", token=token)
 
-def tgs_login(address, username, password) -> Tuple[Tuple[str, datetime], None]:
+def tgs_login(address, username, password) -> Tuple[Tuple[str, float], None]:
 	basic = base64.b64encode("{}:{}".format(username, password).encode("ascii")).decode("ascii")
 	resp = tgs_request(address, method="post", headers={"Authorization": "Basic {}".format(basic)})
 	if(resp is None):
@@ -289,7 +289,7 @@ def tgs_login(address, username, password) -> Tuple[Tuple[str, datetime], None]:
 		return None
 	resp = resp.json()
 	expStr = resp["expiresAt"].split(".")[0]
-	return tuple([resp["bearer"], datetime.strptime(expStr, "%Y-%m-%dT%H:%M:%S")])
+	return tuple([resp["bearer"], datetime.strptime(expStr, "%Y-%m-%dT%H:%M:%S").timestamp()])
 
 def tgs_instances(address, token) -> Tuple[InstanceInformationQuery, None]:
 	resp = tgs_request(address, "/Instance/List", token=token)
