@@ -421,6 +421,9 @@ class RepositoryStatus:
 		if("revisionInformation" in dict.keys()): self.revisionInformation = RevisionInformation().decode(dict["revisionInformation"])
 		return self
 
+class ErrorMessageResponse:
+	message: str
+
 class TestMergeParamaters:
 	number: int = None
 	targetCommitSha: str = None
@@ -631,11 +634,16 @@ def tgs_repo_update_tms(address, token, instance, gh_token, update_from_origin=T
 	update_req: RepositoryUpdateRequest = RepositoryUpdateRequest()
 	update_req.updateFromOrigin = update_from_origin
 	update_req.newTestMerges = new_tms
+	update_req.committerName = status.committerName
+	update_req.committerEmail = status.committerEmail
 
 	log.info("Sending request: {}".format(update_req.encode(dict())))
 	resp: requests.Response = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())))
 	if(not resp):
 		if(resp is not None): log.info(resp.reason)
+		try:
+			log.info(resp.json(cls=ErrorMessageResponse).message)
+		except: pass
 		return None
 
 	resp: RepositoryStatus = resp.json(cls=RepositoryStatus)
