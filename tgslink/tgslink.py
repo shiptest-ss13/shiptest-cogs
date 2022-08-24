@@ -633,12 +633,12 @@ def tgs_repo_update_tms(address, token, instance, gh_token, update_from_origin=T
 	update_req.newTestMerges = new_tms
 
 	log.info("Sending request: {}".format(update_req.encode(dict())))
-	resp = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())))
+	resp: requests.Response = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())))
 	if(not resp):
-		log.info(resp)
+		if(resp is not None): log.info(resp.reason)
 		return None
-	resp: RepositoryStatus = resp.json(cls=RepositoryStatus)
 
+	resp: RepositoryStatus = resp.json(cls=RepositoryStatus)
 	job: JobInformation = resp.activeJob
 
 	log.info("Waiting for job completion")
