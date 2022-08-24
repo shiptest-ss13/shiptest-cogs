@@ -503,6 +503,17 @@ class RepositoryUpdateRequest:
 				tmList.append(tm.encode((dict())))
 			_dict["newTestMerges"] = tmList
 		return _dict
+	
+	def populate_from_status(self, status: RepositoryStatus):
+		self.committerName = status.committerName
+		self.committerEmail = status.committerEmail
+		self.pushTestMergeCommits = status.pushTestMergeCommits
+		self.createGithubDeployments = status.createGithubDeployments
+		self.showTestMergeCommitters = status.showTestMergeCommitters
+		self.autoUpdatesKeepTestMerges = status.autoUpdatesKeepTestMerges
+		self.postTestMergeComment = status.postTestMergeComment
+		self.updateSubmodules = status.updateSubmodules
+		return self
 
 def make_request(address: str, method = "get", headers = None, json = None) -> requests.Response:
 	_headers = {"User-Agent": "TGSLink/1.0"}
@@ -636,8 +647,8 @@ def tgs_repo_update_tms(address, token, instance, gh_token, update_from_origin=T
 	update_req.updateFromOrigin = update_from_origin
 	if(update_from_origin): update_req.reference = status.reference
 	update_req.newTestMerges = new_tms
-	update_req.committerName = status.committerName
-	update_req.committerEmail = status.committerEmail
+	update_req.populate_from_status(status)
+	update_req.autoUpdatesSynchronize = False
 
 	log.info("Sending request: {}".format(update_req.encode(dict())))
 	_resp: requests.Response = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())), headers={"Instance": str(instance)})
