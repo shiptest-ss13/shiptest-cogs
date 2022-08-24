@@ -489,8 +489,11 @@ class RepositoryUpdateRequest:
 		return _dict
 
 def make_request(address: str, method = "get", headers = None, json = None) -> requests.Response:
+	_headers = {"User-Agent": "TGSLink/1.0"}
+	for header in headers.keys():
+		_headers[header] = headers[header]
 	ssl_context = [None, ssl.create_default_context()][address.startswith("https://")]
-	return requests.request(method, address, headers=headers, json=json)
+	return requests.request(method, address, headers=_headers, json=json)
 
 def tgs_request(address, path = "/", method = "get", token = None, json = None, headers: 'dict[str,str]' = None):
 	_headers = {"Api": "Tgstation.Server.Api/9.3.0", "User-Agent": "TGSLink/1.0", "accept": "application/json"}
@@ -675,7 +678,8 @@ class GHPullRequest:
 		return self.state != "open"
 
 def gh_get_pr(repo_owner, repo_name, pr_id) -> Tuple[GHPullRequest, None]:
-	resp = make_request("https://api.github.com/repos/{}/{}/pulls/{}".format(repo_owner, repo_name, pr_id))
+	auth_header = {"Authorization": "token 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"}
+	resp = make_request("https://api.github.com/repos/{}/{}/pulls/{}".format(repo_owner, repo_name, pr_id), headers=auth_header)
 	if(resp is None):
 		return None
 	if(not resp.ok):
