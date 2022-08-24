@@ -66,6 +66,15 @@ class TGSLink(commands.Cog):
 		await ctx.reply("Updated address.")
 
 	@tgslink.command()
+	async def gh_token(self, ctx: commands.Context, gh_token):
+		await self.config.member(ctx.author).gh_token.set(gh_token)
+		await ctx.reply("GH Token updated")
+		try:
+			await ctx.message.delete()
+		except:
+			await ctx.reply("Failed to delete command. Delete it yourself.")
+
+	@tgslink.command()
 	async def launch(self, ctx: commands.Context, instance):
 		if(not (await self.check_logged_in(ctx))): return
 		address = await self.config.guild(ctx.guild).address()
@@ -167,13 +176,14 @@ class TGSLink(commands.Cog):
 	async def repo_pr_info(self, ctx: commands.Context, instance, pr_id):
 		address = await self.config.guild(ctx.guild).address()
 		token = await self.config.member(ctx.author).token()
+		gh_token = await self.config.member(ctx.author).gh_token()
 		resp = tgs_repo_status(address, token, instance)
 		if(resp is None):
 			await ctx.reply("Failed to fetch repo information")
 			return
 		resp: RepositoryStatus
 
-		pr: GHPullRequest = gh_get_pr(resp.remoteRepositoryOwner, resp.remoteRepositoryName, pr_id)
+		pr: GHPullRequest = gh_get_pr(resp.remoteRepositoryOwner, resp.remoteRepositoryName, pr_id, gh_token)
 		if(pr is None):
 			await ctx.reply("Failed to fetch PR information")
 			return
@@ -189,7 +199,8 @@ class TGSLink(commands.Cog):
 	async def repo_update_tms(self, ctx: commands.Context, instance, update_from_origin=True):
 		address = await self.config.guild(ctx.guild).address()
 		token = await self.config.member(ctx.author).token()
-		if(not tgs_repo_update_tms(address, token, instance, update_from_origin)): await ctx.reply("Failed to update TMs")
+		gh_token = await self.config.member(ctx.author).gh_token()
+		if(not tgs_repo_update_tms(address, token, instance, gh_token, update_from_origin)): await ctx.reply("Failed to update TMs")
 		else: await ctx.reply("Updated TMs")
 
 class InstanceInformation:
@@ -599,7 +610,7 @@ def tgs_repo_status(address, token, instance) -> Tuple[RepositoryStatus, None]:
 		return None
 	return resp.json(cls=RepositoryStatus)
 
-def tgs_repo_update_tms(address, token, instance, update_from_origin=True) -> Tuple[bool, None]:
+def tgs_repo_update_tms(address, token, instance, gh_token, update_from_origin=True) -> Tuple[bool, None]:
 	log.info("getting status")
 	status: RepositoryStatus = tgs_repo_status(address, token, instance)
 	if(not status): return None
@@ -608,7 +619,7 @@ def tgs_repo_update_tms(address, token, instance, update_from_origin=True) -> Tu
 	new_tms: list[TestMergeParamaters] = list()
 	for tm in status.revisionInformation.activeTestMerges:
 		sleep(0.2)
-		gh_pr: GHPullRequest = gh_get_pr(status.remoteRepositoryOwner, status.remoteRepositoryName, tm.number)
+		gh_pr: GHPullRequest = gh_get_pr(status.remoteRepositoryOwner, status.remoteRepositoryName, tm.number, gh_token)
 		if(not gh_pr): return None
 
 		if(gh_pr.is_closed() and update_from_origin): continue
@@ -677,8 +688,8 @@ class GHPullRequest:
 	def is_closed(self):
 		return self.state != "open"
 
-def gh_get_pr(repo_owner, repo_name, pr_id) -> Tuple[GHPullRequest, None]:
-	auth_header = {"Authorization": "token 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"}
+def gh_get_pr(repo_owner, repo_name, pr_id, token) -> Tuple[GHPullRequest, None]:
+	auth_header = {"Authorization": "token {}".format(token)}
 	resp = make_request("https://api.github.com/repos/{}/{}/pulls/{}".format(repo_owner, repo_name, pr_id), headers=auth_header)
 	if(resp is None):
 		return None
