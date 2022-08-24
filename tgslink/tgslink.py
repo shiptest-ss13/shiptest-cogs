@@ -440,9 +440,9 @@ class TestMergeParamaters:
 	
 	def encode(self, dict: dict):
 		dict.clear()
-		if(self.number is not None): dict["number"] = self.number
-		if(self.targetCommitSha is not None): dict["targetCommitSha"] = self.targetCommitSha
-		if(self.comment is not None): dict["comment"] = self.comment
+		if(self.number is not None): dict["Number"] = self.number
+		if(self.targetCommitSha is not None): dict["TargetCommitSha"] = self.targetCommitSha
+		if(self.comment is not None): dict["Comment"] = self.comment
 		return dict
 
 class RepositoryUpdateRequest:
@@ -483,25 +483,25 @@ class RepositoryUpdateRequest:
 	
 	def encode(self, _dict: dict):
 		_dict.clear()
-		if(self.checkoutSha is not None): _dict["checkoutSha"] = self.checkoutSha
-		if(self.updateFromOrigin is not None): _dict["updateFromOrigin"] = self.updateFromOrigin
-		if(self.reference is not None): _dict["reference"] = self.reference
-		if(self.committerName is not None): _dict["committerName"] = self.committerName
-		if(self.committerEmail is not None): _dict["committerEmail"] = self.committerEmail
-		if(self.accessUser is not None): _dict["accessUser"] = self.accessUser
-		if(self.accessToken is not None): _dict["accessToken"] = self.accessToken
-		if(self.pushTestMergeCommits is not None): _dict["pushTestMergeCommits"] = self.pushTestMergeCommits
-		if(self.createGithubDeployments is not None): _dict["createGithubDeployments"] = self.createGithubDeployments
-		if(self.showTestMergeCommitters is not None): _dict["showTestMergeCommitters"] = self.showTestMergeCommitters
-		if(self.autoUpdatesKeepTestMerges is not None): _dict["autoUpdatesKeepTestMerges"] = self.autoUpdatesKeepTestMerges
-		if(self.autoUpdatesSynchronize is not None): _dict["autoUpdatesSynchronize"] = self.autoUpdatesSynchronize
-		if(self.postTestMergeComment is not None): _dict["postTestMergeComment"] = self.postTestMergeComment
-		if(self.updateSubmodules is not None): _dict["updateSubmodules"] = self.updateSubmodules
+		if(self.checkoutSha is not None): _dict["CheckoutSha"] = self.checkoutSha
+		if(self.updateFromOrigin is not None): _dict["UpdateFromOrigin"] = self.updateFromOrigin
+		if(self.reference is not None): _dict["Reference"] = self.reference
+		if(self.committerName is not None): _dict["CommitterName"] = self.committerName
+		if(self.committerEmail is not None): _dict["CommitterEmail"] = self.committerEmail
+		if(self.accessUser is not None): _dict["AccessUser"] = self.accessUser
+		if(self.accessToken is not None): _dict["AccessToken"] = self.accessToken
+		if(self.pushTestMergeCommits is not None): _dict["PushTestMergeCommits"] = self.pushTestMergeCommits
+		if(self.createGithubDeployments is not None): _dict["CreateGithubDeployments"] = self.createGithubDeployments
+		if(self.showTestMergeCommitters is not None): _dict["ShowTestMergeCommitters"] = self.showTestMergeCommitters
+		if(self.autoUpdatesKeepTestMerges is not None): _dict["AutoUpdatesKeepTestMerges"] = self.autoUpdatesKeepTestMerges
+		if(self.autoUpdatesSynchronize is not None): _dict["AutoUpdatesSynchronize"] = self.autoUpdatesSynchronize
+		if(self.postTestMergeComment is not None): _dict["PostTestMergeComment"] = self.postTestMergeComment
+		if(self.updateSubmodules is not None): _dict["UpdateSubmodules"] = self.updateSubmodules
 		if(self.newTestMerges is not None):
 			tmList = list()
 			for tm in self.newTestMerges:
 				tmList.append(tm.encode((dict())))
-			_dict["newTestMerges"] = tmList
+			_dict["NewTestMerges"] = tmList
 		return _dict
 	
 	def populate_from_status(self, status: RepositoryStatus):
