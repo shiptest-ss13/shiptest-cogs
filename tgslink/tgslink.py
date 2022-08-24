@@ -644,11 +644,11 @@ def tgs_repo_update_tms(address, token, instance, gh_token, update_from_origin=T
 	log.info("{} tms to update, {} to remove".format(len(new_tms), len(status.revisionInformation.activeTestMerges) - len(new_tms)))
 	if(len(new_tms) == 0): new_tms = None
 	update_req: RepositoryUpdateRequest = RepositoryUpdateRequest()
-	update_req.updateFromOrigin = update_from_origin
-	if(update_from_origin): update_req.reference = status.reference
-	update_req.newTestMerges = new_tms
+	# update_req.updateFromOrigin = update_from_origin
+	# if(update_from_origin): update_req.reference = status.reference
+	# update_req.newTestMerges = new_tms
 	update_req.populate_from_status(status)
-	update_req.autoUpdatesSynchronize = False
+	update_req.autoUpdatesSynchronize = True
 
 	log.info("Sending request: {}".format(update_req.encode(dict())))
 	_resp: requests.Response = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())), headers={"Instance": str(instance)})
