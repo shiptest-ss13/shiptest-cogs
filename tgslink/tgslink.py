@@ -629,7 +629,7 @@ class GHPullRequest:
 		return self
 
 def gh_get_pr(repo_owner, repo_name, pr_id) -> Tuple[GHPullRequest, None]:
-	resp = make_request("https://api.github.com/repos/{}/{}/pulls/{}")
+	resp = make_request("https://api.github.com/repos/{}/{}/pulls/{}".format(repo_owner, repo_name, pr_id))
 	if(resp is None):
 		return None
 	if(not resp.ok):
