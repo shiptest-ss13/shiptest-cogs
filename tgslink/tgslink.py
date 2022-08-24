@@ -597,9 +597,11 @@ def tgs_repo_status(address, token, instance) -> Tuple[RepositoryStatus, None]:
 	return resp.json(cls=RepositoryStatus)
 
 def tgs_repo_update_tms(address, token, instance, update_from_origin=True) -> Tuple[bool, None]:
+	print("getting status")
 	status: RepositoryStatus = tgs_repo_status(address, token, instance)
 	if(not status): return None
 
+	print("assembling tms")
 	new_tms: list[TestMergeParamaters] = list()
 	for tm in status.revisionInformation.activeTestMerges:
 		sleep(0.2)
@@ -609,17 +611,22 @@ def tgs_repo_update_tms(address, token, instance, update_from_origin=True) -> Tu
 		if(gh_pr.is_closed() and update_from_origin): continue
 		new_tms.append(TestMergeParamaters().decode({"number": tm.number, "comment": "automatic update", "targetCommitSha": gh_pr.head.sha}))
 	
+	print("{} tms to update, {} to remove".format(len(new_tms), len(status.revisionInformation.activeTestMerges) - len(new_tms)))
 	if(len(new_tms) == 0): new_tms = None
 	update_req: RepositoryUpdateRequest = RepositoryUpdateRequest()
 	update_req.updateFromOrigin = update_from_origin
 	update_req.newTestMerges = new_tms
 
+	print("Sending request: {}".format(update_req.encode(dict())))
 	resp = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())))
-	if(not resp): return None
+	if(not resp):
+		print(resp)
+		return None
 	resp: RepositoryStatus = resp.json(cls=RepositoryStatus)
 
 	job: JobInformation = resp.activeJob
 
+	print("Waiting for job completion")
 	wait_count = 0
 	while not job.stoppedAt:
 		if(wait_count > 10): return None
@@ -627,7 +634,9 @@ def tgs_repo_update_tms(address, token, instance, update_from_origin=True) -> Tu
 		sleep(2)
 		job = tgs_job_get(address, token, instance, job.id)
 
-	if(job.errorCode): return None
+	if(job.errorCode):
+		print(job.exceptionDetails)
+		return None
 	return True
 
 class GHHead:
