@@ -614,7 +614,10 @@ def tgs_repo_update_tms(address, token, instance, update_from_origin=True) -> Tu
 	update_req.updateFromOrigin = update_from_origin
 	update_req.newTestMerges = new_tms
 
-	resp: RepositoryStatus = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())))
+	resp = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())))
+	if(not resp): return None
+	resp: RepositoryStatus = resp.json(cls=RepositoryStatus)
+
 	job: JobInformation = resp.activeJob
 
 	wait_count = 0
