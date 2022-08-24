@@ -497,7 +497,7 @@ class RepositoryUpdateRequest:
 			tmList = list()
 			for tm in self.newTestMerges:
 				tmList.append(tm.encode((dict())))
-			_dict["updateSubmodules"] = tmList
+			_dict["newTestMerges"] = tmList
 		return _dict
 
 def make_request(address: str, method = "get", headers = None, json = None) -> requests.Response:
