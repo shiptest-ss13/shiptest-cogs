@@ -162,7 +162,7 @@ class TGSLink(commands.Cog):
 		await ctx.reply(resp_str)
 
 	@tgslink.command()
-	async def repo_rp_info(self, ctx: commands.Context, instance, pr_id):
+	async def repo_pr_info(self, ctx: commands.Context, instance, pr_id):
 		address = await self.config.guild(ctx.guild).address()
 		token = await self.config.member(ctx.author).token()
 		resp = tgs_repo_status(address, token, instance)
