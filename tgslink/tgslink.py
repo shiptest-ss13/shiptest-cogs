@@ -156,12 +156,41 @@ class TGSLink(commands.Cog):
 		resp: RepositoryStatus
 
 		resp_str = "Test Merges\n```\n"
-		idx = 0
 		for tm in resp.revisionInformation.activeTestMerges:
-			idx += 1
-			resp_str += "{} - {} @ {}\n".format(idx, tm.titleAtMerge, tm.targetCommitSha)
+			resp_str += "{} - {} @ {}\n".format(tm.number, tm.titleAtMerge, tm.targetCommitSha)
 		resp_str += "```\n"
 		await ctx.reply(resp_str)
+
+	@tgslink.command()
+	async def repo_rp_info(self, ctx: commands.Context, instance, pr_id):
+		address = await self.config.guild(ctx.guild).address()
+		token = await self.config.member(ctx.author).token()
+		resp = tgs_repo_status(address, token, instance)
+		if(resp is None):
+			await ctx.reply("Failed to fetch repo information")
+			return
+		resp: RepositoryStatus
+
+		pr: GHPullRequest = gh_get_pr(resp.remoteRepositoryOwner, resp.remoteRepositoryName, pr_id)
+		if(pr is None):
+			await ctx.reply("Failed to fetch PR information")
+			return
+		
+		resp_str = "PR - {}\n```\n".format(pr.number)
+		resp_str += "Title: {}\n".format(pr.title)
+		resp_str += "State: {}\n".format(pr.state)
+		resp_str += "SHA: {}\n".format(pr.head.sha)
+		resp_str += "```\n"
+		await ctx.reply(resp_str)
+
+	@tgslink.command()
+	async def repo_update_tms(self, ctx: commands.Context, instance):
+		address = await self.config.guild(ctx.guild).address()
+		token = await self.config.member(ctx.author).token()
+		if(resp is None):
+			await ctx.reply("Failed to fetch repo information")
+			return
+		resp: RepositoryStatus
 
 class InstanceInformation:
 	accessible: bool
@@ -566,3 +595,44 @@ def tgs_repo_status(address, token, instance) -> Tuple[RepositoryStatus, None]:
 		print("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.json(cls=RepositoryStatus)
+
+class GHHead:
+	label: str
+	ref: str
+	sha: str
+
+	def decode(self, dict):
+		if(isinstance(dict, str)):
+			dict = JSONDecoder().decode(dict)
+		self.label = dict["label"]
+		self.ref = dict["ref"]
+		self.sha = dict["sha"]
+		return self
+
+class GHPullRequest:
+	url: str
+	number: int
+	state: str
+	locked: bool
+	title: str
+	head: GHHead
+
+	def decode(self, dict):
+		if(isinstance(dict, str)):
+			dict = JSONDecoder().decode(dict)
+		if("url" in dict.keys()): self.url = dict["url"]
+		if("number" in dict.keys()): self.number = dict["number"]
+		if("state" in dict.keys()): self.state = dict["state"]
+		if("locked" in dict.keys()): self.locked = dict["locked"]
+		if("title" in dict.keys()): self.title = dict["title"]
+		if("head" in dict.keys()): self.head = GHHead().decode(dict["head"])
+		return self
+
+def gh_get_pr(repo_owner, repo_name, pr_id) -> Tuple[GHPullRequest, None]:
+	resp = make_request("https://api.github.com/repos/{}/{}/pulls/{}")
+	if(resp is None):
+		return None
+	if(not resp.ok):
+		print("Failed to run query: {}".format(resp.reason))
+		return None
+	return resp.json(cls=GHPullRequest)
