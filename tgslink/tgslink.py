@@ -422,9 +422,9 @@ class RepositoryStatus:
 		return self
 
 class TestMergeParamaters:
-	number: int
-	targetCommitSha: str
-	comment: str
+	number: int = None
+	targetCommitSha: str = None
+	comment: str = None
 
 	def decode(self, dict):
 		if(isinstance(dict, str)):
