@@ -1,6 +1,7 @@
 import asyncio
 from cmath import exp
 from datetime import datetime
+from http.client import HTTPResponse
 from operator import indexOf
 from time import sleep
 from typing import Dict, Tuple
@@ -642,7 +643,9 @@ def tgs_repo_update_tms(address, token, instance, gh_token, update_from_origin=T
 	if(not _resp):
 		if(_resp is not None): log.info(_resp.reason)
 		try:
-			log.info(_resp.raw)
+			resp_json: dict = _resp.json()
+			for key in resp_json.keys():
+				log.info("{} - {}".format(key, resp_json[key]))
 		except: pass
 		return None
 
