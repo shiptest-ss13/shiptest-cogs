@@ -247,18 +247,18 @@ class TGSUserInformation:
 		return self
 
 class JobInformation:
-	startedBy: TGSUserInformation
-	description: str
+	startedBy: TGSUserInformation = None
+	description: str = None
 	errorCode: Tuple[int, None] = None
 	exceptionDetails: Tuple[str, None] = None
-	startedAt: datetime
+	startedAt: datetime = None
 	stoppedAt: Tuple[datetime, None] = None
-	cancelled: bool
-	cancelRightsType: int
-	cancelRight: int
-	id: int
-	progress: int
-	stage: str
+	cancelled: bool = None
+	cancelRightsType: int = None
+	cancelRight: int = None
+	id: int = None
+	progress: int = None
+	stage: str = None
 
 	def decode(self, dict):
 		if(isinstance(dict, str)):
@@ -278,10 +278,10 @@ class JobInformation:
 		return self
 
 class JobInformationQuery:
-	content: 'list[JobInformation]'
-	totalPages: int
-	pageSize: int
-	totalItems: int
+	content: 'list[JobInformation]' = None
+	totalPages: int = None
+	pageSize: int = None
+	totalItems: int = None
 
 	def decode(self, dict):
 		if(isinstance(dict, str)):
@@ -295,18 +295,18 @@ class JobInformationQuery:
 		return self
 
 class WatchdogStatus:
-	status: int
-	softRestart: bool
-	softShutdown: bool
-	autoStart: bool
-	allowWebClient: bool
-	visibility: int
-	securityLevel: int
-	port: int
-	startupTimeout: int
-	heartbeatSeconds: int
-	topicRequestTimeout: int
-	additionalParameters: str
+	status: int = None
+	softRestart: bool = None
+	softShutdown: bool = None
+	autoStart: bool = None
+	allowWebClient: bool = None
+	visibility: int = None
+	securityLevel: int = None
+	port: int = None
+	startupTimeout: int = None
+	heartbeatSeconds: int = None
+	topicRequestTimeout: int = None
+	additionalParameters: str = None
 
 	def decode(self, dict):
 		if(isinstance(dict, str)):
@@ -328,15 +328,15 @@ class WatchdogStatus:
 	def is_online(self) -> bool: return self.status != 0
 
 class TestMerge:
-	id: int
-	mergedAt: datetime
-	titleAtMerge: str
-	bodyAtMerge: str
-	url: str
-	author: str
-	number: int
-	targetCommitSha: str
-	comment: str
+	id: int = None
+	mergedAt: datetime = None
+	titleAtMerge: str = None
+	bodyAtMerge: str = None
+	url: str = None
+	author: str = None
+	number: int = None
+	targetCommitSha: str = None
+	comment: str = None
 
 	def decode(self, dict):
 		if(isinstance(dict, str)):
@@ -371,22 +371,22 @@ class RevisionInformation:
 		return self
 
 class RepositoryStatus:
-	origin: str
-	remoteGitProvider: int
-	remoteRepositoryOwner: str
-	remoteRepositoryName: str
-	activeJob: JobInformation
-	reference: str
-	committerName: str
-	committerEmail: str
-	accessUser: str
-	pushTestMergeCommits: bool
-	createGithubDeployments: bool
-	showTestMergeCommitters: bool
-	autoUpdatesKeepTestMerges: bool
-	postTestMergeComment: bool
-	updateSubmodules: bool
-	revisionInformation: RevisionInformation
+	origin: str = None
+	remoteGitProvider: int = None
+	remoteRepositoryOwner: str = None
+	remoteRepositoryName: str = None
+	activeJob: JobInformation = None
+	reference: str = None
+	committerName: str = None
+	committerEmail: str = None
+	accessUser: str = None
+	pushTestMergeCommits: bool = None
+	createGithubDeployments: bool = None
+	showTestMergeCommitters: bool = None
+	autoUpdatesKeepTestMerges: bool = None
+	postTestMergeComment: bool = None
+	updateSubmodules: bool = None
+	revisionInformation: RevisionInformation = None
 
 	def decode(self, dict):
 		if(isinstance(dict, str)):
@@ -430,21 +430,21 @@ class TestMergeParamaters:
 		return dict
 
 class RepositoryUpdateRequest:
-	checkoutSha: str
-	updateFromOrigin: bool
-	reference: str
-	committerName: str
-	committerEmail: str
-	accessUser: str
-	accessToken: str
-	pushTestMergeCommits: bool
-	createGithubDeployments: bool
-	showTestMergeCommitters: bool
-	autoUpdatesKeepTestMerges: bool
-	autoUpdatesSynchronize: bool
-	postTestMergeComment: bool
-	updateSubmodules: bool
-	newTestMerges: 'list[TestMergeParamaters]'
+	checkoutSha: str = None
+	updateFromOrigin: bool = None
+	reference: str = None
+	committerName: str = None
+	committerEmail: str = None
+	accessUser: str = None
+	accessToken: str = None
+	pushTestMergeCommits: bool = None
+	createGithubDeployments: bool = None
+	showTestMergeCommitters: bool = None
+	autoUpdatesKeepTestMerges: bool = None
+	autoUpdatesSynchronize: bool = None
+	postTestMergeComment: bool = None
+	updateSubmodules: bool = None
+	newTestMerges: 'list[TestMergeParamaters]' = None
 
 	def decode(self, dict):
 		if(isinstance(dict, str)):
