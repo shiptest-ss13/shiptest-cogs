@@ -639,8 +639,8 @@ def tgs_repo_update_tms(address, token, instance, gh_token, update_from_origin=T
 
 	log.info("Sending request: {}".format(update_req.encode(dict())))
 	_resp: requests.Response = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())))
-	if(not resp):
-		if(resp is not None): log.info(resp.reason)
+	if(not _resp):
+		if(_resp is not None): log.info(_resp.reason)
 		try:
 			log.info(_resp.raw)
 		except: pass
