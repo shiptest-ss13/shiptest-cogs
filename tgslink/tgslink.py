@@ -509,7 +509,7 @@ def tgs_login(address, username, password) -> Tuple[Tuple[str, float], None]:
 	if(resp is None):
 		return None
 	if(not resp.ok):
-		print("Failed to run query: {}".format(resp.reason))
+		log.info("Failed to run query: {}".format(resp.reason))
 		return None
 	resp = resp.json()
 	expStr = resp["expiresAt"].split(".")[0]
@@ -520,7 +520,7 @@ def tgs_instances(address, token) -> Tuple[InstanceInformationQuery, None]:
 	if(resp is None):
 		return None
 	if(not resp.ok):
-		print("Failed to run query: {}".format(resp.reason))
+		log.info("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.json(cls=InstanceInformationQuery)
 
@@ -529,7 +529,7 @@ def tgs_get_instance(address, token, instance) -> Tuple[InstanceInformation, Non
 	if(resp is None):
 		return None
 	if(not resp.ok):
-		print("Failed to run query: {}".format(resp.reason))
+		log.info("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.json(cls=InstanceInformation)
 
@@ -538,7 +538,7 @@ def tgs_dm_deploy(address, token, instance) -> Tuple[JobInformation, None]:
 	if(resp is None):
 		return None
 	if(not resp.ok):
-		print("Failed to run query: {}".format(resp.reason))
+		log.info("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.json(cls=JobInformation)
 
@@ -547,7 +547,7 @@ def tgs_job_get(address, token, instance, jobid) -> Tuple[JobInformation, None]:
 	if(resp is None):
 		return None
 	if(not resp.ok):
-		print("Failed to run query: {}".format(resp.reason))
+		log.info("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.json(cls=JobInformation)
 
@@ -556,7 +556,7 @@ def tgs_job_all(address, token, instance) -> Tuple[JobInformationQuery, None]:
 	if(resp is None):
 		return None
 	if(not resp.ok):
-		print("Failed to run query: {}".format(resp.reason))
+		log.info("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.json(cls=JobInformationQuery)
 
@@ -565,7 +565,7 @@ def tgs_watchdog_status(address, token, instance) -> Tuple[WatchdogStatus, None]
 	if(resp is None):
 		return None
 	if(not resp.ok):
-		print("Failed to run query: {}".format(resp.reason))
+		log.info("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.json(cls=WatchdogStatus)
 
@@ -574,7 +574,7 @@ def tgs_watchdog_start(address, token, instance) -> Tuple[JobInformation, None]:
 	if(resp is None):
 		return None
 	if(not resp.ok):
-		print("Failed to run query: {}".format(resp.reason))
+		log.info("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.json(cls=JobInformation)
 
@@ -583,7 +583,7 @@ def tgs_watchdog_shutdown(address, token, instance) -> Tuple[bool, None]:
 	if(resp is None):
 		return None
 	if(not resp.ok):
-		print("Failed to run query: {}".format(resp.reason))
+		log.info("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.status_code == 204
 
@@ -592,16 +592,16 @@ def tgs_repo_status(address, token, instance) -> Tuple[RepositoryStatus, None]:
 	if(resp is None):
 		return None
 	if(not resp.ok):
-		print("Failed to run query: {}".format(resp.reason))
+		log.info("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.json(cls=RepositoryStatus)
 
 def tgs_repo_update_tms(address, token, instance, update_from_origin=True) -> Tuple[bool, None]:
-	print("getting status")
+	log.info("getting status")
 	status: RepositoryStatus = tgs_repo_status(address, token, instance)
 	if(not status): return None
 
-	print("assembling tms")
+	log.info("assembling tms")
 	new_tms: list[TestMergeParamaters] = list()
 	for tm in status.revisionInformation.activeTestMerges:
 		sleep(0.2)
@@ -611,22 +611,22 @@ def tgs_repo_update_tms(address, token, instance, update_from_origin=True) -> Tu
 		if(gh_pr.is_closed() and update_from_origin): continue
 		new_tms.append(TestMergeParamaters().decode({"number": tm.number, "comment": "automatic update", "targetCommitSha": gh_pr.head.sha}))
 	
-	print("{} tms to update, {} to remove".format(len(new_tms), len(status.revisionInformation.activeTestMerges) - len(new_tms)))
+	log.info("{} tms to update, {} to remove".format(len(new_tms), len(status.revisionInformation.activeTestMerges) - len(new_tms)))
 	if(len(new_tms) == 0): new_tms = None
 	update_req: RepositoryUpdateRequest = RepositoryUpdateRequest()
 	update_req.updateFromOrigin = update_from_origin
 	update_req.newTestMerges = new_tms
 
-	print("Sending request: {}".format(update_req.encode(dict())))
+	log.info("Sending request: {}".format(update_req.encode(dict())))
 	resp = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())))
 	if(not resp):
-		print(resp)
+		log.info(resp)
 		return None
 	resp: RepositoryStatus = resp.json(cls=RepositoryStatus)
 
 	job: JobInformation = resp.activeJob
 
-	print("Waiting for job completion")
+	log.info("Waiting for job completion")
 	wait_count = 0
 	while not job.stoppedAt:
 		if(wait_count > 10): return None
@@ -635,7 +635,7 @@ def tgs_repo_update_tms(address, token, instance, update_from_origin=True) -> Tu
 		job = tgs_job_get(address, token, instance, job.id)
 
 	if(job.errorCode):
-		print(job.exceptionDetails)
+		log.info(job.exceptionDetails)
 		return None
 	return True
 
@@ -679,6 +679,6 @@ def gh_get_pr(repo_owner, repo_name, pr_id) -> Tuple[GHPullRequest, None]:
 	if(resp is None):
 		return None
 	if(not resp.ok):
-		print("Failed to run query: {}".format(resp.reason))
+		log.info("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.json(cls=GHPullRequest)
