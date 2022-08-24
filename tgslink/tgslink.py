@@ -128,6 +128,22 @@ class TGSLink(commands.Cog):
 			await ctx.message.delete()
 		except:
 			await ctx.reply("Failed to delete login message, please delete it manually.")
+	
+	@tgslink.command()
+	async def repo_status(self, ctx: commands.Context, instance):
+		address = await self.config.guild(ctx.guild).address()
+		token = await self.config.member(ctx.author).token()
+		resp = tgs_repo_status(address, token, instance)
+		if(resp is None):
+			await ctx.reply("Failed to fetch repo information")
+			return
+		resp: RepositoryStatus
+		
+		resp_str = "Repository Information\n```\n"
+		resp_str += "Remote: {}/{}\n".format(resp.remoteRepositoryOwner, resp.remoteRepositoryName)
+		resp_str += "SHA: {}\n".format(resp.revisionInformation.commitSha)
+		resp_str += "```\n"
+		await ctx.reply(resp_str)
 
 class InstanceInformation:
 	accessible: bool
@@ -264,6 +280,167 @@ class WatchdogStatus:
 
 	def is_online(self) -> bool: return self.status != 0
 
+class TestMerge:
+	id: int
+	mergedAt: datetime
+	titleAtMerge: str
+	bodyAtMerge: str
+	url: str
+	author: str
+	number: int
+	targetCommitSha: str
+	comment: str
+
+	def decode(self, dict):
+		if(isinstance(dict, str)):
+			dict = JSONDecoder().decode(dict)
+		if("id" in dict.keys()): self.id = dict["id"]
+		if("mergedAt" in dict.keys()): self.mergedAt = dict["mergedAt"]
+		if("titleAtMerge" in dict.keys()): self.titleAtMerge = dict["titleAtMerge"]
+		if("bodyAtMerge" in dict.keys()): self.bodyAtMerge = dict["bodyAtMerge"]
+		if("url" in dict.keys()): self.url = dict["url"]
+		if("author" in dict.keys()): self.author = dict["author"]
+		if("number" in dict.keys()): self.number = dict["number"]
+		if("targetCommitSha" in dict.keys()): self.targetCommitSha = dict["targetCommitSha"]
+		if("comment" in dict.keys()): self.comment = dict["comment"]
+		return self
+
+class RevisionInformation:
+	originCommitSha: str
+	timestamp: datetime
+	commitSha: str
+	activeTestMerges: 'list[TestMerge]'
+
+	def decode(self, dict):
+		if(isinstance(dict, str)):
+			dict = JSONDecoder().decode(dict)
+		if("originCommitSha" in dict.keys()): self.originCommitSha = dict["originCommitSha"]
+		if("timestamp" in dict.keys()): self.timestamp = dict["timestamp"]
+		if("commitSha" in dict.keys()): self.commitSha = dict["commitSha"]
+		if("activeTestMerges" in dict.keys()):
+			self.activeTestMerges = list()
+			for entry in dict["activeTestMerges"]:
+				self.activeTestMerges.append(TestMerge().decode(entry))
+		return self
+
+class RepositoryStatus:
+	origin: str
+	remoteGitProvider: int
+	remoteRepositoryOwner: str
+	remoteRepositoryName: str
+	activeJob: JobInformation
+	reference: str
+	committerName: str
+	committerEmail: str
+	accessUser: str
+	pushTestMergeCommits: bool
+	createGithubDeployments: bool
+	showTestMergeCommitters: bool
+	autoUpdatesKeepTestMerges: bool
+	postTestMergeComment: bool
+	updateSubmodules: bool
+	revisionInformation: RevisionInformation
+
+	def decode(self, dict):
+		if(isinstance(dict, str)):
+			dict = JSONDecoder().decode(dict)
+		if("origin" in dict.keys()): self.origin = dict["origin"]
+		if("remoteGitProvider" in dict.keys()): self.remoteGitProvider = dict["remoteGitProvider"]
+		if("remoteRepositoryOwner" in dict.keys()): self.remoteRepositoryOwner = dict["remoteRepositoryOwner"]
+		if("remoteRepositoryName" in dict.keys()): self.remoteRepositoryName = dict["remoteRepositoryName"]
+		if("activeJob" in dict.keys()): self.activeJob = dict["activeJob"]
+		if("reference" in dict.keys()): self.reference = dict["reference"]
+		if("committerName" in dict.keys()): self.committerName = dict["committerName"]
+		if("committerEmail" in dict.keys()): self.committerEmail = dict["committerEmail"]
+		if("accessUser" in dict.keys()): self.accessUser = dict["accessUser"]
+		if("pushTestMergeCommits" in dict.keys()): self.pushTestMergeCommits = dict["pushTestMergeCommits"]
+		if("createGithubDeployments" in dict.keys()): self.createGithubDeployments = dict["createGithubDeployments"]
+		if("showTestMergeCommitters" in dict.keys()): self.showTestMergeCommitters = dict["showTestMergeCommitters"]
+		if("autoUpdatesKeepTestMerges" in dict.keys()): self.autoUpdatesKeepTestMerges = dict["autoUpdatesKeepTestMerges"]
+		if("postTestMergeComment" in dict.keys()): self.postTestMergeComment = dict["postTestMergeComment"]
+		if("updateSubmodules" in dict.keys()): self.updateSubmodules = dict["updateSubmodules"]
+		if("revisionInformation" in dict.keys()): self.revisionInformation = RevisionInformation().decode(dict["revisionInformation"])
+		return self
+
+class TestMergeParamaters:
+	number: int
+	targetCommitSha: str
+	comment: str
+
+	def decode(self, dict):
+		if(isinstance(dict, str)):
+			dict = JSONDecoder().decode(dict)
+		if("number" in dict.keys()): self.number = dict["number"]
+		if("targetCommitSha" in dict.keys()): self.targetCommitSha = dict["targetCommitSha"]
+		if("comment" in dict.keys()): self.comment = dict["comment"]
+		return self
+	
+	def encode(self, dict: dict):
+		dict.clear()
+		if(self.number is not None): dict["number"] = self.number
+		if(self.targetCommitSha is not None): dict["targetCommitSha"] = self.targetCommitSha
+		if(self.comment is not None): dict["comment"] = self.comment
+		return dict
+
+class RepositoryUpdateRequest:
+	checkoutSha: str
+	updateFromOrigin: bool
+	reference: str
+	committerName: str
+	committerEmail: str
+	accessUser: str
+	accessToken: str
+	pushTestMergeCommits: bool
+	createGithubDeployments: bool
+	showTestMergeCommitters: bool
+	autoUpdatesKeepTestMerges: bool
+	autoUpdatesSynchronize: bool
+	postTestMergeComment: bool
+	updateSubmodules: bool
+	newTestMerges: 'list[TestMergeParamaters]'
+
+	def decode(self, dict):
+		if(isinstance(dict, str)):
+			dict = JSONDecoder().decode(dict)
+		if("checkoutSha" in dict.keys()): self.checkoutSha = dict["checkoutSha"]
+		if("updateFromOrigin" in dict.keys()): self.updateFromOrigin = dict["updateFromOrigin"]
+		if("reference" in dict.keys()): self.reference = dict["reference"]
+		if("committerName" in dict.keys()): self.committerName = dict["committerName"]
+		if("committerEmail" in dict.keys()): self.committerEmail = dict["committerEmail"]
+		if("accessUser" in dict.keys()): self.accessUser = dict["accessUser"]
+		if("accessToken" in dict.keys()): self.accessToken = dict["accessToken"]
+		if("pushTestMergeCommits" in dict.keys()): self.pushTestMergeCommits = dict["pushTestMergeCommits"]
+		if("createGithubDeployments" in dict.keys()): self.createGithubDeployments = dict["createGithubDeployments"]
+		if("showTestMergeCommitters" in dict.keys()): self.showTestMergeCommitters = dict["showTestMergeCommitters"]
+		if("autoUpdatesKeepTestMerges" in dict.keys()): self.autoUpdatesKeepTestMerges = dict["autoUpdatesKeepTestMerges"]
+		if("autoUpdatesSynchronize" in dict.keys()): self.autoUpdatesSynchronize = dict["autoUpdatesSynchronize"]
+		if("postTestMergeComment" in dict.keys()): self.postTestMergeComment = dict["postTestMergeComment"]
+		if("updateSubmodules" in dict.keys()): self.updateSubmodules = dict["updateSubmodules"]
+		return self
+	
+	def encode(self, dict: dict):
+		dict.clear()
+		if(self.checkoutSha is not None): dict["checkoutSha"] = self.checkoutSha
+		if(self.updateFromOrigin is not None): dict["updateFromOrigin"] = self.updateFromOrigin
+		if(self.reference is not None): dict["reference"] = self.reference
+		if(self.committerName is not None): dict["committerName"] = self.committerName
+		if(self.committerEmail is not None): dict["committerEmail"] = self.committerEmail
+		if(self.accessUser is not None): dict["accessUser"] = self.accessUser
+		if(self.accessToken is not None): dict["accessToken"] = self.accessToken
+		if(self.pushTestMergeCommits is not None): dict["pushTestMergeCommits"] = self.pushTestMergeCommits
+		if(self.createGithubDeployments is not None): dict["createGithubDeployments"] = self.createGithubDeployments
+		if(self.showTestMergeCommitters is not None): dict["showTestMergeCommitters"] = self.showTestMergeCommitters
+		if(self.autoUpdatesKeepTestMerges is not None): dict["autoUpdatesKeepTestMerges"] = self.autoUpdatesKeepTestMerges
+		if(self.autoUpdatesSynchronize is not None): dict["autoUpdatesSynchronize"] = self.autoUpdatesSynchronize
+		if(self.postTestMergeComment is not None): dict["postTestMergeComment"] = self.postTestMergeComment
+		if(self.updateSubmodules is not None): dict["updateSubmodules"] = self.updateSubmodules
+		if(self.newTestMerges is not None):
+			tmList = list()
+			for tm in self.newTestMerges:
+				tmList.append(tm.encode(dict()))
+			dict["updateSubmodules"] = tmList
+		return dict
+
 def make_request(address: str, method = "get", headers = None, json = None) -> requests.Response:
 	ssl_context = [None, ssl.create_default_context()][address.startswith("https://")]
 	return requests.request(method, address, headers=headers, json=json)
@@ -362,3 +539,12 @@ def tgs_watchdog_shutdown(address, token, instance) -> Tuple[bool, None]:
 		print("Failed to run query: {}".format(resp.reason))
 		return None
 	return resp.status_code == 204
+
+def tgs_repo_status(address, token, instance) -> Tuple[RepositoryStatus, None]:
+	resp = tgs_request(address, "/Repository", token=token, headers={"Instance": str(instance)})
+	if(resp is None):
+		return None
+	if(not resp.ok):
+		print("Failed to run query: {}".format(resp.reason))
+		return None
+	return resp.json(cls=RepositoryStatus)
