@@ -3,7 +3,7 @@ from cmath import exp
 from datetime import datetime
 from operator import indexOf
 from time import sleep
-from typing import Tuple
+from typing import Dict, Tuple
 from redbot.core import commands, Config
 from json import JSONDecoder, JSONEncoder
 import logging
@@ -465,28 +465,28 @@ class RepositoryUpdateRequest:
 		if("updateSubmodules" in dict.keys()): self.updateSubmodules = dict["updateSubmodules"]
 		return self
 	
-	def encode(self, dict: dict):
-		dict.clear()
-		if(self.checkoutSha is not None): dict["checkoutSha"] = self.checkoutSha
-		if(self.updateFromOrigin is not None): dict["updateFromOrigin"] = self.updateFromOrigin
-		if(self.reference is not None): dict["reference"] = self.reference
-		if(self.committerName is not None): dict["committerName"] = self.committerName
-		if(self.committerEmail is not None): dict["committerEmail"] = self.committerEmail
-		if(self.accessUser is not None): dict["accessUser"] = self.accessUser
-		if(self.accessToken is not None): dict["accessToken"] = self.accessToken
-		if(self.pushTestMergeCommits is not None): dict["pushTestMergeCommits"] = self.pushTestMergeCommits
-		if(self.createGithubDeployments is not None): dict["createGithubDeployments"] = self.createGithubDeployments
-		if(self.showTestMergeCommitters is not None): dict["showTestMergeCommitters"] = self.showTestMergeCommitters
-		if(self.autoUpdatesKeepTestMerges is not None): dict["autoUpdatesKeepTestMerges"] = self.autoUpdatesKeepTestMerges
-		if(self.autoUpdatesSynchronize is not None): dict["autoUpdatesSynchronize"] = self.autoUpdatesSynchronize
-		if(self.postTestMergeComment is not None): dict["postTestMergeComment"] = self.postTestMergeComment
-		if(self.updateSubmodules is not None): dict["updateSubmodules"] = self.updateSubmodules
+	def encode(self, _dict: dict):
+		_dict.clear()
+		if(self.checkoutSha is not None): _dict["checkoutSha"] = self.checkoutSha
+		if(self.updateFromOrigin is not None): _dict["updateFromOrigin"] = self.updateFromOrigin
+		if(self.reference is not None): _dict["reference"] = self.reference
+		if(self.committerName is not None): _dict["committerName"] = self.committerName
+		if(self.committerEmail is not None): _dict["committerEmail"] = self.committerEmail
+		if(self.accessUser is not None): _dict["accessUser"] = self.accessUser
+		if(self.accessToken is not None): _dict["accessToken"] = self.accessToken
+		if(self.pushTestMergeCommits is not None): _dict["pushTestMergeCommits"] = self.pushTestMergeCommits
+		if(self.createGithubDeployments is not None): _dict["createGithubDeployments"] = self.createGithubDeployments
+		if(self.showTestMergeCommitters is not None): _dict["showTestMergeCommitters"] = self.showTestMergeCommitters
+		if(self.autoUpdatesKeepTestMerges is not None): _dict["autoUpdatesKeepTestMerges"] = self.autoUpdatesKeepTestMerges
+		if(self.autoUpdatesSynchronize is not None): _dict["autoUpdatesSynchronize"] = self.autoUpdatesSynchronize
+		if(self.postTestMergeComment is not None): _dict["postTestMergeComment"] = self.postTestMergeComment
+		if(self.updateSubmodules is not None): _dict["updateSubmodules"] = self.updateSubmodules
 		if(self.newTestMerges is not None):
 			tmList = list()
 			for tm in self.newTestMerges:
-				tmList.append(tm.encode(dict()))
-			dict["updateSubmodules"] = tmList
-		return dict
+				tmList.append(tm.encode((dict())))
+			_dict["updateSubmodules"] = tmList
+		return _dict
 
 def make_request(address: str, method = "get", headers = None, json = None) -> requests.Response:
 	ssl_context = [None, ssl.create_default_context()][address.startswith("https://")]
