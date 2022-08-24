@@ -34,6 +34,7 @@ class TGSLink(commands.Cog):
 		def_member = {
 			"token": None,
 			"expiresAt": None,
+			"gh_token": None,
 		}
 
 		self.config.register_guild(**def_guild)
