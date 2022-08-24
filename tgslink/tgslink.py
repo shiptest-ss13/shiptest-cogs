@@ -144,6 +144,24 @@ class TGSLink(commands.Cog):
 		resp_str += "SHA: {}\n".format(resp.revisionInformation.commitSha)
 		resp_str += "```\n"
 		await ctx.reply(resp_str)
+	
+	@tgslink.command()
+	async def repo_tms(self, ctx: commands.Context, instance):
+		address = await self.config.guild(ctx.guild).address()
+		token = await self.config.member(ctx.author).token()
+		resp = tgs_repo_status(address, token, instance)
+		if(resp is None):
+			await ctx.reply("Failed to fetch repo information")
+			return
+		resp: RepositoryStatus
+
+		resp_str = "Test Merges\n```\n"
+		idx = 0
+		for tm in resp.revisionInformation.activeTestMerges:
+			idx += 1
+			resp_str += "{} - {} @ {}\n".format(idx, tm.titleAtMerge, tm.targetCommitSha)
+		resp_str += "```\n"
+		await ctx.reply(resp_str)
 
 class InstanceInformation:
 	accessible: bool
