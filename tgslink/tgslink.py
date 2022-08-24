@@ -622,7 +622,7 @@ def tgs_repo_update_tms(address, token, instance, gh_token, update_from_origin=T
 	log.info("assembling tms")
 	new_tms: list[TestMergeParamaters] = list()
 	for tm in status.revisionInformation.activeTestMerges:
-		sleep(0.2)
+		sleep(0.1)
 		gh_pr: GHPullRequest = gh_get_pr(status.remoteRepositoryOwner, status.remoteRepositoryName, tm.number, gh_token)
 		if(not gh_pr): return None
 
@@ -638,15 +638,15 @@ def tgs_repo_update_tms(address, token, instance, gh_token, update_from_origin=T
 	update_req.committerEmail = status.committerEmail
 
 	log.info("Sending request: {}".format(update_req.encode(dict())))
-	resp: requests.Response = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())))
+	_resp: requests.Response = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())))
 	if(not resp):
 		if(resp is not None): log.info(resp.reason)
 		try:
-			log.info(resp.json(cls=ErrorMessageResponse).message)
+			log.info(_resp.raw)
 		except: pass
 		return None
 
-	resp: RepositoryStatus = resp.json(cls=RepositoryStatus)
+	resp: RepositoryStatus = _resp.json(cls=RepositoryStatus)
 	job: JobInformation = resp.activeJob
 
 	log.info("Waiting for job completion")
