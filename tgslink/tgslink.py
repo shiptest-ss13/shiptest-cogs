@@ -479,26 +479,25 @@ class RepositoryUpdateRequest:
 	
 	def encode(self, _dict: dict):
 		_dict.clear()
-		_dict["checkoutSha"] = self.checkoutSha
-		_dict["updateFromOrigin"] = self.updateFromOrigin
-		_dict["reference"] = self.reference
-		_dict["committerName"] = self.committerName
-		_dict["committerEmail"] = self.committerEmail
-		_dict["accessUser"] = self.accessUser
-		_dict["accessToken"] = self.accessToken
-		_dict["pushTestMergeCommits"] = self.pushTestMergeCommits
-		_dict["createGithubDeployments"] = self.createGithubDeployments
-		_dict["showTestMergeCommitters"] = self.showTestMergeCommitters
-		_dict["autoUpdatesKeepTestMerges"] = self.autoUpdatesKeepTestMerges
-		_dict["autoUpdatesSynchronize"] = self.autoUpdatesSynchronize
-		_dict["postTestMergeComment"] = self.postTestMergeComment
-		_dict["updateSubmodules"] = self.updateSubmodules
+		if(self.checkoutSha is not None): _dict["checkoutSha"] = self.checkoutSha
+		if(self.updateFromOrigin is not None): _dict["updateFromOrigin"] = self.updateFromOrigin
+		if(self.reference is not None): _dict["reference"] = self.reference
+		if(self.committerName is not None): _dict["committerName"] = self.committerName
+		if(self.committerEmail is not None): _dict["committerEmail"] = self.committerEmail
+		if(self.accessUser is not None): _dict["accessUser"] = self.accessUser
+		if(self.accessToken is not None): _dict["accessToken"] = self.accessToken
+		if(self.pushTestMergeCommits is not None): _dict["pushTestMergeCommits"] = self.pushTestMergeCommits
+		if(self.createGithubDeployments is not None): _dict["createGithubDeployments"] = self.createGithubDeployments
+		if(self.showTestMergeCommitters is not None): _dict["showTestMergeCommitters"] = self.showTestMergeCommitters
+		if(self.autoUpdatesKeepTestMerges is not None): _dict["autoUpdatesKeepTestMerges"] = self.autoUpdatesKeepTestMerges
+		if(self.autoUpdatesSynchronize is not None): _dict["autoUpdatesSynchronize"] = self.autoUpdatesSynchronize
+		if(self.postTestMergeComment is not None): _dict["postTestMergeComment"] = self.postTestMergeComment
+		if(self.updateSubmodules is not None): _dict["updateSubmodules"] = self.updateSubmodules
 		if(self.newTestMerges is not None):
 			tmList = list()
 			for tm in self.newTestMerges:
 				tmList.append(tm.encode((dict())))
 			_dict["newTestMerges"] = tmList
-		else: _dict["newTestMerges"] = None
 		return _dict
 
 def make_request(address: str, method = "get", headers = None, json = None) -> requests.Response:
@@ -625,7 +624,7 @@ def tgs_repo_update_tms(address, token, instance, gh_token, update_from_origin=T
 		if(not gh_pr): return None
 
 		if(gh_pr.is_closed() and update_from_origin): continue
-		new_tms.append(TestMergeParamaters().decode({"number": tm.number, "comment": "automatic update", "targetCommitSha": gh_pr.head.sha}))
+		new_tms.append(TestMergeParamaters().decode({"number": tm.number}))
 	
 	log.info("{} tms to update, {} to remove".format(len(new_tms), len(status.revisionInformation.activeTestMerges) - len(new_tms)))
 	if(len(new_tms) == 0): new_tms = None
