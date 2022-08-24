@@ -1,9 +1,11 @@
+import asyncio
 from cmath import exp
 from datetime import datetime
 from operator import indexOf
+from time import sleep
 from typing import Tuple
 from redbot.core import commands, Config
-from json import JSONDecoder
+from json import JSONDecoder, JSONEncoder
 import logging
 import base64
 import ssl
@@ -184,13 +186,11 @@ class TGSLink(commands.Cog):
 		await ctx.reply(resp_str)
 
 	@tgslink.command()
-	async def repo_update_tms(self, ctx: commands.Context, instance):
+	async def repo_update_tms(self, ctx: commands.Context, instance, update_from_origin=True):
 		address = await self.config.guild(ctx.guild).address()
 		token = await self.config.member(ctx.author).token()
-		if(resp is None):
-			await ctx.reply("Failed to fetch repo information")
-			return
-		resp: RepositoryStatus
+		if(not tgs_repo_update_tms(address, token, instance, update_from_origin)): await ctx.reply("Failed to update TMs")
+		else: await ctx.reply("Updated TMs")
 
 class InstanceInformation:
 	accessible: bool
@@ -596,6 +596,37 @@ def tgs_repo_status(address, token, instance) -> Tuple[RepositoryStatus, None]:
 		return None
 	return resp.json(cls=RepositoryStatus)
 
+def tgs_repo_update_tms(address, token, instance, update_from_origin=True) -> Tuple[bool, None]:
+	status: RepositoryStatus = tgs_repo_status(address, token, instance)
+	if(not status): return None
+
+	new_tms: list[TestMergeParamaters] = list()
+	for tm in status.revisionInformation.activeTestMerges:
+		sleep(0.2)
+		gh_pr: GHPullRequest = gh_get_pr(status.remoteRepositoryOwner, status.remoteRepositoryName, tm.number)
+		if(not gh_pr): return None
+
+		if(gh_pr.is_closed() and update_from_origin): continue
+		new_tms.append(TestMergeParamaters().decode({"number": tm.number, "comment": "automatic update", "targetCommitSha": gh_pr.head.sha}))
+	
+	if(len(new_tms) == 0): new_tms = None
+	update_req: RepositoryUpdateRequest = RepositoryUpdateRequest()
+	update_req.updateFromOrigin = update_from_origin
+	update_req.newTestMerges = new_tms
+
+	resp: RepositoryStatus = tgs_request(address, "/Repository", method="post", token=token, json=JSONEncoder().encode(update_req.encode(dict())))
+	job: JobInformation = resp.activeJob
+
+	wait_count = 0
+	while not job.stoppedAt:
+		if(wait_count > 10): return None
+		wait_count += 1
+		sleep(2)
+		job = tgs_job_get(address, token, instance, job.id)
+
+	if(job.errorCode): return None
+	return True
+
 class GHHead:
 	label: str
 	ref: str
@@ -627,6 +658,9 @@ class GHPullRequest:
 		if("title" in dict.keys()): self.title = dict["title"]
 		if("head" in dict.keys()): self.head = GHHead().decode(dict["head"])
 		return self
+	
+	def is_closed(self):
+		return self.state != "open"
 
 def gh_get_pr(repo_owner, repo_name, pr_id) -> Tuple[GHPullRequest, None]:
 	resp = make_request("https://api.github.com/repos/{}/{}/pulls/{}".format(repo_owner, repo_name, pr_id))
