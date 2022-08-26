@@ -40,7 +40,7 @@ class TGSLink(commands.Cog):
 	@tgslink.command()
 	async def login(self, ctx, username = None, password = None):
 		cfg = self._config.member(ctx.author)
-		if(username ^ password):
+		if(bool(username) ^ bool(password)):
 			await ctx.reply("Either both username and password must be supplied or neither!")
 			await self.try_delete(ctx.message)
 			return
