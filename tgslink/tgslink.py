@@ -27,7 +27,7 @@ class TGSLink(commands.Cog):
 		self._config.register_guild(**def_guild)
 		self._config.register_member(**def_member)
 
-	async def address(self, guild): return await self._config.guild(guild).address()
+	async def get_address(self, guild): return await self._config.guild(guild).address()
 	async def try_delete(self, message):
 		try:
 			await message.delete()
@@ -59,7 +59,7 @@ class TGSLink(commands.Cog):
 				return
 
 		try:
-			resp = tgs_login(await self.address(ctx.guild), username, password)
+			resp = tgs_login(await self.get_address(ctx.guild), username, password)
 			await cfg.token_bearer.set(resp.Bearer)
 			await cfg.token_expiration.set(resp.ExpiresAt)
 			await ctx.reply("Logged in")
