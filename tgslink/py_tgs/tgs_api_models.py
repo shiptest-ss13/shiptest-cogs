@@ -3,9 +3,12 @@ from enum import Enum, Flag
 from inspect import ismethod
 from json import JSONDecoder, JSONEncoder
 import json
+import logging
 from operator import contains
 from typing import Iterable, Iterator
 from uuid import UUID
+
+log = logging.getLogger("PyTgsModels")
 
 class PythonTgsApi:
 	ApiVersion = "9.3.0"
@@ -24,6 +27,7 @@ class TgsModelBase:
 		return self.from_dict(JSONDecoder().decode(json))
 
 	def from_dict(self, dict):
+		log.info("decoding {}:".format(self.__class__.__name__))
 		_dict_keys = dict.keys()
 
 		for key in dir(self):
@@ -31,6 +35,7 @@ class TgsModelBase:
 			j_key = key[0].lower() + key[1:]
 			if(contains(_dict_keys, j_key)):
 				setattr(self, key, dict[j_key])
+				log.info(" -- {}".format(key))
 		self.sanitize()
 		if(not self._base_json): self._base_json = JSONEncoder().encode(dict)
 		return self
@@ -39,15 +44,17 @@ class TgsModelBase:
 		"""
 		Ensure that all variables set during decode are valid
 		"""
-		pass
+		log.info("sanitizing {}".format(self.__class__.__name__))
 
 	def encode(self):
+		log.info("encoding {}:".format(self.__class__.__name__))
 		_dict: dict = dict()
 		for key in dir(self):
 			if(key.startswith("_")): continue
 			# j_key = key[0].lower() + key[1:]
 			val = getattr(self, key)
 			if(ismethod(val)): continue
+			log.info(" -- {}".format(key))
 			_dict[key] = val
 
 		return json.dumps(_dict, sort_keys=True, indent=None)

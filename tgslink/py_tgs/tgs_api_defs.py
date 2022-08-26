@@ -1,11 +1,13 @@
 from argparse import ArgumentError
 import base64
 from codecs import ascii_encode
+import logging
 from time import sleep
 from typing import List
 from requests import request
 
 from .tgs_api_models import *
+log = logging.getLogger("PyTgs")
 
 def __tgs_request(address, path = "/", *, cls, method = "get", token = None, json = None, data = None, headers: 'dict[str,str]' = None, query: 'dict[str, str]'= None) -> object:
 	if(cls is None): raise ArgumentError()
