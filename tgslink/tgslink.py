@@ -35,7 +35,7 @@ class TGSLink(commands.Cog):
 			await message.reply("Failed to delete message, you must delete it manually!")
 
 	@commands.group()
-	async def tgslink(self): pass
+	async def tgslink(self, ctx): pass
 
 	@tgslink.command()
 	async def login(self, ctx, username, password):
