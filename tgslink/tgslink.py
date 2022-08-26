@@ -1,4 +1,4 @@
-from redbot.core import commands, Config
+from redbot.core import commands, Config, checks
 import logging
 
 from .py_tgs.tgs_api_defs import tgs_login
@@ -58,7 +58,7 @@ class TGSLink(commands.Cog):
 				return
 
 		try:
-			resp = tgs_login(self.address(ctx.guild), username, password)
+			resp = tgs_login(await self.address(ctx.guild), username, password)
 			await cfg.token_bearer.set(resp.Bearer)
 			await cfg.token_expiration.set(resp.ExpiresAt)
 			await ctx.reply("Logged in")
@@ -77,3 +77,10 @@ class TGSLink(commands.Cog):
 			await cfg.pass_username.set(None)
 			await cfg.pass_password.set(None)
 		await ctx.reply("Login details are {} being saved.".format(["no longer", "now"][target]))
+
+	@config.command()
+	@checks.admin()
+	async def address(self, ctx, address):
+		cfg = self._config.guild(ctx.guild)
+		await cfg.address.set(address)
+		await ctx.reply("Updated address!")
