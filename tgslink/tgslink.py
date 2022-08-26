@@ -46,6 +46,7 @@ class TGSLink(commands.Cog):
 			return
 
 		if(await cfg.pass_remember() and username):
+			log.info("saving login information for {}".format(ctx.author))
 			await cfg.pass_username.set(username)
 			await cfg.pass_password.set(password)
 
@@ -62,7 +63,8 @@ class TGSLink(commands.Cog):
 			await cfg.token_bearer.set(resp.Bearer)
 			await cfg.token_expiration.set(resp.ExpiresAt)
 			await ctx.reply("Logged in")
-		except:
+		except Exception as a:
+			log.error(a)
 			await ctx.reply("Failed to log in.")
 		await self.try_delete(ctx.message)
 
