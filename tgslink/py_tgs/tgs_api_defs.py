@@ -1,10 +1,8 @@
 from argparse import ArgumentError
-from audioop import add
 import base64
 from codecs import ascii_encode
-from msilib import add_data
 from time import sleep
-from typing import List, Tuple
+from typing import List
 from requests import request
 
 from .tgs_api_models import *

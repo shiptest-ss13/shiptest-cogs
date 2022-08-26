@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
 from enum import Enum, Flag
-from inspect import getmembers, ismethod
+from inspect import ismethod
 from json import JSONDecoder, JSONEncoder
 import json
 from operator import contains
-from typing import Generic, Iterable, Iterator, TypeVar, cast
+from typing import Iterable, Iterator
 from uuid import UUID
 
 class PythonTgsApi:
