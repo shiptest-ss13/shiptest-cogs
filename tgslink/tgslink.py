@@ -95,7 +95,7 @@ class TGSLink(commands.Cog):
 				return
 
 		try:
-			if(self._login(ctx, username, password)): await ctx.reply("Logged in")
+			if(await self._login(ctx, username, password)): await ctx.reply("Logged in")
 			else: await ctx.reply("Failed to log in.")
 		except Exception as a:
 			await ctx.reply("Failed to log in.")
