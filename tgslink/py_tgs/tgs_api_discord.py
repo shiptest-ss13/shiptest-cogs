@@ -11,7 +11,7 @@ def job_to_embed(job: TgsModel_JobResponse) -> Embed:
 	emb = Embed(type="rich", title="Job #{} Information".format(job.Id), timestamp=datetime.utcnow(), color=color)
 	emb.add_field(name="Job Information", value="Started:{}\nBy: {}\nDesc: {}".format(job.StartedAt, job.StartedBy.Name, job.Description))
 	if(state is not JobState.Running):
-		emb.add_field("Job Completion Information", value="Stopped: {}\nCanceled: {}\nBy: {}".format(job.StoppedAt, job.Cancelled, "N/A" if job.CancelledBy is None else job.CancelledBy.Name))
+		emb.add_field(name="Job Completion Information", value="Stopped: {}\nCanceled: {}\nBy: {}".format(job.StoppedAt, job.Cancelled, "N/A" if job.CancelledBy is None else job.CancelledBy.Name))
 	if(state is JobState.Errored):
 		emb.add_field(name="Error Information", value="Error #{}\n{}".format(job.ErrorCode, job.ExceptionDetails))
 	return emb
