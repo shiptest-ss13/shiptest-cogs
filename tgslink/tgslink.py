@@ -16,7 +16,7 @@ class TGSLink(commands.Cog):
 		}
 
 		def_member = {
-			"pass_remember": False,
+			"pass_remember": None,
 			"pass_username": None,
 			"pass_password": None,
 			"token_bearer": None,
