@@ -60,7 +60,9 @@ class TGSLink(commands.Cog):
 				return
 
 		try:
-			resp = tgs_login(await self.get_address(ctx.guild), username, password)
+			add = await self.get_address(ctx.guild)
+			log.info("Attempting to login to {} with username {}".format(add, username))
+			resp = tgs_login(add, username, password)
 			await cfg.token_bearer.set(resp.Bearer)
 			await cfg.token_expiration.set(resp.ExpiresAt)
 			await ctx.reply("Logged in")
