@@ -6,7 +6,7 @@ import logging
 from time import sleep
 from typing import List
 from urllib.error import HTTPError
-from requests import request
+import requests
 
 from .tgs_api_models import *
 log = logging.getLogger("PyTgs")
@@ -24,7 +24,7 @@ def __tgs_request(address, path = "/", *, cls, method = "get", token = None, jso
 	if(json is not None):
 		_headers["Content-Type"] = "application/json"
 		_data = ascii_encode(json)[0]
-	req = request(method, "{}{}".format(address, path), headers=_headers, data=_data, params=query)
+	req = requests.request(method, "{}{}".format(address, path), headers=_headers, data=_data, params=query)
 	if(req is None): raise IOError()
 	if(not req.ok):
 		err: TgsModel_ErrorMessageResponse = req.json(cls=TgsModel_ErrorMessageResponse)
