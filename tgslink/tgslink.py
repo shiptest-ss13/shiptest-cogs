@@ -41,6 +41,7 @@ class TGSLink(commands.Cog):
 		exp = await cfg.token_expiration()
 		dif = (exp - datetime.utcnow().timestamp()) if exp is not None else None
 		if(not dif and not await self._login(ctx)):
+			log.info("token expired and we failed to refresh it")
 			return None
 		return await cfg.token_bearer()
 
