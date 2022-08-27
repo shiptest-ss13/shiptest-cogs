@@ -20,7 +20,7 @@ class TGSLink(commands.Cog):
 			"pass_username": None,
 			"pass_password": None,
 			"token_bearer": None,
-			"token_expiration": None,
+			"token_expiration": None, # this is a timestamp
 			"token_gh": None,
 		}
 
@@ -64,7 +64,7 @@ class TGSLink(commands.Cog):
 			log.info("Attempting to login to {} with username {}".format(add, username))
 			resp = tgs_login(add, username, password)
 			await cfg.token_bearer.set(resp.Bearer)
-			await cfg.token_expiration.set(resp.ExpiresAt)
+			await cfg.token_expiration.set(resp.ExpiresAt.timestamp())
 			await ctx.reply("Logged in")
 		except Exception as a:
 			log.exception("exception tying to log in", str(a))
