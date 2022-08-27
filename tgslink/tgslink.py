@@ -67,7 +67,7 @@ class TGSLink(commands.Cog):
 			await cfg.token_expiration.set(resp.ExpiresAt)
 			await ctx.reply("Logged in")
 		except Exception as a:
-			log.error("exception tying to log in: " + str(a))
+			log.exception("exception tying to log in", str(a))
 			await ctx.reply("Failed to log in.")
 		await self.try_delete(ctx.message)
 
