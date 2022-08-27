@@ -131,7 +131,11 @@ def tgs_job_all(address, token, instance, page=1, page_size=25) -> List[TgsModel
 		yield TgsModel_JobResponse().from_dict(entry)
 
 def tgs_job_cancel(address, token, instance, job_id) -> TgsModel_JobResponse:
-	return __tgs_request(address, "/Job/{}".format(job_id), method="delete", headers={"Instance": str(instance)}, token=token, cls=TgsModel_JobResponse)
+	req: TgsModel_JobResponse = __tgs_request(address, "/Job/{}".format(job_id), method="delete", headers={"Instance": str(instance)}, token=token, cls=TgsModel_JobResponse)
+	while(req.state() == JobState.Running):
+		sleep(0.5)
+		req = tgs_job_get(address, token, instance, job_id)
+	return req
 
 def tgs_job_get(address, token, instance, job_id) -> TgsModel_JobResponse:
 	return __tgs_request(address, "/Job/{}".format(job_id), headers={"Instance": str(instance)}, token=token, cls=TgsModel_JobResponse)
