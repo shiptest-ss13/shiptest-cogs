@@ -130,5 +130,5 @@ class TGSLink(commands.Cog):
 
 	@job.command()
 	async def get(self, ctx, instance, job_id):
-		resp = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx.author), instance, job_id)
+		resp = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job_id)
 		await ctx.reply(embed=job_to_embed(resp))
