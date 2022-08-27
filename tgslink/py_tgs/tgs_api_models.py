@@ -5,6 +5,7 @@ from inspect import ismethod
 from json import JSONDecoder, JSONEncoder
 import json
 import logging
+from math import floor
 from operator import contains
 from typing import Iterable, Iterator
 from urllib import request
@@ -17,7 +18,24 @@ class PythonTgsApi:
 	UserAgent = "PyTgs/1.0"
 
 def tgs_datetime(str) -> datetime:
+	str = str.split(".")[0]
+	if("+" in str):
+		str = str.split("+")[0]
 	return datetime.strptime(str.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+
+def tgs_timedelta(str) -> timedelta:
+	dt = datetime.strptime(str, "%H:%M:%S")
+	return timedelta(hours=dt.hour, minutes=dt.minute, seconds=dt.second)
+
+def tgs_timedelta_enc(_delta: timedelta):
+	total = _delta.total_seconds()
+	hours = floor(total / 3600)
+	total -= hours * 3600
+	minutes = floor(total / 60)
+	total -= minutes * 60
+	total = floor(total)
+
+	return "{}:{}:{}".format(hours, minutes, total)
 
 class TgsModelBase:
 	_base_json: str = None
@@ -57,6 +75,7 @@ class TgsModelBase:
 			val = getattr(self, key)
 			if(ismethod(val)): continue
 			log.info(" -- {}".format(key))
+			if(isinstance(val, timedelta)): val = tgs_timedelta_enc(val)
 			_dict[key] = val
 
 		return json.dumps(_dict, sort_keys=True, indent=None)
@@ -486,6 +505,10 @@ class TgsModel_DreamMakerSettings(TgsModelBase):
 	ApiValidationSecurityLevel: TgsModel_DreamDaemonSecurity = None
 	RequireDMApiValidation: bool = None
 	Timeout: timedelta = None
+
+	def sanitize(self):
+		super().sanitize()
+		if(self.Timeout): self.Timeout = tgs_timedelta(self.Timeout)
 
 class TgsModel_ErrorMessageResponse(TgsModelBase, IOError):
 	ServerApiVersion: str = None

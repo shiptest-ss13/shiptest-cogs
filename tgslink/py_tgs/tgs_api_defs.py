@@ -1,11 +1,9 @@
 from argparse import ArgumentError
 import base64
 from codecs import ascii_encode
-from http.client import UNAUTHORIZED
 import logging
 from time import sleep
 from typing import List
-from urllib.error import HTTPError
 import requests
 
 from .tgs_api_models import *
@@ -112,7 +110,27 @@ def tgs_byond_get_active(address, token, instance) -> TgsModel_ByondResponse:
 
 ## dream daemon routes ## TODO
 
-## dream maker routes ## TODO
+## dream maker routes ##
+
+def tgs_dm_status(address, token, instance) -> TgsModel_DreamMakerResponse:
+	return __tgs_request(address, "/DreamMaker", headers={"Instance": str(instance)}, token=token, cls=TgsModel_DreamMakerResponse)
+
+def tgs_dm_compile_job(address, token, instance, job_id) -> TgsModel_CompileJobResponse:
+	return __tgs_request(address, "/DreamMaker/{}".format(job_id), headers={"Instance": str(instance)}, token=token, cls=TgsModel_CompileJobResponse)
+
+def tgs_dm_compile_job_list(address, token, instance, page=1, page_size=25) -> List[TgsModel_CompileJobResponse]:
+	resp: TgsModel_PaginatedResponse = __tgs_request(address, "/DreamMaker/List", headers={"Instance": str(instance)}, token=token, query={"page": page, "pageSize": page_size}, cls=TgsModel_PaginatedResponse)
+	return resp.iter_as(TgsModel_CompileJobResponse)
+
+def tgs_dm_compile_job_list_all(address, token, instance) -> List[TgsModel_CompileJobResponse]:
+	first = tgs_dm_compile_job_list(address, token, instance, 1, 1)[0]
+	return tgs_dm_compile_job_list(address, token, instance, 1, first.Id)
+
+def tgs_dm_deploy(address, token, instance) -> TgsModel_JobResponse:
+	return __tgs_request(address, "/DreamMaker", method="put", headers={"Instance": str(instance)}, token=token, cls=TgsModel_JobResponse)
+
+def tgs_dm_update(address, token, instance, req: TgsModel_DreamMakerRequest) -> TgsModel_DreamMakerResponse:
+	return __tgs_request(address, "/DreamMaker", method="post", headers={"Instance": str(instance)}, token=token, cls=TgsModel_DreamMakerResponse, json=req.encode())
 
 ## instance routes ## TODO
 
