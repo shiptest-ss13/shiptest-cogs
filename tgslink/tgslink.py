@@ -7,6 +7,7 @@ from discord import Colour
 import logging
 
 from tgslink.py_tgs.tgs_api_discord import job_to_embed
+from tgslink.py_tgs.tgs_api_models import TgsModel_TokenResponse
 
 from .py_tgs.tgs_api_defs import tgs_job_get, tgs_login
 
@@ -35,6 +36,14 @@ class TGSLink(commands.Cog):
 		self._config.register_member(**def_member)
 
 	async def get_address(self, guild): return await self._config.guild(guild).address()
+	async def get_token(self, ctx):
+		cfg = self._config.member(ctx.author)
+		exp = await cfg.token_expiration()
+		dif = (exp - datetime.utcnow().timestamp()) if exp is not None else None
+		if(not dif and not await self._login(ctx)):
+			return None
+		return await cfg.token_bearer()
+
 	async def try_delete(self, message):
 		try:
 			await message.delete()
@@ -43,6 +52,22 @@ class TGSLink(commands.Cog):
 
 	@commands.group()
 	async def tgslink(self, ctx): pass
+
+	async def _login(self, ctx, username = None, password = None) -> bool:
+		cfg = self._config.member(ctx.author)
+
+		if(username is None or password is None):
+			if(not await cfg.pass_remember()): return False
+			username = await cfg.pass_username()
+			password = await cfg.pass_password()
+			if(username is None or password is None): return False
+
+		try:
+			resp = tgs_login(await self.get_address(ctx.guild), username, password)
+			await cfg.token_bearer.set(resp.Bearer)
+			await cfg.token_expiration.set(resp.ExpiresAt.timestamp())
+			return True
+		except: return False
 
 	@tgslink.command()
 	async def login(self, ctx, username = None, password = None):
@@ -67,14 +92,9 @@ class TGSLink(commands.Cog):
 				return
 
 		try:
-			add = await self.get_address(ctx.guild)
-			log.info("Attempting to login to {} with username {}".format(add, username))
-			resp = tgs_login(add, username, password)
-			await cfg.token_bearer.set(resp.Bearer)
-			await cfg.token_expiration.set(resp.ExpiresAt.timestamp())
-			await ctx.reply("Logged in")
+			if(self._login(ctx, username, password)): await ctx.reply("Logged in")
+			else: await ctx.reply("Failed to log in.")
 		except Exception as a:
-			log.exception("exception tying to log in", str(a))
 			await ctx.reply("Failed to log in.")
 		await self.try_delete(ctx.message)
 
