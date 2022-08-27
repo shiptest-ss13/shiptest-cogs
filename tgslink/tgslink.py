@@ -143,3 +143,6 @@ class TGSLink(commands.Cog):
 			await ctx.reply(embed=job_to_embed(resp))
 		except TgsModel_ErrorMessageResponse as err:
 			await ctx.reply("Failed to cancel job: ({})='{}'".format(err._status_code, err.Message))
+
+	@tgslink.group()
+	async def dm(self, ctx): pass
