@@ -307,10 +307,10 @@ class TgsModel_JobResponse(TgsModel_Job):
 		if(self.CancelledBy): self.CancelledBy = TgsModel_UserName().from_dict(self.CancelledBy)
 	
 	def state(self) -> JobState:
+		if(not self.StoppedAt): return JobState.Running
 		if(self.ErrorCode): return JobState.Errored
 		if(self.Cancelled): return JobState.Canceled
-		if(self.StoppedAt): return JobState.Stopped
-		return JobState.Running
+		return JobState.Stopped
 
 class TgsModel_ByondInstallResponse(TgsModel_FileTicketResponse):
 	InstallJob: TgsModel_JobResponse = None
