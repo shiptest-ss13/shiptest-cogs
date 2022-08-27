@@ -51,6 +51,7 @@ class TGSLink(commands.Cog):
 			await cfg.pass_password.set(password)
 
 		if(not username):
+			log.info("no username provided")
 			username = await cfg.pass_username()
 			password = await cfg.pass_password()
 			if(not username or not password):
@@ -64,7 +65,7 @@ class TGSLink(commands.Cog):
 			await cfg.token_expiration.set(resp.ExpiresAt)
 			await ctx.reply("Logged in")
 		except Exception as a:
-			log.exception("exception tying to log in", a)
+			log.error("exception tying to log in: " + str(a))
 			await ctx.reply("Failed to log in.")
 		await self.try_delete(ctx.message)
 

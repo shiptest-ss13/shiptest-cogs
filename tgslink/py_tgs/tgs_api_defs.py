@@ -1,9 +1,11 @@
 from argparse import ArgumentError
 import base64
 from codecs import ascii_encode
+from http.client import UNAUTHORIZED
 import logging
 from time import sleep
 from typing import List
+from urllib.error import HTTPError
 from requests import request
 
 from .tgs_api_models import *
@@ -29,6 +31,8 @@ def __tgs_request(address, path = "/", *, cls, method = "get", token = None, jso
 		err._status_code = req.status_code
 	if(cls == int): return req.status_code
 	if(cls == bytes): return req.content
+	if(cls == TgsModel_TokenResponse and req.status_code == 401):
+		raise IOError("Unauthorized")
 	if(issubclass(cls, TgsModelBase)):
 		ret: TgsModelBase = req.json(cls=cls)
 		ret._status_code = req.status_code
@@ -37,8 +41,7 @@ def __tgs_request(address, path = "/", *, cls, method = "get", token = None, jso
 
 def tgs_login(address, username, password) -> TgsModel_TokenResponse:
 	basic = base64.b64encode("{}:{}".format(username, password).encode("ascii")).decode("ascii")
-	resp = __tgs_request(address, cls=TgsModel_TokenResponse, method="post", headers={"Authorization": "Basic {}".format(basic)})
-	return resp
+	return __tgs_request(address, cls=TgsModel_TokenResponse, method="post", headers={"Authorization": "Basic {}".format(basic)})
 
 def tgs_instances(address, token) -> Iterator[TgsModel_Instance]:
 	resp: TgsModel_PaginatedResponse = __tgs_request(address, "/Instance/List", token=token, cls=TgsModel_PaginatedResponse)
