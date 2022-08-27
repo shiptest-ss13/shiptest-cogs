@@ -1,7 +1,14 @@
+from datetime import datetime
+from tabnanny import check
+from time import time
 from redbot.core import commands, Config, checks
+from discord.embeds import Embed
+from discord import Colour
 import logging
 
-from .py_tgs.tgs_api_defs import tgs_login
+from tgslink.py_tgs.tgs_api_discord import job_to_embed
+
+from .py_tgs.tgs_api_defs import tgs_job_get, tgs_login
 
 log = logging.getLogger("red.tgslink")
 
@@ -90,3 +97,18 @@ class TGSLink(commands.Cog):
 		cfg = self._config.guild(ctx.guild)
 		await cfg.address.set(address)
 		await ctx.reply("Updated address!")
+
+	@config.command()
+	async def gh_token(self, ctx, gh_token):
+		cfg = self._config.member(ctx.author)
+		await cfg.gh_token.set(gh_token)
+		await ctx.reply("Updated your GH Token")
+		await self.try_delete(ctx.message)
+
+	@tgslink.group()
+	async def job(self, ctx): pass
+
+	@job.command()
+	async def get(self, ctx, instance, job_id):
+		resp = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx.author), instance, job_id)
+		await ctx.reply(embed=job_to_embed(resp))

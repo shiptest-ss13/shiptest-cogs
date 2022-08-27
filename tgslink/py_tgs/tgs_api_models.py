@@ -287,6 +287,12 @@ class TgsModel_Job(TgsModel_EntityId):
 		self.StartedAt = tgs_datetime(self.StartedAt)
 		if(self.StoppedAt): self.StoppedAt = tgs_datetime(self.StoppedAt)
 
+class JobState(Enum):
+	Running = 0
+	Stopped = 1
+	Canceled = 2
+	Errored = 3
+
 class TgsModel_JobResponse(TgsModel_Job):
 	StartedBy: TgsModel_UserName = None
 	CancelledBy: TgsModel_UserName = None
@@ -297,6 +303,12 @@ class TgsModel_JobResponse(TgsModel_Job):
 		super().sanitize()
 		self.StartedBy = TgsModel_UserName().from_dict(self.StartedBy)
 		if(self.CancelledBy): self.CancelledBy = TgsModel_UserName().from_dict(self.CancelledBy)
+	
+	def state(self) -> JobState:
+		if(self.ErrorCode): return JobState.Errored
+		if(self.Cancelled): return JobState.Canceled
+		if(self.StoppedAt): return JobState.Stopped
+		return JobState.Running
 
 class TgsModel_ByondInstallResponse(TgsModel_FileTicketResponse):
 	InstallJob: TgsModel_JobResponse = None
