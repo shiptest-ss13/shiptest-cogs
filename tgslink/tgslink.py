@@ -40,21 +40,21 @@ class TGSLink(commands.Cog):
 	@tgslink.command()
 	async def login(self, ctx, username = None, password = None):
 		cfg = self._config.member(ctx.author)
-		if(bool(username) ^ bool(password)):
+		if((username is not None) ^ (password is not None)):
 			await ctx.reply("Either both username and password must be supplied or neither!")
 			await self.try_delete(ctx.message)
 			return
 
-		if(await cfg.pass_remember() and username):
+		if(await cfg.pass_remember() and username is not None):
 			log.info("saving login information for {}".format(ctx.author))
 			await cfg.pass_username.set(username)
 			await cfg.pass_password.set(password)
 
-		if(not username):
+		if(username is None):
 			log.info("no username provided")
 			username = await cfg.pass_username()
 			password = await cfg.pass_password()
-			if(not username or not password):
+			if(username is None or password is None):
 				await ctx.reply("Login information is not saved!")
 				await self.try_delete(ctx.message)
 				return
