@@ -81,6 +81,7 @@ class TGSLink(commands.Cog):
 		if(not target):
 			await cfg.pass_username.set(None)
 			await cfg.pass_password.set(None)
+		await cfg.pass_remember.set(target)
 		await ctx.reply("Login details are {} being saved.".format(["no longer", "now"][target]))
 
 	@config.command()
