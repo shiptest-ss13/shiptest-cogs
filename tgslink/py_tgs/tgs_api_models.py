@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 from enum import Enum, Flag
+from http.client import responses
 from inspect import ismethod
 from json import JSONDecoder, JSONEncoder
 import json
 import logging
 from operator import contains
 from typing import Iterable, Iterator
+from urllib import request
 from uuid import UUID
 
 log = logging.getLogger("PyTgsModels")
@@ -493,6 +495,10 @@ class TgsModel_ErrorMessageResponse(TgsModelBase, IOError):
 
 	def __str__(self) -> str:
 		return "{}: {}".format(self.__class__.__name__, self.Message)
+	
+	def sanitize(self):
+		if(self.Message): return
+		self.Message = responses[self._status_code]
 
 class TgsModel_DreamMakerResponse(TgsModel_DreamMakerSettings):
 	pass

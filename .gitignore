@@ -106,3 +106,4 @@ venv.bak/
 # VsCode
 .VsCode/
 .vscode/
+tgslink/testing.py

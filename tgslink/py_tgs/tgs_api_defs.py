@@ -29,6 +29,7 @@ def __tgs_request(address, path = "/", *, cls, method = "get", token = None, jso
 	if(not req.ok):
 		err: TgsModel_ErrorMessageResponse = req.json(cls=TgsModel_ErrorMessageResponse)
 		err._status_code = req.status_code
+		if(not err.Message): err.sanitize()
 	if(cls == int): return req.status_code
 	if(cls == bytes): return req.content
 	if(cls == TgsModel_TokenResponse and req.status_code == 401):
