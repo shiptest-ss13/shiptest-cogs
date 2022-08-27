@@ -7,7 +7,7 @@ from discord import Colour
 import logging
 
 from tgslink.py_tgs.tgs_api_discord import job_to_embed
-from tgslink.py_tgs.tgs_api_models import TgsModel_TokenResponse
+from tgslink.py_tgs.tgs_api_models import TgsModel_ErrorMessageResponse, TgsModel_TokenResponse
 
 from .py_tgs.tgs_api_defs import tgs_job_cancel, tgs_job_get, tgs_login
 
@@ -138,5 +138,8 @@ class TGSLink(commands.Cog):
 
 	@job.command()
 	async def cancel(self, ctx, instance, job_id):
-		resp = tgs_job_cancel(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job_id)
-		await ctx.reply(embed=job_to_embed(resp))
+		try:
+			resp = tgs_job_cancel(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job_id)
+			await ctx.reply(embed=job_to_embed(resp))
+		except TgsModel_ErrorMessageResponse as err:
+			await ctx.reply("Failed to cancel job: ({})='{}'".format(err._status_code, err.Message))
