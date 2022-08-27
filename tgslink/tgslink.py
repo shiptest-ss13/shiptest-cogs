@@ -68,7 +68,9 @@ class TGSLink(commands.Cog):
 			await cfg.token_bearer.set(resp.Bearer)
 			await cfg.token_expiration.set(resp.ExpiresAt.timestamp())
 			return True
-		except: return False
+		except Exception as e:
+			log.exception(e)
+			return False
 
 	@tgslink.command()
 	async def login(self, ctx, username = None, password = None):
