@@ -9,7 +9,7 @@ import logging
 from tgslink.py_tgs.tgs_api_discord import job_to_embed
 from tgslink.py_tgs.tgs_api_models import TgsModel_TokenResponse
 
-from .py_tgs.tgs_api_defs import tgs_job_get, tgs_login
+from .py_tgs.tgs_api_defs import tgs_job_cancel, tgs_job_get, tgs_login
 
 log = logging.getLogger("red.tgslink")
 
@@ -132,4 +132,9 @@ class TGSLink(commands.Cog):
 	@job.command()
 	async def get(self, ctx, instance, job_id):
 		resp = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job_id)
+		await ctx.reply(embed=job_to_embed(resp))
+
+	@job.command()
+	async def cancel(self, ctx, instance, job_id):
+		resp = tgs_job_cancel(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job_id)
 		await ctx.reply(embed=job_to_embed(resp))
