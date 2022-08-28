@@ -166,7 +166,13 @@ class TGSLink(commands.Cog):
 
             while not job.StoppedAt:
                 await asyncio.sleep(0.5)
-                job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
+                try:
+                    job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
+                except TgsModel_ErrorMessageResponse as err:
+                    if err._status_code == 401:
+                        await msg.edit(content="Token no longer valid, please login again. Waiting two seconds...")
+                    else:
+                        raise err
                 try:
                     await msg.edit(content="```\nProgress: {} ({}%)\nStage: {}\n```\n".format(self.progress_bar(job.Progress), job.Progress, job.Stage or "N/A"))
                 except Exception:
