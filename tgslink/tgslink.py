@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+from math import floor
 from redbot.core import commands, Config, checks
 import logging
 from discord import Message
@@ -166,7 +167,7 @@ class TGSLink(commands.Cog):
             while not job.StoppedAt:
                 await asyncio.sleep(0.5)
                 job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
-                await msg.edit(content="```\nProgress: {}%\nStage: {}\n```\n".format(job.Progress, job.Stage or "N/A"))
+                await msg.edit(content="```\nProgress: {}%\nStage: {}\n```\n".format(self.progress_bar(job.Progress), job.Stage or "N/A"))
 
             if job.ok():
                 await msg.edit(content="Deployment Completed")
@@ -177,6 +178,10 @@ class TGSLink(commands.Cog):
 
         except TgsModel_ErrorMessageResponse as err:
             await ctx.reply("Failed to request deployment: {}|{}".format(err._status_code, err.Message))
+
+    def progress_bar(self, pct, len=10, empty_char="□", filled_char="■"):
+        actual = floor(pct / 10)
+        return (filled_char * actual) + (empty_char * (len - actual))
 
     @tgslink.group()
     async def repo(self, ctx):
