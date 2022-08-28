@@ -161,7 +161,7 @@ class TGSLink(commands.Cog):
 					msg = await ctx.fetch_message(msg_id)
 					for reaction in msg.reactions:
 						log.info("reaction - '{}'".format(reaction.emoji))
-						if(reaction.emoji is not "x"):
+						if(reaction.emoji is not "❌"):
 							continue
 						all_users = await reaction.users().flatten()
 						for user in all_users:
