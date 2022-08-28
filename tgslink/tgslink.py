@@ -158,7 +158,7 @@ class TGSLink(commands.Cog):
 			while(not job.StoppedAt):
 				await asyncio.sleep(0.5)
 				if(not we_canceled):
-					msg = ctx.fetch_message(msg_id)
+					msg = await ctx.fetch_message(msg_id)
 					for reaction in msg.reactions:
 						if(reaction.emoji is not "x"):
 							continue
