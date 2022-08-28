@@ -5,6 +5,7 @@ import logging
 from time import sleep
 from typing import List
 import requests
+import github
 
 from .tgs_api_models import *
 log = logging.getLogger("PyTgs")
@@ -25,7 +26,9 @@ def __tgs_request(address, path = "/", *, cls, method = "get", token = None, jso
 	req = requests.request(method, "{}{}".format(address, path), headers=_headers, data=_data, params=query)
 	if(req is None): raise IOError()
 	if(not req.ok):
-		err: TgsModel_ErrorMessageResponse = req.json(cls=TgsModel_ErrorMessageResponse)
+		if(len(req.content)):
+			err: TgsModel_ErrorMessageResponse = req.json(cls=TgsModel_ErrorMessageResponse)
+		else: err = TgsModel_ErrorMessageResponse()
 		err._status_code = req.status_code
 		if(not err.Message): err.sanitize()
 		raise err
@@ -158,7 +161,50 @@ def tgs_job_cancel(address, token, instance, job_id) -> TgsModel_JobResponse:
 def tgs_job_get(address, token, instance, job_id) -> TgsModel_JobResponse:
 	return __tgs_request(address, "/Job/{}".format(job_id), headers={"Instance": str(instance)}, token=token, cls=TgsModel_JobResponse)
 
-## repository routes ## TODO
+## repository routes ##
+
+def tgs_repo_clone(address, token, instance, req: TgsModel_RepositoryCreateRequest) -> TgsModel_RepositoryResponse:
+	return __tgs_request(address, "/Repository", method="put", headers={"Instance": str(instance)}, token=token, cls=TgsModel_RepositoryResponse, json=req.encode())
+
+def tgs_repo_delete(address, token, instance) -> TgsModel_RepositoryResponse:
+	return __tgs_request(address, "/Repository", method="delete", headers={"Instance": str(instance)}, token=token, cls=TgsModel_RepositoryResponse)
+
+def tgs_repo_status(address, token, instance) -> TgsModel_RepositoryResponse:
+	return __tgs_request(address, "/Repository", headers={"Instance": str(instance)}, token=token, cls=TgsModel_RepositoryResponse)
+
+def tgs_repo_update(address, token, instance, req: TgsModel_RepositoryUpdateRequest) -> TgsModel_RepositoryResponse:
+	return __tgs_request(address, "/Repository", method="post", headers={"Instance": str(instance)}, token=token, cls=TgsModel_RepositoryResponse, json=req.encode())
+
+def tgs_repo_update_tms(address, token, instance):
+	current = tgs_repo_status(address, token, instance)
+	gh = github.Github()
+	gh_repo = gh.get_repo("{}/{}".format(current.RemoteRepositoryOwner, current.RemoteRepositoryName))
+
+	new_tms = list()
+	any_changes = False
+	for tm in current.RevisionInformation.ActiveTestMerges:
+		tm_pr = gh_repo.get_pull(tm.Number)
+		if(tm_pr.closed_at is not None):
+			continue
+		if(tm_pr.head.sha != tm.TargetCommitSha): any_changes = True
+		_tm = TgsModel_TestMergeParameters()
+		_tm.Number = tm.Number
+		new_tms.append(_tm)
+
+	if(not len(new_tms) or not any_changes):
+		return True
+	req = TgsModel_RepositoryUpdateRequest()
+	req.NewTestMerges = new_tms
+	req.UpdateFromOrigin = True
+	req.Reference = current.Reference
+	resp = tgs_repo_update(address, token, instance, req)
+	job = resp.ActiveJob
+	if(job is None):
+		return False
+	while(not job.StoppedAt):
+		sleep(0.5)
+		job = tgs_job_get(address, token, instance, job.Id)
+	return job.ok()
 
 ## swarm routes ## TODO
 

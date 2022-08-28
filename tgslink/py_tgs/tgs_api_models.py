@@ -37,19 +37,37 @@ def tgs_timedelta_enc(_delta: timedelta):
 
 	return "{}:{}:{}".format(hours, minutes, total)
 
+def tgs_encode(obj):
+	if(isinstance(obj, list)):
+		_l = list()
+		for entry in obj:
+			_l.append(tgs_encode(entry))
+		return _l
+	if(isinstance(obj, timedelta)): return tgs_timedelta_enc(obj)
+	if(isinstance(obj, TgsModelBase)): return obj.to_dict()
+	return obj
+
 class TgsModelBase:
 	_base_json: str = None
 	_status_code: int = None
 
 	def decode(self, json):
 		self._base_json = json
-		if(not json): raise IOError()
-		return self.from_dict(JSONDecoder().decode(json))
+		if(isinstance(json, int)):
+			self._status_code = json
+			return self
+		if(isinstance(json, str)):
+			self = self.from_dict(JSONDecoder().decode(json))
+			return self
+		return self
 
 	def from_dict(self, dict):
 		log.info("decoding {}:".format(self.__class__.__name__))
-		_dict_keys = dict.keys()
+		if(isinstance(dict, int)):
+			self._status_code = dict
+			return self
 
+		_dict_keys = dict.keys()
 		for key in dir(self):
 			if(key.startswith("_")): continue
 			j_key = key[0].lower() + key[1:]
@@ -60,6 +78,15 @@ class TgsModelBase:
 		if(not self._base_json): self._base_json = JSONEncoder().encode(dict)
 		return self
 
+	def to_dict(self) -> dict:
+		_dict: dict = dict()
+		for key in [k for k in dir(self) if k and not k.startswith("_")]:
+			if(key.startswith("_")): continue
+			val = getattr(self, key)
+			if(ismethod(val)): continue
+			_dict[key] = val
+		return _dict
+
 	def sanitize(self):
 		"""
 		Ensure that all variables set during decode are valid
@@ -68,25 +95,19 @@ class TgsModelBase:
 
 	def encode(self):
 		log.info("encoding {}:".format(self.__class__.__name__))
-		_dict: dict = dict()
-		for key in dir(self):
-			if(key.startswith("_")): continue
-			# j_key = key[0].lower() + key[1:]
-			val = getattr(self, key)
-			if(ismethod(val)): continue
-			log.info(" -- {}".format(key))
-			if(isinstance(val, timedelta)): val = tgs_timedelta_enc(val)
-			_dict[key] = val
-
+		_dict = self.to_dict()
+		for k in _dict.keys():
+			v = _dict[k]
+			_dict[k] = tgs_encode(v)
 		return json.dumps(_dict, sort_keys=True, indent=None)
-	
+
 	def __str__(self) -> str:
 		return "{}|{}".format(self.__class__.__name__, self._base_json)
 
 	def __bool__(self) -> bool:
-		return self._status_code < 400
+		return self._status_code and self._status_code < 400
 	
-	def ok(self) -> bool: self.__bool__()
+	def ok(self) -> bool: return bool(self)
 
 class TgsModel_EntityId(TgsModelBase):
 	Id: int = None
