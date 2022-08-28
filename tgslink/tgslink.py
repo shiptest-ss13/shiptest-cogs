@@ -1,15 +1,14 @@
+import asyncio
 from datetime import datetime
-from tabnanny import check
-from time import time
+from time import sleep
 from redbot.core import commands, Config, checks
-from discord.embeds import Embed
-from discord import Colour
 import logging
+from discord import Message
 
 from tgslink.py_tgs.tgs_api_discord import job_to_embed
 from tgslink.py_tgs.tgs_api_models import TgsModel_ErrorMessageResponse, TgsModel_TokenResponse
 
-from .py_tgs.tgs_api_defs import tgs_job_cancel, tgs_job_get, tgs_login, tgs_repo_status, tgs_repo_update, tgs_repo_update_tms
+from .py_tgs.tgs_api_defs import tgs_dm_deploy, tgs_job_cancel, tgs_job_get, tgs_login, tgs_repo_status, tgs_repo_update, tgs_repo_update_tms
 
 log = logging.getLogger("red.tgslink")
 
@@ -146,6 +145,23 @@ class TGSLink(commands.Cog):
 
 	@tgslink.group()
 	async def dm(self, ctx): pass
+
+	@dm.command()
+	async def deploy(self, ctx: commands.Context, instance = 1):
+		try:
+			job = tgs_dm_deploy(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
+			msg: Message = await ctx.reply("```\nProgress: {}%\nStage: {}\n```\n")
+
+			while(not job.StoppedAt):
+				await asyncio.sleep(0.2)
+				job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
+				msg.edit(content="```\nProgress: {}%\nStage: {}\n```\n".format(job.Progress, job.Stage or "N/A"))
+			msg.edit(content="Deployment {}".format(["Failed", "Completed"][job.ok()]))
+			if(not job.ok()):
+				await msg.reply("Additional details: ```\n{}\n```".format(job.ExceptionDetails))
+
+		except TgsModel_ErrorMessageResponse as err:
+			await ctx.reply("Failed to request deployment: {}|{}".format(err._status_code, err.Message))
 
 	@tgslink.group()
 	async def repo(self, ctx): pass
