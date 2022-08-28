@@ -160,8 +160,9 @@ class TGSLink(commands.Cog):
 				if(not we_canceled):
 					msg = await ctx.fetch_message(msg_id)
 					for reaction in msg.reactions:
-						log.info("reaction - '{}'".format(reaction.emoji))
-						if(reaction.emoji != "\u274c"):
+						emoji_str = str(reaction.emoji)
+						log.info("reaction - '{}'".format(emoji_str))
+						if(emoji_str != "\u274c"):
 							continue
 						all_users = await reaction.users().flatten()
 						for user in all_users:
