@@ -9,7 +9,7 @@ import logging
 from tgslink.py_tgs.tgs_api_discord import job_to_embed
 from tgslink.py_tgs.tgs_api_models import TgsModel_ErrorMessageResponse, TgsModel_TokenResponse
 
-from .py_tgs.tgs_api_defs import tgs_job_cancel, tgs_job_get, tgs_login
+from .py_tgs.tgs_api_defs import tgs_job_cancel, tgs_job_get, tgs_login, tgs_repo_status, tgs_repo_update, tgs_repo_update_tms
 
 log = logging.getLogger("red.tgslink")
 
@@ -146,3 +146,28 @@ class TGSLink(commands.Cog):
 
 	@tgslink.group()
 	async def dm(self, ctx): pass
+
+	@tgslink.group()
+	async def repo(self, ctx): pass
+
+	@repo.command()
+	async def active_tms(self, ctx, instance = 1):
+		try:
+			resp = tgs_repo_status(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
+			reply = "Active TMs:\n```\n"
+			for tm in resp.RevisionInformation.ActiveTestMerges:
+				reply += "#{} - {} - @{}\n".format(tm.Number, tm.TitleAtMerge, tm.TargetCommitSha)
+			reply += "```\n"
+			await ctx.reply(reply)
+		except TgsModel_ErrorMessageResponse as err:
+			await ctx.reply("Failed to query TMs: {}|{}".format(err._status_code, err.Message))
+
+	@repo.command()
+	async def update_active_tms(self, ctx, instance = 1):
+		try:
+			if(tgs_repo_update_tms(await self.get_address(ctx.guild), await self.get_token(ctx), instance)):
+				await ctx.reply("Updated all TMs")
+			else:
+				await ctx.reply("Failed to update TMs")
+		except TgsModel_ErrorMessageResponse as err:
+			await ctx.reply("Failed to update TMs: {}|{}".format(err._status_code, err.Message))
