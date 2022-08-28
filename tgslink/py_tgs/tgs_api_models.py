@@ -106,7 +106,7 @@ class TgsModelBase:
 
 	def __bool__(self) -> bool:
 		return self._status_code and self._status_code < 400
-	
+
 	def ok(self) -> bool: return bool(self)
 
 class TgsModel_EntityId(TgsModelBase):
@@ -328,6 +328,9 @@ class TgsModel_Job(TgsModel_EntityId):
 		super().sanitize()
 		self.StartedAt = tgs_datetime(self.StartedAt)
 		if(self.StoppedAt): self.StoppedAt = tgs_datetime(self.StoppedAt)
+
+	def ok(self) -> bool:
+		return not self.ErrorCode and not self.Cancelled and super().ok()
 
 class JobState(Enum):
 	Running = 0
