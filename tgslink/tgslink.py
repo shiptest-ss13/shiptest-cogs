@@ -44,9 +44,11 @@ class TGSLink(commands.Cog):
         cfg = self._config.member(ctx.author)
         exp = await cfg.token_expiration()
         dif = (exp - datetime.utcnow().timestamp()) if exp is not None else None
-        if not dif and not await self._login(ctx):
-            log.info("token expired and we failed to refresh it")
-            return None
+        if not dif:
+            log.info("token is expired")
+            if not await self._login():
+                log.info("and we failed to refresh it")
+                return None
         return await cfg.token_bearer()
 
     async def try_delete(self, message: Message):
@@ -63,17 +65,21 @@ class TGSLink(commands.Cog):
         cfg = self._config.member(ctx.author)
 
         if username is None or password is None:
+            log.info("logging in with no user or pass")
             if not await cfg.pass_remember():
+                log.info("they don't want shit saved")
                 return False
             username = await cfg.pass_username()
             password = await cfg.pass_password()
             if username is None or password is None:
+                log.info("they don't have shit saved")
                 return False
 
         try:
             resp = tgs_login(await self.get_address(ctx.guild), username, password)
             await cfg.token_bearer.set(resp.Bearer)
             await cfg.token_expiration.set(resp.ExpiresAt.timestamp())
+            log.info("logged them in")
             return True
         except Exception as e:
             log.exception(e)
