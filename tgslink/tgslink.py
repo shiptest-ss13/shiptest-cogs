@@ -161,13 +161,14 @@ class TGSLink(commands.Cog):
 					msg = await ctx.fetch_message(msg_id)
 					for reaction in msg.reactions:
 						log.info("reaction - '{}'".format(reaction.emoji))
-						if(reaction.emoji is not "❌"):
+						if(reaction.emoji != "\u274c"):
 							continue
 						all_users = await reaction.users().flatten()
 						for user in all_users:
 							if(user.id is not ctx.author.id):
 								continue
 							tgs_job_cancel(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
+							log.info("Requested cancellation")
 							we_canceled = True
 
 				job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
