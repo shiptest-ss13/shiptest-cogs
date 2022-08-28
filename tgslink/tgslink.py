@@ -3,7 +3,7 @@ from datetime import datetime
 from time import sleep
 from redbot.core import commands, Config, checks
 import logging
-from discord import Message, Reaction
+from discord import Message, Emoji
 
 from tgslink.py_tgs.tgs_api_discord import job_to_embed
 from tgslink.py_tgs.tgs_api_models import TgsModel_ErrorMessageResponse, TgsModel_TokenResponse
@@ -151,7 +151,7 @@ class TGSLink(commands.Cog):
 		try:
 			job = tgs_dm_deploy(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
 			msg: Message = await ctx.reply("```Caching```\n")
-			await msg.add_reaction("x")
+			await msg.add_reaction(Emoji(name="x"))
 			msg_id = msg.id
 
 			we_canceled = False
