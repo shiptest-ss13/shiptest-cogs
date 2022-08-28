@@ -150,13 +150,13 @@ class TGSLink(commands.Cog):
 	async def deploy(self, ctx: commands.Context, instance = 1):
 		try:
 			job = tgs_dm_deploy(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
-			msg: Message = await ctx.reply("```\nProgress: {}%\nStage: {}\n```\n")
+			msg: Message = await ctx.reply("```Caching```\n")
 
 			while(not job.StoppedAt):
 				await asyncio.sleep(0.2)
 				job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
-				msg.edit(content="```\nProgress: {}%\nStage: {}\n```\n".format(job.Progress, job.Stage or "N/A"))
-			msg.edit(content="Deployment {}".format(["Failed", "Completed"][job.ok()]))
+				await msg.edit(content="```\nProgress: {}%\nStage: {}\n```\n".format(job.Progress, job.Stage or "N/A"))
+			await msg.edit(content="Deployment {}".format(["Failed", "Completed"][job.ok()]))
 			if(not job.ok()):
 				await msg.reply("Additional details: ```\n{}\n```".format(job.ExceptionDetails))
 
