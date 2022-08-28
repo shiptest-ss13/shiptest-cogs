@@ -4,11 +4,12 @@ from math import floor
 from redbot.core import commands, Config, checks
 import logging
 from discord import Message
+from github import Github
 
 from tgslink.py_tgs.tgs_api_discord import job_to_embed
 from tgslink.py_tgs.tgs_api_models import TgsModel_ErrorMessageResponse
 
-from .py_tgs.tgs_api_defs import tgs_dm_compile_job_list, tgs_dm_deploy, tgs_dm_status, tgs_job_cancel, tgs_job_get, tgs_login, tgs_repo_status, tgs_repo_update_tms
+from .py_tgs.tgs_api_defs import tgs_dm_compile_job_list, tgs_dm_deploy, tgs_job_cancel, tgs_job_get, tgs_login, tgs_repo_status, tgs_repo_update_tms
 
 log = logging.getLogger("red.tgslink")
 
@@ -205,9 +206,12 @@ class TGSLink(commands.Cog):
     async def active_tms(self, ctx, instance=1):
         try:
             resp = tgs_repo_status(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
+            gh = Github().get_repo(f"{resp.RemoteRepositoryOwner}/{resp.RemoteRepositoryName}")
             reply = "Active TMs:\n```\n"
             for tm in resp.RevisionInformation.ActiveTestMerges:
-                reply += "#{} - {} - @{}\n".format(tm.Number, tm.TitleAtMerge, tm.TargetCommitSha)
+                gh_pr = gh.get_pull(tm.Number)
+                update_avail = gh_pr.head.sha != tm.TargetCommitSha
+                reply += "#{}{} - {} - @{}\n".format([" ", "!"][update_avail], tm.Number, tm.TitleAtMerge, tm.TargetCommitSha)
             reply += "```\n"
             await ctx.reply(reply)
         except TgsModel_ErrorMessageResponse as err:
