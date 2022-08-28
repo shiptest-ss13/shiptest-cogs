@@ -98,15 +98,6 @@ class TGSLink(commands.Cog):
             await cfg.pass_username.set(username)
             await cfg.pass_password.set(password)
 
-        if username is None:
-            log.info("no username provided")
-            username = await cfg.pass_username()
-            password = await cfg.pass_password()
-            if username is None or password is None:
-                await ctx.reply("Login information is not saved!")
-                await self.try_delete(ctx.message)
-                return
-
         try:
             if await self._login(ctx, username, password):
                 await ctx.reply("Logged in")
