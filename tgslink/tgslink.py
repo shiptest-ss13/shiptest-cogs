@@ -151,7 +151,7 @@ class TGSLink(commands.Cog):
 		try:
 			job = tgs_dm_deploy(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
 			msg: Message = await ctx.reply("```Caching```\n")
-			msg.add_reaction("x")
+			await msg.add_reaction("x")
 			msg_id = msg.id
 
 			we_canceled = False
@@ -160,6 +160,7 @@ class TGSLink(commands.Cog):
 				if(not we_canceled):
 					msg = await ctx.fetch_message(msg_id)
 					for reaction in msg.reactions:
+						log.info("reaction - '{}'".format(reaction.emoji))
 						if(reaction.emoji is not "x"):
 							continue
 						all_users = await reaction.users().flatten()
