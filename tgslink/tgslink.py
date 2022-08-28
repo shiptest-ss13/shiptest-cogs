@@ -151,7 +151,7 @@ class TGSLink(commands.Cog):
 		try:
 			job = tgs_dm_deploy(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
 			msg: Message = await ctx.reply("```Caching```\n")
-			msg.add_reaction(emoji=Reaction(emoji="x"))
+			msg.add_reaction("x")
 			msg_id = msg.id
 
 			we_canceled = False
