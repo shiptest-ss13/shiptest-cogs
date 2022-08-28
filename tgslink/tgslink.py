@@ -3,7 +3,7 @@ from datetime import datetime
 from time import sleep
 from redbot.core import commands, Config, checks
 import logging
-from discord import Message
+from discord import Message, Reaction
 
 from tgslink.py_tgs.tgs_api_discord import job_to_embed
 from tgslink.py_tgs.tgs_api_models import TgsModel_ErrorMessageResponse, TgsModel_TokenResponse
@@ -151,9 +151,24 @@ class TGSLink(commands.Cog):
 		try:
 			job = tgs_dm_deploy(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
 			msg: Message = await ctx.reply("```Caching```\n")
+			msg.add_reaction(emoji=Reaction(emoji="x"))
+			msg_id = msg.id
 
+			we_canceled = False
 			while(not job.StoppedAt):
-				await asyncio.sleep(0.2)
+				await asyncio.sleep(0.5)
+				if(not we_canceled):
+					msg = ctx.fetch_message(msg_id)
+					for reaction in msg.reactions:
+						if(reaction.emoji is not "x"):
+							continue
+						all_users = await reaction.users().flatten()
+						for user in all_users:
+							if(user.id is not ctx.author.id):
+								continue
+							tgs_job_cancel(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
+							we_canceled = True
+
 				job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
 				await msg.edit(content="```\nProgress: {}%\nStage: {}\n```\n".format(job.Progress, job.Stage or "N/A"))
 			await msg.edit(content="Deployment {}".format(["Failed", "Completed"][job.ok()]))
