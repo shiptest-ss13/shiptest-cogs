@@ -8,7 +8,7 @@ from discord import Message
 from tgslink.py_tgs.tgs_api_discord import job_to_embed
 from tgslink.py_tgs.tgs_api_models import TgsModel_ErrorMessageResponse
 
-from .py_tgs.tgs_api_defs import tgs_dm_deploy, tgs_job_cancel, tgs_job_get, tgs_login, tgs_repo_status, tgs_repo_update_tms
+from .py_tgs.tgs_api_defs import tgs_dm_compile_job_list, tgs_dm_deploy, tgs_dm_status, tgs_job_cancel, tgs_job_get, tgs_login, tgs_repo_status, tgs_repo_update_tms
 
 log = logging.getLogger("red.tgslink")
 
@@ -161,6 +161,11 @@ class TGSLink(commands.Cog):
     @dm.command()
     async def deploy(self, ctx: commands.Context, instance=1):
         try:
+            status = tgs_dm_compile_job_list(await self.get_address(ctx.guild), await self.get_token(ctx), instance)[0]
+            if not status.Job.StoppedAt:
+                await ctx.reply("There is already a deployment in progress!")
+                return
+
             job = tgs_dm_deploy(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
             msg: Message = await ctx.reply("```Caching```\n")
 
