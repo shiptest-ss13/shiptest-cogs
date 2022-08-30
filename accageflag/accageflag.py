@@ -67,7 +67,7 @@ class AccountAgeFlagger(commands.Cog):
     async def check_member_pfp(self, member: User):
         has_avatar = not not member.avatar
         log.info(f"pfp {has_avatar}")
-        return has_avatar
+        return not has_avatar
 
     async def should_filter_member(self, member: Member) -> Tuple[bool, str]:
         cfg = self._config.guild(member.guild)
