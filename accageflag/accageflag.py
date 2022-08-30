@@ -5,7 +5,7 @@ from discord import Member, AllowedMentions, User, TextChannel, Role
 from discord.abc import Snowflake
 from redbot.core import commands, Config, checks
 Context = commands.Context
-log = logging.getLogger("red_aaf")
+log = logging.getLogger("red.AccountAgeFlagger")
 
 
 class AccountAgeFlagger(commands.Cog):
