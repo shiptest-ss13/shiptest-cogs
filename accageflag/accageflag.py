@@ -187,9 +187,11 @@ class AccountAgeFlagger(commands.Cog):
         all_members = await guild.fetch_members(limit=None).flatten()
         total = len(all_members)
         for member in all_members:
-            if not (tally % 5):
+            if not (tally % 10):
                 pct = f"{((tally / total) * 100)}%"
                 await message.edit(content=f"Processed {tally} ({pct})")
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.25)
             tally += 1
             await self.member_join(member)
+        await message.delete()
+        await ctx.send("Processing all members completed.")
