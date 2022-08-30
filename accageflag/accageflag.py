@@ -77,6 +77,10 @@ class AccountAgeFlagger(commands.Cog):
 
     @commands.group()
     @checks.admin()
+    async def aaf(self, ctx):
+        pass
+
+    @aaf.group()
     async def config(self, ctx):
         pass
 
@@ -144,7 +148,6 @@ class AccountAgeFlagger(commands.Cog):
         resp = ["no longer", "now"][target]
         await ctx.send(f"Member having a valid profile picture is {resp} being checked")
 
-    @commands.command()
-    @checks.admin()
+    @aaf.command()
     async def force_self(self, ctx: Context):
         await self.member_join(ctx.author, force=True)
