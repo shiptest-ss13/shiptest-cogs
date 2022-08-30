@@ -50,7 +50,7 @@ class AccountAgeFlagger(commands.Cog):
             log.exception(err)
             failed_to_add = True
 
-        reason = [resp[1], "forced"][force]
+        reason = [resp[1], "forced"][not resp[0]]
         message = f"Verification: <@&{verifier_id}> | {member.mention} has failed verification for the following reason: `{reason}`"
         if failed_to_add:
             message += "\n**And I failed to add the manual verification role!**"
@@ -65,10 +65,9 @@ class AccountAgeFlagger(commands.Cog):
         return False
 
     async def check_member_pfp(self, member: User):
-        log.info(f"pfp {not not member.avatar}")
-        if not member.avatar:
-            return True
-        return False
+        has_avatar = not not member.avatar
+        log.info(f"pfp {has_avatar}")
+        return has_avatar
 
     async def should_filter_member(self, member: Member) -> Tuple[bool, str]:
         cfg = self._config.guild(member.guild)
