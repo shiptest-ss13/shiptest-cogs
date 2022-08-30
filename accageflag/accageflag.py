@@ -152,6 +152,7 @@ class AccountAgeFlagger(commands.Cog):
     async def check_age(self, ctx: Context):
         cfg = self._config.guild(ctx.guild)
         target = not await cfg.filter_age()
+        await cfg.filter_age.set(target)
         resp = ["no longer", "now"][target]
         await ctx.send(f"Member age is {resp} being checked")
 
@@ -159,6 +160,7 @@ class AccountAgeFlagger(commands.Cog):
     async def check_pfp(self, ctx: Context):
         cfg = self._config.guild(ctx.guild)
         target = not await cfg.filter_pfp()
+        await cfg.filter_pfp.set(target)
         resp = ["no longer", "now"][target]
         await ctx.send(f"Member having a valid profile picture is {resp} being checked")
 
