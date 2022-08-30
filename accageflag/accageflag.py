@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import logging
 from typing import Tuple
-from discord import Member, AllowedMentions, User, TextChannel
+from discord import Member, AllowedMentions, User, TextChannel, Role
 from discord.abc import Snowflake
 from redbot.core import commands, Config, checks
 Context = commands.Context
@@ -43,8 +43,9 @@ class AccountAgeFlagger(commands.Cog):
 
         failed_to_add = False
         try:
-            role = [f for f in await member.guild.fetch_roles() if f.id == role_id]
-            await member.add_roles(role, atomic=True)
+            role: Role = member.guild.get_role(role_id)
+            log.info(f"role: {role.name} : {role.id}")
+            await member.add_roles(role)
         except Exception as err:
             log.exception(err)
             failed_to_add = True
