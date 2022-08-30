@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime, timedelta
 import logging
 from typing import List, Tuple
-from discord import Member, AllowedMentions, User, TextChannel, Role, Guild, Message
+from discord import Member, AllowedMentions, TextChannel, Role, Guild, Message
 from discord.abc import Snowflake
 from redbot.core import commands, Config, checks
 Context = commands.Context
@@ -15,6 +15,7 @@ class AccountAgeFlagger(commands.Cog):
     joins_this_minute: List[Member] = list()
     joins_minute_target: int = 0
     joins_raid_triggered: bool = False
+    processing_all: bool = False
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -38,13 +39,24 @@ class AccountAgeFlagger(commands.Cog):
 
     @commands.Cog.listener("on_member_join")
     async def member_join(self, member: Member, force=False):
+        cfg = self._config.guild(member.guild)
+        mem_cfg = self._config.member(member)
+
         time = datetime.utcnow()
         if self.joins_minute_target != time.minute:
             self.joins_minute_target = time.minute
             self.joins_raid_triggered = False
             self.joins_this_minute = list()
-        self.joins_this_minute.append(member)
-        mem_cfg = self._config.member(member)
+        if not self.processing_all:
+            self.joins_this_minute.append(member)
+
+        channel_id = await cfg.flag_channel_id()
+        channel: TextChannel = await self.bot.fetch_channel(channel_id)
+        if self.joins_raid_triggered:
+            channel.edit(topic=f"Raid in Progress {len(self.joins_this_minute)}/{await cfg.raid_join_cutoff()}")
+        else:
+            channel.edit(topic=f"Monitoring: {len(self.joins_this_minute)}/{await cfg.raid_join_cutoff()}")
+
         if await mem_cfg.already_filtered() and not force and not self.joins_raid_triggered:
             return
         await mem_cfg.already_filtered.set(True)
@@ -56,9 +68,6 @@ class AccountAgeFlagger(commands.Cog):
             return
         log.info("Failed")
 
-        cfg = self._config.guild(member.guild)
-        channel_id = await cfg.flag_channel_id()
-        channel: TextChannel = await self.bot.fetch_channel(channel_id)
         verifier_id = await cfg.verifier_role_id()
 
         reason = [resp[1], "forced"][not resp[0]]
@@ -108,7 +117,7 @@ class AccountAgeFlagger(commands.Cog):
             return tuple([True, "Member did not meet the age requirement"])
         if await cfg.filter_pfp() and await self.check_member_pfp(member):
             return tuple([True, "Member did not meet the pgp requirement"])
-        if await cfg.filter_raid() and await self.check_member_raid(member):
+        if not self.processing_all and await cfg.filter_raid() and await self.check_member_raid(member):
             return tuple([True, "Member was caught in a raid trap"])
         return tuple([False, None])
 
@@ -214,6 +223,13 @@ class AccountAgeFlagger(commands.Cog):
         await self.member_join(ctx.author, force=True)
 
     @aaf.command()
+    async def run_on(self, ctx: Context, target_id, force=False):
+        guild: Guild = ctx.guild
+        member = await guild.fetch_member(target_id)
+        await self.member_join(member, force)
+        await ctx.send(f"Ran on {member}")
+
+    @aaf.command()
     @checks.is_owner()
     async def filter_all(self, ctx: Context):
         tally = 0
@@ -221,6 +237,7 @@ class AccountAgeFlagger(commands.Cog):
         guild: Guild = ctx.guild
         all_members = await guild.fetch_members(limit=None).flatten()
         total = len(all_members)
+        self.processing_all = True
         for member in all_members:
             if not (tally % 10):
                 pct = f"{((tally / total) * 100)}%"
@@ -228,5 +245,6 @@ class AccountAgeFlagger(commands.Cog):
                 await asyncio.sleep(0.25)
             tally += 1
             await self.member_join(member)
+        self.processing_all = False
         await message.delete()
         await ctx.send("Processing all members completed.")
