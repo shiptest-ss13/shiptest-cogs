@@ -117,7 +117,7 @@ class AccountAgeFlagger(commands.Cog):
             await ctx.send(f"`flag_channel_id: {cur}` (<#{cur}>)", allowed_mentions=AllowedMentions.none())
             return
 
-        await cfg.flag_role_id.set(int(value))
+        await cfg.flag_channel_id.set(int(value))
         await ctx.send(f"`flag_channel_id: {cur}` (<#{cur}>)", allowed_mentions=AllowedMentions.none())
 
     @config.command()
