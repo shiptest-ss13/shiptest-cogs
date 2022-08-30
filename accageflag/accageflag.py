@@ -184,7 +184,7 @@ class AccountAgeFlagger(commands.Cog):
         tally = 0
         message: Message = ctx.send("Caching")
         guild: Guild = ctx.guild
-        all_members = await guild.fetch_members(limit=None)
+        all_members = await guild.fetch_members(limit=None).flatten()
         total = len(all_members)
         for member in all_members:
             if not (tally % 5):
