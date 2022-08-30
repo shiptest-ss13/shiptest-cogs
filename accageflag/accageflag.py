@@ -43,7 +43,7 @@ class AccountAgeFlagger(commands.Cog):
 
         failed_to_add = False
         try:
-            await member.add_roles(list(role_id))
+            await member.add_roles([role_id])
         except Exception:
             failed_to_add = True
 
@@ -70,10 +70,10 @@ class AccountAgeFlagger(commands.Cog):
     async def should_filter_member(self, member: Member) -> Tuple[bool, str]:
         cfg = self._config.guild(member.guild)
         if await cfg.filter_age() and await self.check_member_age(member):
-            return Tuple(list(True, "Member did not meet the age requirement"))
+            return Tuple([True, "Member did not meet the age requirement"])
         if await cfg.filter_pfp() and await self.check_member_pfp(member):
-            return Tuple(list(True, "Member did not meet the pgp requirement"))
-        return Tuple(list(False, None))
+            return Tuple([True, "Member did not meet the pgp requirement"])
+        return Tuple([False, None])
 
     @commands.group()
     @checks.admin()
