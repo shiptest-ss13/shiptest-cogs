@@ -1,95 +1,150 @@
 from datetime import datetime, timedelta
-from distutils.command.config import config
-import discord
+import logging
+from typing import Tuple
+from discord import Member, AllowedMentions, User, TextChannel
+from discord.abc import Snowflake
 from redbot.core import commands, Config, checks
+Context = commands.Context
+log = logging.getLogger("red_aaf")
 
 
 class AccountAgeFlagger(commands.Cog):
-	"""Class to manage flagging accounts under a specified age"""
+    """Class to manage flagging accounts under a specified age"""
+    _config: Config
 
-	async def _cfg_set(self, ctx: commands.Context, debug: bool = False) -> bool:
-		cfg: Config = self.config.guild(ctx.guild)
+    def __init__(self, bot: commands.Bot) -> None:
+        self.bot = bot
+        self._config = Config.get_conf(self, identifier=51362216380568, force_registration=True)
 
-		nvr = int(await cfg.needs_verification_role())
-		nvl = int(await cfg.needs_verification_log())
-		vr = int(await cfg.verifier_role())
-		ad = int(await cfg.account_age_minimum_days())
+        def_guild = {
+            "flag_role_id": None,
+            "flag_channel_id": None,
+            "verifier_role_id": None,
+            "filter_age": None,
+            "filter_age_seconds": None,
+            "filter_pfp": None,
+        }
+        self.config.register_guild(**def_guild)
 
-		nvr = ctx.guild.get_role(nvr)
-		nvl = ctx.guild.get_channel(nvl)
-		vr = ctx.guild.get_role(vr)
+    @commands.Cog.listener("on_member_join")
+    async def member_join(self, member: Member, force=False):
+        log.info("Checking member for verification requirements")
+        resp = await self.should_filter_member(member)
+        if not resp[0] and not force:
+            log.info(" Passed")
+            return
+        log.info("Failed")
 
-		return (nvr != None and nvl != None and vr != None and ad != None)
+        cfg = self._config.guild(member.guild)
+        role_id = await cfg.flag_role_id()
+        channel_id = await cfg.flag_channel_id()
+        channel: TextChannel = self.bot.fetch_channel(channel_id)
+        verifier_id = await cfg.verifier_role_id()
 
-	def __init__(self, bot: commands.Bot) -> None:
-		self.bot = bot
-		self.config = Config.get_conf(self, identifier=51360816380568, force_registration=True)
+        failed_to_add = False
+        try:
+            await member.add_roles(list(role_id))
+        except Exception:
+            failed_to_add = True
 
-		def_guild = {
-			"needs_verification_role": None,
-			"needs_verification_log": None,
-			"verifier_role": None,
-			"account_age_minimum_days": 15,
-		}
-		self.config.register_guild(**def_guild)
-	
-	@commands.Cog.listener()
-	async def on_member_join(self, ctx: commands.Context, member: discord.Member = None, debug: bool = False):
-		if(await self._cfg_set(ctx, debug) == False):
-			if(debug): await ctx.send("Config not set correctly!")
-			return
+        reason = [resp[1], "forced"][force]
+        message = f"Verification: <@&{verifier_id} | {member.mention} has failed verification for the following reason: `{reason}`"
+        if failed_to_add:
+            message += "\n**And I failed to add the manual verification role!**"
+        await channel.send(message, allowed_mentions=AllowedMentions.none())
 
-		if(isinstance(ctx, commands.Context)):
-			member = ctx.author
-		elif(isinstance(ctx, discord.Member)):
-			member = ctx
-		else: raise Exception("unable to determine method call context")
+    async def check_member_age(self, member: Snowflake):
+        target = await self._config.guild(member.guild).filter_age_seconds()
+        creation_delta: timedelta = datetime.utcnow() - member.created_at
+        log.info(f"age is {creation_delta.total_seconds()}")
+        if creation_delta.total_seconds() < target:
+            return True
+        return False
 
-		day_cutoff: int = int(await self.config.guild(ctx.guild).account_age_minimum_days())
-		mem_age: datetime = member.created_at
-		mem_delta: timedelta = datetime.now() - mem_age
+    async def check_member_pfp(self, member: User):
+        log.info(f"pfp {not not member.avatar}")
+        if not member.avatar:
+            return True
+        return False
 
-		if(debug):
-			await ctx.send("Running test on {}".format(member.display_name))
-			await ctx.send("Age cutoff is {}".format(day_cutoff))
-			await ctx.send("Member age is {}".format(mem_delta.days))
+    async def should_filter_member(self, member: Member) -> Tuple[bool, str]:
+        cfg = self._config.guild(member.guild)
+        if await cfg.filter_age() and await self.check_member_age(member):
+            return Tuple(list(True, "Member did not meet the age requirement"))
+        if await cfg.filter_pfp() and await self.check_member_pfp(member):
+            return Tuple(list(True, "Member did not meet the pgp requirement"))
+        return Tuple(list(False, None))
 
-		if(mem_delta.days > day_cutoff):
-			if(debug): await ctx.send("Member is not going to be flagged but continuing test")
-			else: return
-		
-		guild: discord.Guild = ctx.guild
-		role: discord.Role = guild.get_role(int(await self.config.guild(ctx.guild).needs_verification_role()))
-		await member.add_roles(role)
+    @commands.group()
+    @checks.admin()
+    async def config(self, ctx):
+        pass
 
-		verifier_role: discord.Role = guild.get_role(int(await self.config.guild(ctx.guild).verifier_role()))
-		channel: discord.TextChannel = guild.get_channel(int(await self.config.guild(ctx.guild).needs_verification_log()))
-		await channel.send("[VERIFICATION]: {} is only {} days old! {}".format(member.mention, mem_delta.days, verifier_role.mention))
+    @config.command()
+    async def flag_role_id(self, ctx: Context, value=None):
+        cfg = self._config.guild(ctx.guild)
+        cur = await cfg.flag_role_id()
 
-	@commands.command()
-	@checks.admin()
-	async def aaf(self, ctx: commands.Context, subcom: str = "", cfg_name = "", cfg_val = ""):
-		if(subcom == ""):
-			await ctx.send("Subcommands: `configset`, `configget`, `test_self`")
-		elif(subcom == "configset"):
-			if(cfg_val == "None"): cfg_val = None
-			if(cfg_name not in ["needs_verification_role", "needs_verification_log", "verifier_role", "account_age_minimum_days"]):
-				await ctx.send("Unknown config key?")
-				return
-			if(isinstance(cfg_val, str)):
-				cfg_val = int(cfg_val)
-			cfg = self.config.guild(ctx.guild)
-			await getattr(cfg, cfg_name).set(cfg_val)
-			await ctx.send("{} set to {}".format(cfg_name, cfg_val))
-		elif(subcom == "configget"):
-			cfg: config = self.config.guild(ctx.guild)
-			resp = "Config:\n\
-```\n\
-needs_verification_role =  {}\n\
-needs_verification_log =   {}\n\
-verifier_role =            {}\n\
-account_age_minimum_days = {}\n\
-```".format(await cfg.needs_verification_role(), await cfg.needs_verification_log(), await cfg.verifier_role(), await cfg.account_age_minimum_days())
-			await ctx.send(resp)
-		elif(subcom == "test_self"):
-			await self.on_member_join(ctx, ctx.author, debug=True)
+        if value is None:
+            await ctx.send(f"`flag_role_id: {cur}` (<@&{cur}>)", allowed_mentions=AllowedMentions.none())
+            return
+
+        await cfg.flag_role_id.set(value)
+        await ctx.send(f"`flag_role_id: {cur}` (<@&{cur}>)", allowed_mentions=AllowedMentions.none())
+
+    @config.command()
+    async def verifier_role_id(self, ctx: Context, value=None):
+        cfg = self._config.guild(ctx.guild)
+
+        cur = await cfg.verifier_role_id()
+        if value is None:
+            await ctx.send(f"`verifier_role_id: {cur}` (<@&{cur}>)", allowed_mentions=AllowedMentions.none())
+            return
+
+        await cfg.flag_role_id.set(value)
+        await ctx.send(f"`verifier_role_id: {cur}` (<@&{cur}>)", allowed_mentions=AllowedMentions.none())
+
+    @config.command()
+    async def filter_age_seconds(self, ctx: Context, value=None):
+        cfg = self._config.guild(ctx.guild)
+
+        cur = await cfg.filter_age_seconds()
+        if value is None:
+            await ctx.send(f"`filter_age_seconds: {cur}`", allowed_mentions=AllowedMentions.none())
+            return
+
+        await cfg.flag_role_id.set(value)
+        await ctx.send(f"`filter_age_seconds: {cur}`", allowed_mentions=AllowedMentions.none())
+
+    @config.command()
+    async def all(self, ctx: Context):
+        cfg = self._config.guild(ctx.guild)
+        flag_role_id = await cfg.flag_role_id()
+        verifier_role_id = await cfg.verifier_role_id()
+        filter_age_seconds = await cfg.filter_age_seconds()
+
+        await ctx.send(f"```\nflag_role_id = {flag_role_id}\nverifier_role_id = {verifier_role_id}\nfilter_age_seconds = {filter_age_seconds}\n```")
+
+    @commands.group()
+    @checks.admin()
+    async def filter(self, ctx):
+        pass
+
+    @filter.command()
+    async def check_age(self, ctx: Context):
+        cfg = self._config.guild(ctx.guild)
+        target = not await cfg.filter_age()
+        resp = ["no longer", "now"][target]
+        await ctx.send(f"Member age is {resp} being checked")
+
+    @filter.command()
+    async def check_pfp(self, ctx: Context):
+        cfg = self._config.guild(ctx.guild)
+        target = not await cfg.filter_pfp()
+        resp = ["no longer", "now"][target]
+        await ctx.send(f"Member having a valid profile picture is {resp} being checked")
+
+    @commands.command()
+    @checks.admin()
+    async def force_self(self, ctx: Context):
+        await self.member_join(ctx.author, force=True)
