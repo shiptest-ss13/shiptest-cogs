@@ -109,6 +109,18 @@ class AccountAgeFlagger(commands.Cog):
         await ctx.send(f"`verifier_role_id: {cur}` (<@&{cur}>)", allowed_mentions=AllowedMentions.none())
 
     @config.command()
+    async def flag_channel_id(self, ctx: Context, value=None):
+        cfg = self._config.guild(ctx.guild)
+
+        cur = value or await cfg.flag_channel_id()
+        if value is None:
+            await ctx.send(f"`flag_channel_id: {cur}` (<#{cur}>)", allowed_mentions=AllowedMentions.none())
+            return
+
+        await cfg.flag_role_id.set(int(value))
+        await ctx.send(f"`flag_channel_id: {cur}` (<#{cur}>)", allowed_mentions=AllowedMentions.none())
+
+    @config.command()
     async def filter_age_seconds(self, ctx: Context, value=None):
         cfg = self._config.guild(ctx.guild)
 
