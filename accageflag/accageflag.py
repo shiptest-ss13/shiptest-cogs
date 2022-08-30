@@ -43,9 +43,7 @@ class AccountAgeFlagger(commands.Cog):
 
         failed_to_add = False
         try:
-            role = Snowflake()
-            role.id = role_id
-            await member.add_roles([role], atomic=True)
+            await member.add_roles([role_id], atomic=True)
         except Exception as err:
             log.exception(err)
             failed_to_add = True
@@ -54,7 +52,7 @@ class AccountAgeFlagger(commands.Cog):
         message = f"Verification: <@&{verifier_id}> | {member.mention} has failed verification for the following reason: `{reason}`"
         if failed_to_add:
             message += "\n**And I failed to add the manual verification role!**"
-        await channel.send(message, allowed_mentions=AllowedMentions.none())
+        await channel.send(message, allowed_mentions=[AllowedMentions.none(), None][force])
 
     async def check_member_age(self, member: Snowflake):
         target = await self._config.guild(member.guild).filter_age_seconds()
