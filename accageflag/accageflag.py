@@ -43,8 +43,7 @@ class AccountAgeFlagger(commands.Cog):
 
         failed_to_add = False
         try:
-            guild: Guild = member.guild
-            role = guild.get_role(role_id)
+            role = [f for f in await member.guild.fetch_roles() if f.id == role_id]
             await member.add_roles(role, atomic=True)
         except Exception as err:
             log.exception(err)
