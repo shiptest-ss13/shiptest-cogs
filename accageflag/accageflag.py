@@ -129,8 +129,7 @@ class AccountAgeFlagger(commands.Cog):
 
         await ctx.send(f"```\nflag_role_id = {flag_role_id}\nverifier_role_id = {verifier_role_id}\nfilter_age_seconds = {filter_age_seconds}\n```")
 
-    @commands.group()
-    @checks.admin()
+    @aaf.group()
     async def filter(self, ctx):
         pass
 
