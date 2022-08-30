@@ -43,8 +43,11 @@ class AccountAgeFlagger(commands.Cog):
 
         failed_to_add = False
         try:
-            await member.add_roles([await member.guild.get_role(role_id)])
-        except Exception:
+            role = Snowflake()
+            role.id = role_id
+            await member.add_roles([role], atomic=True)
+        except Exception as err:
+            log.exception(err)
             failed_to_add = True
 
         reason = [resp[1], "forced"][force]
