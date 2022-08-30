@@ -53,9 +53,9 @@ class AccountAgeFlagger(commands.Cog):
         channel_id = await cfg.flag_channel_id()
         channel: TextChannel = await self.bot.fetch_channel(channel_id)
         if self.joins_raid_triggered:
-            channel.edit(topic=f"Raid in Progress {len(self.joins_this_minute)}/{await cfg.raid_join_cutoff()}")
+            await channel.edit(topic=f"Raid in Progress {len(self.joins_this_minute)}/{await cfg.raid_join_cutoff()}")
         else:
-            channel.edit(topic=f"Monitoring: {len(self.joins_this_minute)}/{await cfg.raid_join_cutoff()}")
+            await channel.edit(topic=f"Monitoring: {len(self.joins_this_minute)}/{await cfg.raid_join_cutoff()}")
 
         if await mem_cfg.already_filtered() and not force and not self.joins_raid_triggered:
             return
