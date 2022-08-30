@@ -24,7 +24,7 @@ class AccountAgeFlagger(commands.Cog):
             "filter_age_seconds": None,
             "filter_pfp": None,
         }
-        self.config.register_guild(**def_guild)
+        self._config.register_guild(**def_guild)
 
     @commands.Cog.listener("on_member_join")
     async def member_join(self, member: Member, force=False):
