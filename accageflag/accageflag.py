@@ -87,7 +87,7 @@ class AccountAgeFlagger(commands.Cog):
     @config.command()
     async def flag_role_id(self, ctx: Context, value=None):
         cfg = self._config.guild(ctx.guild)
-        cur = await cfg.flag_role_id()
+        cur = value or await cfg.flag_role_id()
 
         if value is None:
             await ctx.send(f"`flag_role_id: {cur}` (<@&{cur}>)", allowed_mentions=AllowedMentions.none())
@@ -100,7 +100,7 @@ class AccountAgeFlagger(commands.Cog):
     async def verifier_role_id(self, ctx: Context, value=None):
         cfg = self._config.guild(ctx.guild)
 
-        cur = await cfg.verifier_role_id()
+        cur = value or await cfg.verifier_role_id()
         if value is None:
             await ctx.send(f"`verifier_role_id: {cur}` (<@&{cur}>)", allowed_mentions=AllowedMentions.none())
             return
@@ -112,7 +112,7 @@ class AccountAgeFlagger(commands.Cog):
     async def filter_age_seconds(self, ctx: Context, value=None):
         cfg = self._config.guild(ctx.guild)
 
-        cur = await cfg.filter_age_seconds()
+        cur = value or await cfg.filter_age_seconds()
         if value is None:
             await ctx.send(f"`filter_age_seconds: {cur}`", allowed_mentions=AllowedMentions.none())
             return
