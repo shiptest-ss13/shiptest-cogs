@@ -93,7 +93,7 @@ class AccountAgeFlagger(commands.Cog):
             await ctx.send(f"`flag_role_id: {cur}` (<@&{cur}>)", allowed_mentions=AllowedMentions.none())
             return
 
-        await cfg.flag_role_id.set(value)
+        await cfg.flag_role_id.set(int(value))
         await ctx.send(f"`flag_role_id: {cur}` (<@&{cur}>)", allowed_mentions=AllowedMentions.none())
 
     @config.command()
@@ -105,7 +105,7 @@ class AccountAgeFlagger(commands.Cog):
             await ctx.send(f"`verifier_role_id: {cur}` (<@&{cur}>)", allowed_mentions=AllowedMentions.none())
             return
 
-        await cfg.flag_role_id.set(value)
+        await cfg.flag_role_id.set(int(value))
         await ctx.send(f"`verifier_role_id: {cur}` (<@&{cur}>)", allowed_mentions=AllowedMentions.none())
 
     @config.command()
@@ -117,7 +117,7 @@ class AccountAgeFlagger(commands.Cog):
             await ctx.send(f"`filter_age_seconds: {cur}`", allowed_mentions=AllowedMentions.none())
             return
 
-        await cfg.flag_role_id.set(value)
+        await cfg.flag_role_id.set(int(value))
         await ctx.send(f"`filter_age_seconds: {cur}`", allowed_mentions=AllowedMentions.none())
 
     @config.command()
