@@ -70,10 +70,10 @@ class AccountAgeFlagger(commands.Cog):
     async def should_filter_member(self, member: Member) -> Tuple[bool, str]:
         cfg = self._config.guild(member.guild)
         if await cfg.filter_age() and await self.check_member_age(member):
-            return Tuple([True, "Member did not meet the age requirement"])
+            return tuple([True, "Member did not meet the age requirement"])
         if await cfg.filter_pfp() and await self.check_member_pfp(member):
-            return Tuple([True, "Member did not meet the pgp requirement"])
-        return Tuple([False, None])
+            return tuple([True, "Member did not meet the pgp requirement"])
+        return tuple([False, None])
 
     @commands.group()
     @checks.admin()
