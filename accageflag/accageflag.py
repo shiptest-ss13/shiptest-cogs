@@ -1,7 +1,9 @@
+import asyncio
 from datetime import datetime, timedelta
 import logging
+from math import floor
 from typing import Tuple
-from discord import Member, AllowedMentions, User, TextChannel, Role
+from discord import Member, AllowedMentions, User, TextChannel, Role, Guild, Message
 from discord.abc import Snowflake
 from redbot.core import commands, Config, checks
 Context = commands.Context
@@ -24,10 +26,19 @@ class AccountAgeFlagger(commands.Cog):
             "filter_age_seconds": None,
             "filter_pfp": None,
         }
+        def_member = {
+            "already_filtered": None,
+        }
         self._config.register_guild(**def_guild)
+        self._config.register_member(**def_member)
 
     @commands.Cog.listener("on_member_join")
     async def member_join(self, member: Member, force=False):
+        mem_cfg = self._config.member(member)
+        if await mem_cfg.already_filtered() and not force:
+            return
+        await mem_cfg.already_filtered.set(True)
+
         log.info("Checking member for verification requirements")
         resp = await self.should_filter_member(member)
         if not resp[0] and not force:
@@ -166,3 +177,19 @@ class AccountAgeFlagger(commands.Cog):
     @aaf.command()
     async def force_self(self, ctx: Context):
         await self.member_join(ctx.author, force=True)
+
+    @aaf.command()
+    @checks.is_owner()
+    async def filter_all(self, ctx: Context):
+        tally = 0
+        message: Message = ctx.send("Caching")
+        guild: Guild = ctx.guild
+        all_members = await guild.fetch_members(limit=None)
+        total = len(all_members)
+        for member in all_members:
+            if not (tally % 5):
+                pct = f"{((tally / total) * 100)}%"
+                await message.edit(content=f"Processed {tally} ({pct})")
+                await asyncio.sleep(0.5)
+            tally += 1
+            await self.member_join(member)
