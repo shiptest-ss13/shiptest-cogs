@@ -182,7 +182,7 @@ class AccountAgeFlagger(commands.Cog):
     @checks.is_owner()
     async def filter_all(self, ctx: Context):
         tally = 0
-        message: Message = ctx.send("Caching")
+        message: Message = await ctx.send("Caching")
         guild: Guild = ctx.guild
         all_members = await guild.fetch_members(limit=None).flatten()
         total = len(all_members)
