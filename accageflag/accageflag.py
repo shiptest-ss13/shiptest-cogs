@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import logging
 from typing import Tuple
-from discord import Member, AllowedMentions, User, TextChannel
+from discord import Member, AllowedMentions, User, TextChannel, Guild
 from discord.abc import Snowflake
 from redbot.core import commands, Config, checks
 Context = commands.Context
@@ -43,12 +43,12 @@ class AccountAgeFlagger(commands.Cog):
 
         failed_to_add = False
         try:
-            await member.add_roles([role_id])
+            await member.add_roles([await member.guild.get_role(role_id)])
         except Exception:
             failed_to_add = True
 
         reason = [resp[1], "forced"][force]
-        message = f"Verification: <@&{verifier_id} | {member.mention} has failed verification for the following reason: `{reason}`"
+        message = f"Verification: <@&{verifier_id}> | {member.mention} has failed verification for the following reason: `{reason}`"
         if failed_to_add:
             message += "\n**And I failed to add the manual verification role!**"
         await channel.send(message, allowed_mentions=AllowedMentions.none())
