@@ -38,7 +38,7 @@ class AccountAgeFlagger(commands.Cog):
         cfg = self._config.guild(member.guild)
         role_id = await cfg.flag_role_id()
         channel_id = await cfg.flag_channel_id()
-        channel: TextChannel = self.bot.fetch_channel(channel_id)
+        channel: TextChannel = await self.bot.fetch_channel(channel_id)
         verifier_id = await cfg.verifier_role_id()
 
         failed_to_add = False
