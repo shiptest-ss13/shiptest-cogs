@@ -1,8 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta
 import logging
-from math import floor
-from typing import Tuple
+from typing import List, Tuple
 from discord import Member, AllowedMentions, User, TextChannel, Role, Guild, Message
 from discord.abc import Snowflake
 from redbot.core import commands, Config, checks
@@ -13,6 +12,9 @@ log = logging.getLogger("red.AccountAgeFlagger")
 class AccountAgeFlagger(commands.Cog):
     """Class to manage flagging accounts under a specified age"""
     _config: Config
+    joins_this_minute: List[Member] = list()
+    joins_minute_target: int = 0
+    joins_raid_triggered: bool = False
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -25,6 +27,8 @@ class AccountAgeFlagger(commands.Cog):
             "filter_age": None,
             "filter_age_seconds": None,
             "filter_pfp": None,
+            "filter_raid": None,
+            "raid_join_cutoff": None,
         }
         def_member = {
             "already_filtered": None,
@@ -34,8 +38,14 @@ class AccountAgeFlagger(commands.Cog):
 
     @commands.Cog.listener("on_member_join")
     async def member_join(self, member: Member, force=False):
+        time = datetime.utcnow()
+        if self.joins_minute_target != time.minute:
+            self.joins_minute_target = time.minute
+            self.joins_raid_triggered = False
+            self.joins_this_minute = list()
+        self.joins_this_minute.append(member)
         mem_cfg = self._config.member(member)
-        if await mem_cfg.already_filtered() and not force:
+        if await mem_cfg.already_filtered() and not force and not self.joins_raid_triggered:
             return
         await mem_cfg.already_filtered.set(True)
 
@@ -47,11 +57,18 @@ class AccountAgeFlagger(commands.Cog):
         log.info("Failed")
 
         cfg = self._config.guild(member.guild)
-        role_id = await cfg.flag_role_id()
         channel_id = await cfg.flag_channel_id()
         channel: TextChannel = await self.bot.fetch_channel(channel_id)
         verifier_id = await cfg.verifier_role_id()
 
+        reason = [resp[1], "forced"][not resp[0]]
+        message = f"Verification: <@&{verifier_id}> | {member.mention} has failed verification for the following reason: `{reason}`"
+        if not await self.filter_member(member):
+            message += "\n**And I failed to add the manual verification role!**"
+        await channel.send(message, allowed_mentions=AllowedMentions.none())
+
+    async def filter_member(self, member: Member) -> bool:
+        role_id = await self._config.guild(member.guild).flag_role_id()
         failed_to_add = False
         try:
             role: Role = member.guild.get_role(role_id)
@@ -60,25 +77,30 @@ class AccountAgeFlagger(commands.Cog):
         except Exception as err:
             log.exception(err)
             failed_to_add = True
-
-        reason = [resp[1], "forced"][not resp[0]]
-        message = f"Verification: <@&{verifier_id}> | {member.mention} has failed verification for the following reason: `{reason}`"
-        if failed_to_add:
-            message += "\n**And I failed to add the manual verification role!**"
-        await channel.send(message, allowed_mentions=[None, AllowedMentions.none()][force])
+        return not failed_to_add
 
     async def check_member_age(self, member: Snowflake):
         target = await self._config.guild(member.guild).filter_age_seconds()
         creation_delta: timedelta = datetime.utcnow() - member.created_at
-        log.info(f"age is {creation_delta.total_seconds()}")
         if creation_delta.total_seconds() < target:
             return True
         return False
 
-    async def check_member_pfp(self, member: User):
+    async def check_member_pfp(self, member: Member):
         has_avatar = not not member.avatar
-        log.info(f"pfp {has_avatar}")
         return not has_avatar
+
+    async def check_member_raid(self, member: Member):
+        if self.joins_raid_triggered:
+            return True
+        if len(self.joins_this_minute) >= await self._config.guild(member.guild).raid_join_cutoff():
+            self.joins_raid_triggered = True
+            for member_stored in self.joins_this_minute:
+                if member_stored.id == member.id:
+                    continue
+                await self.member_join(member_stored)
+            return True
+        return False
 
     async def should_filter_member(self, member: Member) -> Tuple[bool, str]:
         cfg = self._config.guild(member.guild)
@@ -86,6 +108,8 @@ class AccountAgeFlagger(commands.Cog):
             return tuple([True, "Member did not meet the age requirement"])
         if await cfg.filter_pfp() and await self.check_member_pfp(member):
             return tuple([True, "Member did not meet the pgp requirement"])
+        if await cfg.filter_raid() and await self.check_member_raid(member):
+            return tuple([True, "Member was caught in a raid trap"])
         return tuple([False, None])
 
     @commands.group()
@@ -146,13 +170,16 @@ class AccountAgeFlagger(commands.Cog):
         await ctx.send(f"`filter_age_seconds: {cur}`", allowed_mentions=AllowedMentions.none())
 
     @config.command()
-    async def all(self, ctx: Context):
+    async def raid_join_cutoff(self, ctx: Context, value=None):
         cfg = self._config.guild(ctx.guild)
-        flag_role_id = await cfg.flag_role_id()
-        verifier_role_id = await cfg.verifier_role_id()
-        filter_age_seconds = await cfg.filter_age_seconds()
 
-        await ctx.send(f"```\nflag_role_id = {flag_role_id}\nverifier_role_id = {verifier_role_id}\nfilter_age_seconds = {filter_age_seconds}\n```")
+        cur = value or await cfg.raid_join_cutoff()
+        if value is None:
+            await ctx.send(f"`raid_join_cutoff: {cur}`", allowed_mentions=AllowedMentions.none())
+            return
+
+        await cfg.raid_join_cutoff.set(int(value))
+        await ctx.send(f"`raid_join_cutoff: {cur}`", allowed_mentions=AllowedMentions.none())
 
     @aaf.group()
     async def filter(self, ctx):
@@ -173,6 +200,14 @@ class AccountAgeFlagger(commands.Cog):
         await cfg.filter_pfp.set(target)
         resp = ["no longer", "now"][target]
         await ctx.send(f"Member having a valid profile picture is {resp} being checked")
+
+    @filter.command()
+    async def check_raid(self, ctx: Context):
+        cfg = self._config.guild(ctx.guild)
+        target = not await cfg.filter_raid()
+        await cfg.filter_raid.set(target)
+        resp = ["no longer", "now"][target]
+        await ctx.send(f"Member raids are {resp} being checked")
 
     @aaf.command()
     async def force_self(self, ctx: Context):
