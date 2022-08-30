@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import logging
 from typing import Tuple
-from discord import Member, AllowedMentions, User, TextChannel, Guild
+from discord import Member, AllowedMentions, User, TextChannel
 from discord.abc import Snowflake
 from redbot.core import commands, Config, checks
 Context = commands.Context
@@ -131,7 +131,7 @@ class AccountAgeFlagger(commands.Cog):
             await ctx.send(f"`filter_age_seconds: {cur}`", allowed_mentions=AllowedMentions.none())
             return
 
-        await cfg.flag_role_id.set(int(value))
+        await cfg.filter_age_seconds.set(int(value))
         await ctx.send(f"`filter_age_seconds: {cur}`", allowed_mentions=AllowedMentions.none())
 
     @config.command()
