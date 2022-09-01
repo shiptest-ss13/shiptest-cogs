@@ -92,6 +92,8 @@ class BluejaryBot(commands.Cog):
 
         for react in tallying:
             react: Reaction
+            if not react.custom_emoji or isinstance(react.emoji, str):
+                continue
             if react.emoji.id != emoji_id:
                 continue
             for reactee in await react.users().flatten():
