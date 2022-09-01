@@ -298,8 +298,10 @@ class TGSLink(commands.Cog):
     @repo.command()
     async def reset_repo(self, ctx, instance=1):
         try:
+            current = tgs_repo_status(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
             req = TgsModel_RepositoryUpdateRequest()
             req.UpdateFromOrigin = True
+            req.Reference = current.Reference
             resp = tgs_repo_update(await self.get_address(ctx.guild), await self.get_token(ctx), instance, req)
             if not resp.ok():
                 await ctx.send("Failed! ({})".format(resp._status_code))
