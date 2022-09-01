@@ -1,0 +1,10 @@
+{
+    "author": ["ZephyrTFA"],
+    "name": "Bluejary",
+    "short": "Bluejary.",
+    "description": "Bluejary.",
+    "permissions" : [],
+    "tags": [
+        "Utility", "Bluejary"
+    ]
+}
