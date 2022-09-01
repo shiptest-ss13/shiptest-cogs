@@ -80,7 +80,14 @@ class BluejaryBot(commands.Cog):
         emoji_id = await config.emoji_id()
         total = 0
         counted = list()
-        for react in message.reactions + board_message.reactions:
+
+        tallying = list()
+        if message.reactions is not None:
+            tallying += message.reactions
+        if board_message is not None and board_message.reactions is not None:
+            tallying += board_message.reactions
+
+        for react in tallying:
             if react.emoji.id != emoji_id:
                 continue
             for reactee in await react.users().flatten():
