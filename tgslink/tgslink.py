@@ -241,11 +241,6 @@ class TGSLink(commands.Cog):
                 if active.Id == pr_num:
                     await ctx.send("That is already TMd")
                     return
-                tm = TgsModel_TestMergeParameters()
-                tm.Number = active.Number
-                tm.TargetCommitSha = active.TargetCommitSha
-                tm.Comment = active.Comment
-                req.NewTestMerges.append(tm)
             tm = TgsModel_TestMergeParameters()
             tm.Number = int(pr_num)
             tm.Comment = "TGSLink Automatic Test Merge"
