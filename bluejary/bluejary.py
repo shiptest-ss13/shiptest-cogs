@@ -9,7 +9,11 @@ class BluejaryBot(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: Message):
-        if "bluejary" not in message.content:
+        if not message.content:
+            return
+        if not isinstance(message.content, str):
+            return
+        if "bluejary" not in message.content.lower():
             return
         if message.author.bot:
             return
