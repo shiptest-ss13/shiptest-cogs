@@ -72,7 +72,7 @@ class BluejaryBot(commands.Cog):
         emoji_id = await config.emoji_id()
         total = 0
         for react in message.reactions:
-            if react.id != emoji_id:
+            if react.emoji.id != emoji_id:
                 continue
             total = react.count
             break
