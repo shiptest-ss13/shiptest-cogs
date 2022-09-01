@@ -251,10 +251,10 @@ class TGSLink(commands.Cog):
             tm.Comment = "TGSLink Automatic Test Merge"
             req.NewTestMerges.append(tm)
             resp = tgs_repo_update(await self.get_address(ctx.guild), await self.get_token(ctx), instance, req)
-            if not resp.ActiveJob:
+            if resp.ActiveJob is None:
                 await ctx.send("Test Merge did not create a job, error?")
                 return
-            job = resp.ActiveJob
+            job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, resp.ActiveJob.Id)
             while not job.StoppedAt:
                 await asyncio.sleep(0.5)
                 job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)

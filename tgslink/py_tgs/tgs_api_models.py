@@ -332,6 +332,7 @@ class TgsModel_Job(TgsModel_EntityId):
 	def ok(self) -> bool:
 		return not self.ErrorCode and not self.Cancelled and super().ok()
 
+
 class JobState(Enum):
 	Running = 0
 	Stopped = 1
