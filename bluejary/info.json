@@ -3,7 +3,7 @@
     "name": "Bluejary",
     "short": "Bluejary.",
     "description": "Bluejary.",
-    "permissions" : [],
+    "permissions" : ["Add Reactions"],
     "tags": [
         "Utility", "Bluejary"
     ]
