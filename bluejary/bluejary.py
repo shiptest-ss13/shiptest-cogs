@@ -95,6 +95,7 @@ class BluejaryBot(commands.Cog):
 
         counted = list()
         emoji_id = await config.emoji_id()
+        emoji = await guild.fetch_emoji(emoji_id)
         for react in tallying:
             react: Reaction
             if not react.custom_emoji or isinstance(react.emoji, str):
@@ -113,7 +114,7 @@ class BluejaryBot(commands.Cog):
                 board_map[str(board_message.id)] = message.id
                 message_map[str(message.id)] = {"board": board_message.id, "channel": message.channel.id}
             embed: Embed = Embed(type="rich", timestamp=datetime.utcnow(), description=message.content, title=message.author.display_name).set_author(name=message.author.display_name, icon_url=message.author.avatar_url)
-            await board_message.edit(content=f"{total} :bluejary:s", allowed_mentions=AllowedMentions.none(), embed=embed)
+            await board_message.edit(content=f"{total} <:{emoji.name}:{emoji.id}>s", allowed_mentions=AllowedMentions.none(), embed=embed)
         elif board_message is not None:
             board_map.pop(str(board_message.id))
             message_map.pop(str(message.id))
