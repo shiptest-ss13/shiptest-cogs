@@ -13,6 +13,7 @@ class BluejaryBot(commands.Cog):
             "board_id": None,
             "board_req": None,
             "board_map": None,
+            "message_map": None,
         }
 
         self.config.register_guild(**def_cfg)
@@ -53,6 +54,8 @@ class BluejaryBot(commands.Cog):
             await cfg.board_map.set({})
         if await cfg.board_id() is None:
             await cfg.board_id.set(1014906614815404144)
+        if await cfg.message_map() is None:
+            await cfg.message_map.set({})
 
     async def update(self, event: RawReactionActionEvent):
         if not event.guild_id:
@@ -68,21 +71,21 @@ class BluejaryBot(commands.Cog):
         if board is None:
             return
 
-        channel = await self.bot.fetch_channel(event.channel_id)
-        message: Message = await channel.fetch_message(event.message_id)
-
+        message_map: dict = await config.message_map()
         board_map: dict = await config.board_map()
-        board_key = str(message.id)
+        message: Message = None
         board_message: Message = None
-        if board_key in board_map.keys():
+        if event.channel_id == board_id:
+            m_id = board_map[str(event.message_id)]
+            c_id = message_map[str(m_id)]["channel"]
+            message = await (await self.bot.fetch_channel(c_id)).fetch_message(m_id)
+            board_message = await board.fetch_message(event.message_id)
+        else:
+            message = await (await self.bot.fetch_channel(event.channel_id)).fetch_message(event.message_id)
             try:
-                board_message = await board.fetch_message(board_map[board_key])
-            except Exception:
+                board_message = await board.fetch_message(message_map[str(message.id)]["board"])
+            except KeyError:
                 pass
-
-        emoji_id = await config.emoji_id()
-        total = 0
-        counted = list()
 
         tallying = list()
         if message.reactions is not None:
@@ -90,6 +93,8 @@ class BluejaryBot(commands.Cog):
         if board_message is not None and board_message.reactions is not None:
             tallying = tallying + board_message.reactions
 
+        counted = list()
+        emoji_id = await config.emoji_id()
         for react in tallying:
             react: Reaction
             if not react.custom_emoji or isinstance(react.emoji, str):
@@ -102,16 +107,16 @@ class BluejaryBot(commands.Cog):
         total = len(set(counted))
         should_board = (total >= await config.board_req())
 
-        if channel.id == board.id:
-            board_message = message
-
         if should_board:
             if not board_message:
                 board_message = await board.send("caching")
-                board_map[board_key] = board_message.id
+                board_map[str(board_message.id)] = message.id
+                message_map[str(message.id)] = {"board": board_message.id, "channel": message.channel.id}
             embed: Embed = Embed(type="rich", timestamp=datetime.utcnow(), description=message.content, title=message.author.display_name).set_author(name=message.author.display_name, icon_url=message.author.avatar_url)
             await board_message.edit(content=f"{total} :bluejary:s", allowed_mentions=AllowedMentions.none(), embed=embed)
         elif board_message is not None:
+            board_map.pop(str(board_message.id))
+            message_map.pop(str(message.id))
             await board_message.delete()
-            board_map.pop(board_key)
         await config.board_map.set(board_map)
+        await config.message_map.set(message_map)
