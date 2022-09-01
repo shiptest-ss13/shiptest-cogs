@@ -210,6 +210,9 @@ class TGSLink(commands.Cog):
     async def active_tms(self, ctx, instance=1):
         try:
             resp = tgs_repo_status(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
+            if not resp.ok():
+                await ctx.send("I failed to fetch the repository status! ({})".format(resp._status_code))
+                return
             gh = Github().get_repo(f"{resp.RemoteRepositoryOwner}/{resp.RemoteRepositoryName}")
             reply = "Active TMs:\n```\n"
             for tm in resp.RevisionInformation.ActiveTestMerges:
