@@ -75,7 +75,10 @@ class BluejaryBot(commands.Cog):
         board_key = str(message.id)
         board_message: Message = None
         if board_key in board_map.keys():
-            board_message = await board.fetch_message(board_map[board_key])
+            try:
+                board_message = await board.fetch_message(board_map[board_key])
+            except Exception:
+                pass
 
         emoji_id = await config.emoji_id()
         total = 0
