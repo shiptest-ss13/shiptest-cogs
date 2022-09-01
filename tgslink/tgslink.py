@@ -7,9 +7,9 @@ from discord import Message
 from github import Github
 
 from tgslink.py_tgs.tgs_api_discord import job_to_embed
-from tgslink.py_tgs.tgs_api_models import TgsModel_DreamDaemonRequest, TgsModel_ErrorMessageResponse
+from tgslink.py_tgs.tgs_api_models import TgsModel_DreamDaemonRequest, TgsModel_ErrorMessageResponse, TgsModel_RepositoryUpdateRequest, TgsModel_TestMergeParameters
 
-from .py_tgs.tgs_api_defs import tgs_dd_launch, tgs_dd_stop, tgs_dd_update, tgs_dm_compile_job_list, tgs_dm_deploy, tgs_job_cancel, tgs_job_get, tgs_login, tgs_repo_status, tgs_repo_update_tms
+from .py_tgs.tgs_api_defs import tgs_dd_launch, tgs_dd_stop, tgs_dd_update, tgs_dm_compile_job_list, tgs_dm_deploy, tgs_job_cancel, tgs_job_get, tgs_login, tgs_repo_status, tgs_repo_update, tgs_repo_update_tms
 
 log = logging.getLogger("red.tgslink")
 
@@ -228,6 +228,40 @@ class TGSLink(commands.Cog):
                 await ctx.reply("Updated all TMs")
             else:
                 await ctx.reply("Failed to update TMs")
+        except TgsModel_ErrorMessageResponse as err:
+            await ctx.reply("Failed to update TMs: {}|{}".format(err._status_code, err.Message))
+
+    @repo.command()
+    async def test_merge(self, ctx, pr_num, instance=1):
+        try:
+            current = tgs_repo_status(await self.get_address(ctx.guild), await self.get_token(ctx), instance)
+            req = TgsModel_RepositoryUpdateRequest()
+            req.NewTestMerges = list()
+            for active in current.RevisionInformation.ActiveTestMerges:
+                if active.Id == pr_num:
+                    await ctx.send("That is already TMd")
+                    return
+                tm = TgsModel_TestMergeParameters()
+                tm.Number = active.Number
+                tm.TargetCommitSha = active.TargetCommitSha
+                tm.Comment = active.Comment
+                req.NewTestMerges.append(tm)
+            tm = TgsModel_TestMergeParameters()
+            tm.Number = int(pr_num)
+            tm.Comment = "TGSLink Automatic Test Merge"
+            req.NewTestMerges.append(tm)
+            resp = tgs_repo_update(await self.get_address(ctx.guild), await self.get_token(ctx), instance, req)
+            if not resp.ActiveJob:
+                await ctx.send("Test Merge did not create a job, error?")
+                return
+            job = resp.ActiveJob
+            while not job.StoppedAt:
+                await asyncio.sleep(0.5)
+                job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
+            if job.ok():
+                await ctx.send("Test merged!")
+                return
+            await ctx.send("Failed to test merge: `{}`".format(job.ExceptionDetails))
         except TgsModel_ErrorMessageResponse as err:
             await ctx.reply("Failed to update TMs: {}|{}".format(err._status_code, err.Message))
 
