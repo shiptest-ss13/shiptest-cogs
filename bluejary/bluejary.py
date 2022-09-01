@@ -1,3 +1,4 @@
+from datetime import datetime
 from redbot.core import commands, Config
 from discord import Message, RawReactionActionEvent, TextChannel, AllowedMentions, Embed
 
@@ -88,7 +89,8 @@ class BluejaryBot(commands.Cog):
             if not board_message:
                 board_message = await board.send("caching")
                 board_map[board_key] = board_message.id
-            await board_message.edit(content=f"{total} Bluejaries\nBy: {message.author}\n{message.content}", allowed_mentions=AllowedMentions.none())
+            embed: Embed = Embed(type="rich", timestamp=datetime.utcnow(), description=message.content, title=message.author.display_name).set_author(icon_url=message.author.avatar_url)
+            await board_message.edit(content=f"{total} :bluejary:s", allowed_mentions=AllowedMentions.none(), embed=embed)
         elif board_message is not None:
             await board_message.delete()
             board_map.pop(board_key)
