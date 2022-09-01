@@ -44,7 +44,7 @@ class TGSLink(commands.Cog):
         cfg = self._config.member(ctx.author)
         exp = await cfg.token_expiration()
         dif = (exp - datetime.utcnow().timestamp()) if exp is not None else None
-        if not dif:
+        if dif is None or dif < 1:
             log.info("token is expired")
             if not await self._login():
                 log.info("and we failed to refresh it")
@@ -60,6 +60,13 @@ class TGSLink(commands.Cog):
     @commands.group()
     async def tgslink(self, ctx):
         pass
+
+    @tgslink.command()
+    @checks.is_owner()
+    async def force_expire(self, ctx):
+        cfg = self._config.member(ctx.author)
+        await cfg.token_expiration.set(0)
+        await ctx.send("Forced token expiration")
 
     async def _login(self, ctx, username=None, password=None) -> bool:
         cfg = self._config.member(ctx.author)
