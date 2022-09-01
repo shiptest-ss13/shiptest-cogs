@@ -241,7 +241,7 @@ class TGSLink(commands.Cog):
     @dd.command()
     async def graceful(self, ctx, enabled=True, instance=1):
         try:
-            req = TgsModel_DreamDaemonRequest
+            req = TgsModel_DreamDaemonRequest()
             req.SoftShutdown = enabled
             resp = tgs_dd_update(await self.get_address(ctx.guild), await self.get_token(ctx), req, instance)
             await ctx.reply("Graceful is now {}".format(["disabled", "enabled"][not not resp.SoftShutdown]))
