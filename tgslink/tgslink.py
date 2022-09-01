@@ -213,6 +213,9 @@ class TGSLink(commands.Cog):
             if not resp.ok():
                 await ctx.send("I failed to fetch the repository status! ({})".format(resp._status_code))
                 return
+            if not len(resp.RevisionInformation.ActiveTestMerges):
+                await ctx.send("No TMs active")
+                return
             gh = Github().get_repo(f"{resp.RemoteRepositoryOwner}/{resp.RemoteRepositoryName}")
             reply = "Active TMs:\n```\n"
             for tm in resp.RevisionInformation.ActiveTestMerges:
@@ -260,6 +263,26 @@ class TGSLink(commands.Cog):
                 await ctx.send("Test merged!")
                 return
             await ctx.send("Failed to test merge: `{}`".format(job.ExceptionDetails))
+        except TgsModel_ErrorMessageResponse as err:
+            await ctx.reply("Failed to update TMs: {}|{}".format(err._status_code, err.Message))
+
+    async def test_merge_all(self, ctx, pr_str: str, instance=1):
+        try:
+            if pr_str is None or "|" not in pr_str:
+                await ctx.send("Format must be the following `123|124|127|129`")
+                return
+            nums = pr_str.split("|")
+            req = TgsModel_RepositoryUpdateRequest()
+            for num in set(nums):
+                tm = TgsModel_TestMergeParameters()
+                tm.Number = int(num)
+                tm.Comment = "TGSLink Test Merge"
+                req.NewTestMerges.append(tm)
+            resp = tgs_repo_update(await self.get_address(ctx.guild), await self.get_token(ctx), instance, req)
+            if not resp.ok():
+                await ctx.send("Failed! ({})".format(resp._status_code))
+                return
+            await ctx.send("TM'd specified PRs!")
         except TgsModel_ErrorMessageResponse as err:
             await ctx.reply("Failed to update TMs: {}|{}".format(err._status_code, err.Message))
 
