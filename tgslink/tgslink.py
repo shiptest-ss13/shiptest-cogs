@@ -266,6 +266,7 @@ class TGSLink(commands.Cog):
         except TgsModel_ErrorMessageResponse as err:
             await ctx.reply("Failed to update TMs: {}|{}".format(err._status_code, err.Message))
 
+    @repo.command()
     async def test_merge_all(self, ctx, pr_str: str, instance=1):
         try:
             if pr_str is None or "|" not in pr_str:
