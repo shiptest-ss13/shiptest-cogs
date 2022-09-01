@@ -15,5 +15,5 @@ class BluejaryBot(commands.Cog):
             return
         if not message.guild:
             return
-        emoji = await message.guild.fetch_emoji(1014879985149956126)
+        emoji = await message.guild.fetch_emoji(979343052411920384)
         await message.add_reaction(emoji)
