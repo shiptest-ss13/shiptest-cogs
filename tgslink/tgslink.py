@@ -274,6 +274,7 @@ class TGSLink(commands.Cog):
                 return
             nums = pr_str.split("|")
             req = TgsModel_RepositoryUpdateRequest()
+            req.NewTestMerges = list()
             for num in set(nums):
                 tm = TgsModel_TestMergeParameters()
                 tm.Number = int(num)
