@@ -7,9 +7,9 @@ from discord import Message
 from github import Github
 
 from tgslink.py_tgs.tgs_api_discord import job_to_embed
-from tgslink.py_tgs.tgs_api_models import TgsModel_ErrorMessageResponse
+from tgslink.py_tgs.tgs_api_models import TgsModel_DreamDaemonRequest, TgsModel_ErrorMessageResponse
 
-from .py_tgs.tgs_api_defs import tgs_dm_compile_job_list, tgs_dm_deploy, tgs_job_cancel, tgs_job_get, tgs_login, tgs_repo_status, tgs_repo_update_tms
+from .py_tgs.tgs_api_defs import tgs_dd_launch, tgs_dd_stop, tgs_dd_update, tgs_dm_compile_job_list, tgs_dm_deploy, tgs_job_cancel, tgs_job_get, tgs_login, tgs_repo_status, tgs_repo_update_tms
 
 log = logging.getLogger("red.tgslink")
 
@@ -223,3 +223,37 @@ class TGSLink(commands.Cog):
                 await ctx.reply("Failed to update TMs")
         except TgsModel_ErrorMessageResponse as err:
             await ctx.reply("Failed to update TMs: {}|{}".format(err._status_code, err.Message))
+
+    @tgslink.group()
+    async def dd(self, ctx):
+        pass
+
+    @dd.command()
+    async def launch(self, ctx, instance=1):
+        try:
+            if tgs_dd_launch(await self.get_address(ctx.guild), await self.get_token(ctx), instance):
+                await ctx.reply("Instance launched")
+            else:
+                await ctx.reply("Failed to launch instance!")
+        except TgsModel_ErrorMessageResponse as err:
+            await ctx.reply("Failed to launch the watchdog: {}|{}".format(err._status_code, err.Message))
+
+    @dd.command()
+    async def graceful(self, ctx, enabled=True, instance=1):
+        try:
+            req = TgsModel_DreamDaemonRequest
+            req.SoftShutdown = enabled
+            resp = tgs_dd_update(await self.get_address(ctx.guild), await self.get_token(ctx), req, instance)
+            await ctx.reply("Graceful is now {}".format(["disabled", "enabled"][not not resp.SoftShutdown]))
+        except TgsModel_ErrorMessageResponse as err:
+            await ctx.reply("Failed to update the watchdog: {}|{}".format(err._status_code, err.Message))
+
+    @dd.command()
+    async def shutdown(self, ctx, instance=1):
+        try:
+            if tgs_dd_stop(await self.get_address(ctx.guild), await self.get_token(ctx), instance):
+                await ctx.reply("Instance stopped")
+            else:
+                await ctx.reply("Failed to stop instance!")
+        except TgsModel_ErrorMessageResponse as err:
+            await ctx.reply("Failed to stop the watchdog: {}|{}".format(err._status_code, err.Message))

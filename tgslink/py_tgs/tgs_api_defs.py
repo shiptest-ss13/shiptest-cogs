@@ -145,8 +145,20 @@ def tgs_byond_get_active(address, token, instance) -> TgsModel_ByondResponse:
 # dream daemon routes #
 
 
-def tgs_dd_launch(address, token, instance=1) -> TgsModel_JobResponse:
-    return __tgs_request(address, "/DreamDaemon", headers={"Instance": str(instance)}, method="put", token=token, cls=TgsModel_JobResponse)
+def tgs_dd_launch(address, token, instance=1) -> bool:
+    resp: TgsModel_JobResponse = __tgs_request(address, "/DreamDaemon", headers={"Instance": str(instance)}, method="put", token=token, cls=TgsModel_JobResponse)
+    while not resp.StoppedAt:
+        sleep(0.5)
+        resp = tgs_job_get(address, token, instance, resp.Id)
+    return resp.ok()
+
+
+def tgs_dd_stop(address, token, instance=1) -> bool:
+    resp: TgsModel_JobResponse = __tgs_request(address, "/DreamDaemon", headers={"Instance": str(instance)}, method="delete", token=token, cls=TgsModel_JobResponse)
+    while not resp.StoppedAt:
+        sleep(0.5)
+        resp = tgs_job_get(address, token, instance, resp.Id)
+    return resp.ok()
 
 
 def tgs_dd_restart(address, token, instance=1) -> TgsModel_JobResponse:
