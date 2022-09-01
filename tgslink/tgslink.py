@@ -295,6 +295,26 @@ class TGSLink(commands.Cog):
         except TgsModel_ErrorMessageResponse as err:
             await ctx.reply("Failed to update TMs: {}|{}".format(err._status_code, err.Message))
 
+    @repo.command()
+    async def reset_repo(self, ctx, instance=1):
+        try:
+            req = TgsModel_RepositoryUpdateRequest()
+            req.UpdateFromOrigin = True
+            resp = tgs_repo_update(await self.get_address(ctx.guild), await self.get_token(ctx), instance, req)
+            if not resp.ok():
+                await ctx.send("Failed! ({})".format(resp._status_code))
+                return
+            job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, resp.ActiveJob.Id)
+            while not job.StoppedAt:
+                await asyncio.sleep(0.5)
+                job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
+            if job.ok():
+                await ctx.send("Reset repository state to remote state!")
+                return
+            await ctx.send("Failed: `{}`".format(job.ExceptionDetails))
+        except TgsModel_ErrorMessageResponse as err:
+            await ctx.reply("Failed to reset repository state: {}|{}".format(err._status_code, err.Message))
+
     @tgslink.group()
     async def dd(self, ctx):
         pass
