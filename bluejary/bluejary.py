@@ -68,6 +68,9 @@ class BluejaryBot(commands.Cog):
         if board is None:
             return
 
+        if event.channel_id == board_id:
+            return
+
         channel = await self.bot.fetch_channel(event.channel_id)
         message: Message = await channel.fetch_message(event.message_id)
         emoji_id = await config.emoji_id()
@@ -89,7 +92,7 @@ class BluejaryBot(commands.Cog):
             if not board_message:
                 board_message = await board.send("caching")
                 board_map[board_key] = board_message.id
-            embed: Embed = Embed(type="rich", timestamp=datetime.utcnow(), description=message.content, title=message.author.display_name).set_author(icon_url=message.author.avatar_url)
+            embed: Embed = Embed(type="rich", timestamp=datetime.utcnow(), description=message.content, title=message.author.display_name).set_author(name=message.author.display_name, icon_url=message.author.avatar_url)
             await board_message.edit(content=f"{total} :bluejary:s", allowed_mentions=AllowedMentions.none(), embed=embed)
         elif board_message is not None:
             await board_message.delete()
