@@ -1,6 +1,6 @@
 from datetime import datetime
 from redbot.core import commands, Config
-from discord import Message, RawReactionActionEvent, TextChannel, AllowedMentions, Embed
+from discord import Message, RawReactionActionEvent, TextChannel, AllowedMentions, Embed, Reaction
 
 
 class BluejaryBot(commands.Cog):
@@ -86,11 +86,12 @@ class BluejaryBot(commands.Cog):
 
         tallying = list()
         if message.reactions is not None:
-            tallying += message.reactions
+            tallying = tallying + message.reactions
         if board_message is not None and board_message.reactions is not None:
-            tallying += board_message.reactions
+            tallying = tallying + board_message.reactions
 
         for react in tallying:
+            react: Reaction
             if react.emoji.id != emoji_id:
                 continue
             for reactee in await react.users().flatten():
