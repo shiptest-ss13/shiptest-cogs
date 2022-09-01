@@ -1,6 +1,9 @@
 from datetime import datetime
+import logging
 from redbot.core import commands, Config
 from discord import Message, RawReactionActionEvent, TextChannel, AllowedMentions, Embed, Reaction
+
+log = logging.getLogger("red.bluejary")
 
 
 class BluejaryBot(commands.Cog):
@@ -76,10 +79,13 @@ class BluejaryBot(commands.Cog):
         message: Message = None
         board_message: Message = None
         if event.channel_id == board_id:
+            log.info("board reaction")
             m_id = board_map[str(event.message_id)]
             c_id = message_map[str(m_id)]["channel"]
             message = await (await self.bot.fetch_channel(c_id)).fetch_message(m_id)
+            log.info(f"message id {message.id}")
             board_message = await board.fetch_message(event.message_id)
+            log.info(f"board id {board_message.id}")
         else:
             message = await (await self.bot.fetch_channel(event.channel_id)).fetch_message(event.message_id)
             try:
@@ -90,7 +96,9 @@ class BluejaryBot(commands.Cog):
         tallying = list()
         if message.reactions is not None:
             tallying = tallying + message.reactions
+            log.info(f"added message reactions: {len(message.reactions)}")
         if board_message is not None and board_message.reactions is not None:
+            log.info(f"added board reactions: {len(board_message.reactions)}")
             tallying = tallying + board_message.reactions
 
         counted = list()
@@ -104,7 +112,6 @@ class BluejaryBot(commands.Cog):
                 continue
             for reactee in await react.users().flatten():
                 counted.append(reactee.id)
-            break
         total = len(set(counted))
         should_board = (total >= await config.board_req())
 
