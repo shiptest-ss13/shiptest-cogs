@@ -284,7 +284,14 @@ class TGSLink(commands.Cog):
             if not resp.ok():
                 await ctx.send("Failed! ({})".format(resp._status_code))
                 return
-            await ctx.send("TM'd specified PRs!")
+            job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, resp.ActiveJob.Id)
+            while not job.StoppedAt:
+                await asyncio.sleep(0.5)
+                job = tgs_job_get(await self.get_address(ctx.guild), await self.get_token(ctx), instance, job.Id)
+            if job.ok():
+                await ctx.send("Test merged!")
+                return
+            await ctx.send("Failed to test merge: `{}`".format(job.ExceptionDetails))
         except TgsModel_ErrorMessageResponse as err:
             await ctx.reply("Failed to update TMs: {}|{}".format(err._status_code, err.Message))
 
