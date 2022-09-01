@@ -68,25 +68,29 @@ class BluejaryBot(commands.Cog):
         if board is None:
             return
 
-        if event.channel_id == board_id:
-            return
-
         channel = await self.bot.fetch_channel(event.channel_id)
         message: Message = await channel.fetch_message(event.message_id)
-        emoji_id = await config.emoji_id()
-        total = 0
-        for react in message.reactions:
-            if react.emoji.id != emoji_id:
-                continue
-            total = react.count
-            break
-        should_board = (total >= await config.board_req())
-        board_map: dict = await config.board_map()
 
+        board_map: dict = await config.board_map()
         board_key = str(message.id)
         board_message: Message = None
         if board_key in board_map.keys():
             board_message = await board.fetch_message(board_map[board_key])
+
+        emoji_id = await config.emoji_id()
+        total = 0
+        counted = list()
+        for react in message.reactions + board_message.reactions:
+            if react.emoji.id != emoji_id:
+                continue
+            for reactee in await react.users().flatten():
+                counted.append(reactee.id)
+            break
+        total = len(set(counted))
+        should_board = (total >= await config.board_req())
+
+        if channel.id == board.id:
+            board_message = message
 
         if should_board:
             if not board_message:
