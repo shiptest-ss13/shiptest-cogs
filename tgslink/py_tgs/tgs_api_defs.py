@@ -142,7 +142,23 @@ def tgs_byond_get_active(address, token, instance) -> TgsModel_ByondResponse:
 # configuration routes # TODO
 
 
-# dream daemon routes # TODO
+# dream daemon routes #
+
+
+def tgs_dd_launch(address, token, instance=1) -> TgsModel_JobResponse:
+    return __tgs_request(address, "/DreamDaemon", headers={"Instance": str(instance)}, method="put", token=token, cls=TgsModel_JobResponse)
+
+
+def tgs_dd_restart(address, token, instance=1) -> TgsModel_JobResponse:
+    return __tgs_request(address, "/DreamDaemon", headers={"Instance": str(instance)}, method="patch", token=token, cls=TgsModel_JobResponse)
+
+
+def tgs_dd_status(address, token, instance=1) -> TgsModel_DreamDaemonResponse:
+    return __tgs_request(address, "/DreamDaemon", headers={"Instance": str(instance)}, token=token, cls=TgsModel_DreamDaemonResponse)
+
+
+def tgs_dd_update(address, token, req: TgsModel_DreamDaemonResponse, instance=1) -> TgsModel_DreamDaemonResponse:
+    return __tgs_request(address, "/DreamDaemon", headers={"Instance": str(instance)}, method="post", token=token, cls=TgsModel_DreamDaemonResponse, json=req.encode())
 
 
 # dream maker routes #
