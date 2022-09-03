@@ -60,6 +60,20 @@ class BluejaryBot(commands.Cog):
         await self.config.guild(ctx.guild).board_id.set(channel_id)
         await ctx.send("Updated the board!")
 
+    @bluejary.command()
+    async def set_emoji(self, ctx: commands.Context, emoji_id):
+        await self.assert_defaults(ctx.guild)
+        current = await self.config.guild(ctx.guild).emoji_id()
+        if current == emoji_id:
+            await ctx.send("That is already the emoji!")
+            return
+        board = await ctx.guild.fetch_emoji(emoji_id)
+        if board is None:
+            await ctx.send("Couldnt find that emoji, is it the ID?")
+            return
+        await self.config.guild(ctx.guild).emoji_id.set(emoji_id)
+        await ctx.send("Updated the board!")
+
     @commands.Cog.listener()
     async def on_message(self, message: Message):
         if not message.content:
