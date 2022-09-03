@@ -45,6 +45,7 @@ class BluejaryBot(commands.Cog):
         else:
             ignored.append(channel_id)
             await ctx.send("Now ignoring that channel")
+        await self.config.guild(ctx.guild).ignored.set(ignored)
 
     @bluejary.command()
     async def set_board(self, ctx: commands.Context, channel_id):
