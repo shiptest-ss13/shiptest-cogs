@@ -1,6 +1,6 @@
 from datetime import datetime
 import logging
-from redbot.core import commands, Config
+from redbot.core import commands, Config, checks
 from discord import Message, RawReactionActionEvent, TextChannel, AllowedMentions, Embed, Reaction
 
 log = logging.getLogger("red.bluejary")
@@ -17,9 +17,48 @@ class BluejaryBot(commands.Cog):
             "board_req": None,
             "board_map": None,
             "message_map": None,
+            "ignored": None,
         }
 
         self.config.register_guild(**def_cfg)
+
+    @commands.group()
+    @commands.guild_only()
+    @checks.admin()
+    async def bluejary(self, ctx: commands.Context):
+        pass
+
+    @bluejary.command()
+    async def ignore_channel(self, ctx: commands.Context, channel_id=None):
+        await self.assert_defaults(ctx.guild)
+        ignored: list = await self.config.guild(ctx.guild).ignored()
+        if channel_id is None:
+            resp = "Ignored Channels:\n```\n"
+            for channel in ignored:
+                channel_ins: TextChannel = self.bot.get_channel(channel)
+                resp += f"{channel_ins.name}\n"
+            resp += "```\n"
+            await ctx.send(resp)
+        elif channel_id in ignored:
+            ignored.remove(channel_id)
+            await ctx.send("No longer ignoring that channel")
+        else:
+            ignored.append(channel_id)
+            await ctx.send("Now ignoring that channel")
+
+    @bluejary.command()
+    async def set_board(self, ctx: commands.Context, channel_id):
+        await self.assert_defaults(ctx.guild)
+        current = await self.config.guild(ctx.guild).board_id()
+        if current == channel_id:
+            await ctx.send("That is already the board!")
+            return
+        board = await self.bot.get_channel(channel_id)
+        if board is None:
+            await ctx.send("Couldnt find that channel, is it the ID of the channel?")
+            return
+        await self.config.guild(ctx.guild).board_id.set(channel_id)
+        await ctx.send("Updated the board!")
 
     @commands.Cog.listener()
     async def on_message(self, message: Message):
@@ -59,6 +98,8 @@ class BluejaryBot(commands.Cog):
             await cfg.board_id.set(1014906614815404144)
         if await cfg.message_map() is None:
             await cfg.message_map.set({})
+        if await cfg.ignored() is None:
+            await cfg.ignored.set([])
 
     async def update(self, event: RawReactionActionEvent):
         if not event.guild_id:
