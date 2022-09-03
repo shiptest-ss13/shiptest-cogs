@@ -122,6 +122,10 @@ class BluejaryBot(commands.Cog):
         await self.assert_defaults(guild)
         config = self.config.guild(guild)
 
+        ignored: list = config.ignored()
+        if event.channel_id in ignored:
+            return
+
         board_id = await config.board_id()
         if not board_id:
             return
