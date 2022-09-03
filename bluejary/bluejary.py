@@ -35,7 +35,7 @@ class BluejaryBot(commands.Cog):
         if channel_id is None:
             resp = "Ignored Channels:\n```\n"
             for channel in ignored:
-                channel_ins: TextChannel = self.bot.fetch_channel(channel)
+                channel_ins: TextChannel = await self.bot.fetch_channel(channel)
                 resp += f"{channel} - {channel_ins.name}\n"
             resp += "```\n"
             await ctx.send(resp)
