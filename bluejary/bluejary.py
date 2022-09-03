@@ -35,7 +35,7 @@ class BluejaryBot(commands.Cog):
         if channel_id is None:
             resp = "Ignored Channels:\n```\n"
             for channel in ignored:
-                channel_ins: TextChannel = self.bot.get_channel(channel)
+                channel_ins: TextChannel = self.bot.fetch_channel(channel)
                 resp += f"{channel_ins.name}\n"
             resp += "```\n"
             await ctx.send(resp)
@@ -122,7 +122,7 @@ class BluejaryBot(commands.Cog):
         await self.assert_defaults(guild)
         config = self.config.guild(guild)
 
-        ignored: list = config.ignored()
+        ignored: list = await config.ignored()
         if event.channel_id in ignored:
             return
 
