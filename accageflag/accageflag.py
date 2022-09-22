@@ -37,6 +37,26 @@ class AccountAgeFlagger(commands.Cog):
         self._config.register_guild(**def_guild)
         self._config.register_member(**def_member)
 
+    @commands.Cog.listener("on_member_update")
+    async def member_update(self, _: Member, after: Member):
+        mem_cfg = self._config.member(after)
+        cfg = self._config.guild(after.guild)
+
+        mem_roles: List[Role] = after.roles
+        flag_id = await cfg.flag_role_id()
+        found = False
+        for role in mem_roles:
+            if role.id == flag_id:
+                found = True
+                break
+        await mem_cfg.already_filtered.set(not found)
+        if found:
+            await self.member_join(after, True)
+
+    @commands.Cog.listener("on_member_leave")
+    async def member_leave(self, member: Member):
+        await self.member_update(member)
+
     @commands.Cog.listener("on_member_join")
     async def member_join(self, member: Member, force=False):
         cfg = self._config.guild(member.guild)
@@ -47,7 +67,7 @@ class AccountAgeFlagger(commands.Cog):
             self.joins_minute_target = time.minute
             self.joins_raid_triggered = False
             self.joins_this_minute = list()
-        if not self.processing_all:
+        if not self.processing_all and not force:
             self.joins_this_minute.append(member)
 
         channel_id = await cfg.flag_channel_id()
