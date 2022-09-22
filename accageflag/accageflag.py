@@ -37,21 +37,22 @@ class AccountAgeFlagger(commands.Cog):
         self._config.register_guild(**def_guild)
         self._config.register_member(**def_member)
 
+    def has_role(self, member: Member, role_id: int):
+        for role in member.roles:
+            if role.id == role_id:
+                return True
+        return False
+
     @commands.Cog.listener("on_member_update")
-    async def member_update(self, _: Member, after: Member):
+    async def member_update(self, before: Member, after: Member):
         mem_cfg = self._config.member(after)
         cfg = self._config.guild(after.guild)
-
-        mem_roles: List[Role] = after.roles
         flag_id = await cfg.flag_role_id()
-        found = False
-        for role in mem_roles:
-            if role.id == flag_id:
-                found = True
-                break
+        found = self.has_role(after, flag_id)
         await mem_cfg.already_filtered.set(not found)
-        if found:
-            await self.member_join(after, True)
+        if found == self.has_role(before, flag_id):
+            return
+        await self.member_join(after, True)
 
     @commands.Cog.listener("on_member_leave")
     async def member_leave(self, member: Member):
