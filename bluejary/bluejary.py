@@ -187,7 +187,7 @@ class BluejaryBot(commands.Cog):
         emoji_str = f"{emojis} - <:{emoji.name}:{emoji.id}>\n{'-' * 10}\n"
         embie = Embed(type="rich", description=(emoji_str + message.clean_content), timestamp=message.created_at)
         embie.set_author(name=message.author.display_name, icon_url=message.author.avatar_url)
-        embie.add_field(name="Origin", value=f"<#{message.channel.id}> | <a href='{message.jump_url}'>Jump To</a>")
+        embie.add_field(name="Origin", value=f"<#{message.channel.id}> | [{message.jump_url}](Jump To)")
         if len(message.attachments):
             embie.url = message.attachments[0].url
         await board_message.edit(embed=embie)
