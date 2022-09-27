@@ -1,7 +1,6 @@
 from inspect import ismethod
 from json import JSONDecoder, JSONEncoder
 from discord import Message, TextChannel, NotFound
-from .bluejary import BluejaryBot
 from typing import Union
 
 
@@ -32,7 +31,7 @@ class MessageInfo:
         self.board_message = board_message
         return self
 
-    async def get_message(self, bot: BluejaryBot, fetch=False) -> Union[Message, None]:
+    async def get_message(self, bot, fetch=False) -> Union[Message, None]:
         try:
             channel: TextChannel = await bot.fetch_channel(self.message_channel)
             self.message_message = await channel.fetch_message(self.message_id)
@@ -40,7 +39,7 @@ class MessageInfo:
             return None
         return self.message_message
 
-    async def get_board_message(self, bot: BluejaryBot, fetch=False) -> Union[Message, None]:
+    async def get_board_message(self, bot, fetch=False) -> Union[Message, None]:
         try:
             channel: TextChannel = await bot.fetch_channel(self.board_channel)
             self.board_message = await channel.fetch_message(self.board_id)
