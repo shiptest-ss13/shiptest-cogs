@@ -22,6 +22,7 @@ class BluejaryBot(commands.Cog):
             "id_board": None,
             "board_count": None,
             "board_map": None,
+            "allow_board": None,
         }
 
         self.config.register_guild(**def_cfg)
@@ -48,6 +49,12 @@ class BluejaryBot(commands.Cog):
             await ctx.send("Updated value")
         except Exception:
             await ctx.send("Failed to update value, check your syntax")
+
+    async def allow_board(self, ctx):
+        cfg = self.config.guild(ctx.guild)
+        val = not await cfg.allow_board()
+        await cfg.allow_board.set(val)
+        await ctx.send(f"{['no longer', 'now'][val]} allowing board reactions")
 
     @bluejary.command()
     async def board_count(self, ctx: commands.Context, value):
@@ -134,7 +141,7 @@ class BluejaryBot(commands.Cog):
             self.im_doing_shit = False
             return
 
-        if message.channel.id == board_channel:
+        if message.channel.id == board_channel and not await cfg.allow_board():
             log.error("Attempted to process a board message!")
             self.im_doing_shit = False
             return
@@ -168,14 +175,17 @@ class BluejaryBot(commands.Cog):
         self.im_doing_shit = False
 
     async def update_board_message(self, message: Message, board_message: Message, emojis):
+        if not message or not board_message or not emojis:
+            return log.error("Attempted to update board with missing args")
         emoji = await message.guild.fetch_emoji(await self.config.guild(message.guild).id_emoji())
+        log.info(f"emoji name: {emoji.name}")
         emoji_str = f"{emojis} - <:{emoji.name}:{emoji.id}>\n\n"
         embie = Embed(type="rich", description=(emoji_str + message.clean_content()), timestamp=message.created_at)
         embie.set_author(name=message.author.display_name, icon_url=message.author.avatar_url)
         embie.set_footer(f"<#{message.channel.id}> | <a href='{message.jump_url}'>Jump To</a>")
         if len(message.attachments):
             embie.url = message.attachments[0].url
-        await board_message.edit(content=None, embed=embie)
+        await board_message.edit(embed=embie)
 
     @commands.Cog.listener("on_raw_reaction_add")
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
