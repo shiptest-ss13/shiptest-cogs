@@ -175,8 +175,8 @@ class BluejaryBot(commands.Cog):
         try:
             log.info("Updating board")
             await self.update_board_message(message, board_msg, emoji_count)
-        except Exception:
-            pass
+        except Exception as exc:
+            log.error(f"failed to update board:\n{str(exc)}")
         self.im_doing_shit = False
 
     async def update_board_message(self, message: Message, board_message: Message, emojis):
