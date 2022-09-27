@@ -153,10 +153,11 @@ class BluejaryBot(commands.Cog):
         log.info(f"Looking for {count_target} found {emoji_count} boarded {boarded}")
         board_msg = await self.get_board_message(message)
 
-        if not boarded and board_msg:
-            log.info("Shouldnt be boarded, but we found a board message")
-            await board_msg.delete()
-            self.im_doing_shit = False
+        if not boarded:
+            if board_msg:
+                log.info("Shouldnt be boarded, but we found a board message")
+                await board_msg.delete()
+                self.im_doing_shit = False
             return
 
         if not board_channel:
