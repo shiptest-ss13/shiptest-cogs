@@ -7,45 +7,45 @@ from typing import Union
 class MessageInfo:
     message_id: int
     message_channel: int
-    message_message: Message
+    _message_message: Message
 
     board_id: int
     board_channel: int
-    board_message: Message
+    _board_message: Message
 
     def set_message(self, message: Message):
         self.message_id = message.id
         self.message_channel = message.channel.id
-        self.message_message = message
+        self._message_message = message
         return self
 
     def set_board_message(self, board_message: Message):
         if not board_message or not isinstance(board_message, Message):
             self.board_id = None
             self.board_channel = None
-            self.board_message = None
+            self._board_message = None
             return self
 
         self.board_id = board_message.id
         self.board_channel = board_message.channel.id
-        self.board_message = board_message
+        self._board_message = board_message
         return self
 
     async def get_message(self, bot, fetch=False) -> Union[Message, None]:
         try:
             channel: TextChannel = await bot.fetch_channel(self.message_channel)
-            self.message_message = await channel.fetch_message(self.message_id)
+            self._message_message = await channel.fetch_message(self.message_id)
         except NotFound:
             return None
-        return self.message_message
+        return self._message_message
 
     async def get_board_message(self, bot, fetch=False) -> Union[Message, None]:
         try:
             channel: TextChannel = await bot.fetch_channel(self.board_channel)
-            self.board_message = await channel.fetch_message(self.board_id)
+            self._board_message = await channel.fetch_message(self.board_id)
         except NotFound:
             return None
-        return self.board_message
+        return self._board_message
 
     def to_json(self) -> str:
         ret = {}
