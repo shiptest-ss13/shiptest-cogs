@@ -168,8 +168,8 @@ class BluejaryBot(commands.Cog):
         if not board_msg:
             log.info("No board message, making a new one")
             board_msg = await (await self.bot.fetch_channel(board_channel)).send("caching context")
-            # wait two seconds to ensure discord updates
-            await asyncio.sleep(2)
+            # wait to ensure discord updates
+            await asyncio.sleep(0.5)
             await self.set_board_message(message, board_msg)
 
         try:
@@ -184,10 +184,10 @@ class BluejaryBot(commands.Cog):
             return log.error("Attempted to update board with missing args")
         emoji = await message.guild.fetch_emoji(await self.config.guild(message.guild).id_emoji())
         log.info(f"emoji name: {emoji.name}")
-        emoji_str = f"{emojis} - <:{emoji.name}:{emoji.id}>\n\n"
+        emoji_str = f"{emojis} - <:{emoji.name}:{emoji.id}>\n{'-' * 10}\n"
         embie = Embed(type="rich", description=(emoji_str + message.clean_content), timestamp=message.created_at)
         embie.set_author(name=message.author.display_name, icon_url=message.author.avatar_url)
-        embie.set_footer(text=f"<#{message.channel.id}> | <a href='{message.jump_url}'>Jump To</a>")
+        embie.add_field(name="Origin", value=f"<#{message.channel.id}> | <a href='{message.jump_url}'>Jump To</a>")
         if len(message.attachments):
             embie.url = message.attachments[0].url
         await board_message.edit(embed=embie)
