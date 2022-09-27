@@ -67,6 +67,7 @@ class BluejaryBot(commands.Cog):
             await ctx.send("Failed to update value, check your syntax")
 
     async def set_board_message(self, message: Message, board_message: Message):
+        log.info(f"setting board for guild {message.guild.id}")
         cfg = self.config.guild(message.guild)
         map = await cfg.board_map()
         if not map:
@@ -81,6 +82,7 @@ class BluejaryBot(commands.Cog):
         await cfg.board_map.set(map)
 
     async def get_board_message(self, message: Message) -> Union[Message, None]:
+        log.info(f"getting board for guild {message.guild.id}")
         cfg = self.config.guild(message.guild)
         map = await cfg.board_map()
         if not map:
@@ -167,9 +169,9 @@ class BluejaryBot(commands.Cog):
 
         if not board_msg:
             board_msg = await (await self.bot.fetch_channel(board_channel)).send("caching context")
+            await self.set_board_message(message, board_msg)
             # wait to ensure discord updates
             await asyncio.sleep(0.5)
-            await self.set_board_message(message, board_msg)
 
         try:
             await self.update_board_message(message, board_msg, emoji_count)
