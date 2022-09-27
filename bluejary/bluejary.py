@@ -110,6 +110,7 @@ class BluejaryBot(commands.Cog):
             for user in await reaction.users().flatten():
                 counts.append(user.id)
         counts = set(counts)
+        log.info(f"Found {len(counts)} reactions")
         return len(counts)
 
     async def update_message(self, message: Message = None, message_id=None, message_channel=None):
@@ -149,6 +150,7 @@ class BluejaryBot(commands.Cog):
 
         emoji_count = await self.count_emoji(message)
         boarded = (emoji_count >= count_target)
+        log.info(f"Looking for {count_target} found {emoji_count} boarded {boarded}")
         board_msg = await self.get_board_message(message)
 
         if not boarded and board_msg:
