@@ -157,7 +157,7 @@ class BluejaryBot(commands.Cog):
             if board_msg:
                 log.info("Shouldnt be boarded, but we found a board message")
                 await board_msg.delete()
-                self.im_doing_shit = False
+            self.im_doing_shit = False
             return
 
         if not board_channel:
