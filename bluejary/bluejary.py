@@ -118,7 +118,7 @@ class BluejaryBot(commands.Cog):
             self.old_updates[chk_id] = utcnow
 
         log.info(f"Need to wait: {self.im_doing_shit}")
-        while self.im_doing_shit is True:
+        while self.im_doing_shit:
             await asyncio.sleep(0.25)
         self.im_doing_shit = True
 
