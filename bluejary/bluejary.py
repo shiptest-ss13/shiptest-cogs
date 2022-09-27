@@ -50,6 +50,7 @@ class BluejaryBot(commands.Cog):
         except Exception:
             await ctx.send("Failed to update value, check your syntax")
 
+    @bluejary.command()
     async def allow_board(self, ctx):
         cfg = self.config.guild(ctx.guild)
         val = not await cfg.allow_board()
