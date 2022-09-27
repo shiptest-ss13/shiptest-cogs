@@ -84,8 +84,10 @@ class BluejaryBot(commands.Cog):
         cfg = self.config.guild(message)
         map = await cfg.board_map()
         if not map:
+            log.info("resetting map, invalid state")
             map = {}
-        inf: MessageInfo = map.get(message.id, None)
+            await cfg.board_map.set(map)
+        inf: MessageInfo = map.get(message.id)
         if not inf:
             log.info("info not found in map")
             return None
