@@ -77,6 +77,7 @@ class BluejaryBot(commands.Cog):
         else:
             inf.set_board_message(board_message)
         map[message.id] = inf.to_json()
+        log.info(f"map id {message.id} set to {inf.to_json()}")
         await cfg.board_map.set(map)
 
     async def get_board_message(self, message: Message) -> Union[Message, None]:
@@ -86,6 +87,7 @@ class BluejaryBot(commands.Cog):
             map = {}
         inf: MessageInfo = map.get(message.id, None)
         if not inf:
+            log.info("info not found in map")
             return None
         return await inf.get_board_message(self)
 
@@ -110,7 +112,6 @@ class BluejaryBot(commands.Cog):
             for user in await reaction.users().flatten():
                 counts.append(user.id)
         counts = set(counts)
-        log.info(f"Found {len(counts)} reactions")
         return len(counts)
 
     async def update_message(self, message: Message = None, message_id=None, message_channel=None):
@@ -126,7 +127,6 @@ class BluejaryBot(commands.Cog):
                 return
             self.old_updates[chk_id] = utcnow
 
-        log.info(f"Need to wait: {self.im_doing_shit}")
         while self.im_doing_shit:
             await asyncio.sleep(0.25)
         self.im_doing_shit = True
@@ -150,12 +150,10 @@ class BluejaryBot(commands.Cog):
 
         emoji_count = await self.count_emoji(message)
         boarded = (emoji_count >= count_target)
-        log.info(f"Looking for {count_target} found {emoji_count} boarded {boarded}")
         board_msg = await self.get_board_message(message)
 
         if not boarded:
             if board_msg:
-                log.info("Shouldnt be boarded, but we found a board message")
                 await board_msg.delete()
             self.im_doing_shit = False
             return
@@ -166,14 +164,12 @@ class BluejaryBot(commands.Cog):
             return
 
         if not board_msg:
-            log.info("No board message, making a new one")
             board_msg = await (await self.bot.fetch_channel(board_channel)).send("caching context")
             # wait to ensure discord updates
             await asyncio.sleep(0.5)
             await self.set_board_message(message, board_msg)
 
         try:
-            log.info("Updating board")
             await self.update_board_message(message, board_msg, emoji_count)
         except Exception as exc:
             log.error(f"failed to update board:\n{str(exc)}")
@@ -183,7 +179,6 @@ class BluejaryBot(commands.Cog):
         if not message or not board_message or not emojis:
             return log.error("Attempted to update board with missing args")
         emoji = await message.guild.fetch_emoji(await self.config.guild(message.guild).id_emoji())
-        log.info(f"emoji name: {emoji.name}")
         emoji_str = f"{emojis} - <:{emoji.name}:{emoji.id}>\n{'-' * 10}\n"
         embie = Embed(type="rich", description=(emoji_str + message.clean_content), timestamp=message.created_at)
         embie.set_author(name=message.author.display_name, icon_url=message.author.avatar_url)
