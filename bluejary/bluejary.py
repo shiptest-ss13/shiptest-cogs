@@ -129,11 +129,13 @@ class BluejaryBot(commands.Cog):
         board_channel = await cfg.id_board()
         count_target = await cfg.board_count()
 
-        if not count_target or not board_channel:
+        if not count_target:
+            log.error("No count target!")
             self.im_doing_shit = False
             return
 
         if message.channel.id == board_channel:
+            log.error("Attempted to process a board message!")
             self.im_doing_shit = False
             return
 
