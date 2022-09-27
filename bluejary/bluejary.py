@@ -67,7 +67,7 @@ class BluejaryBot(commands.Cog):
             await ctx.send("Failed to update value, check your syntax")
 
     async def set_board_message(self, message: Message, board_message: Message):
-        cfg = self.config.guild(message)
+        cfg = self.config.guild(message.guild)
         map = await cfg.board_map()
         if not map:
             map = {}
@@ -81,7 +81,7 @@ class BluejaryBot(commands.Cog):
         await cfg.board_map.set(map)
 
     async def get_board_message(self, message: Message) -> Union[Message, None]:
-        cfg = self.config.guild(message)
+        cfg = self.config.guild(message.guild)
         map = await cfg.board_map()
         if not map:
             log.info("resetting map, invalid state")
