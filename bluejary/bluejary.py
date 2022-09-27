@@ -105,13 +105,17 @@ class BluejaryBot(commands.Cog):
         return len(counts)
 
     async def update_message(self, message: Message = None, message_id=None, message_channel=None):
-        if message.id in self.old_updates:
-            last_update: datetime = self.old_updates[message.id]
+        if message:
+            chk_id = message.id
+        else:
+            chk_id = message_id
+        if chk_id in self.old_updates:
+            last_update: datetime = self.old_updates[chk_id]
             utcnow = datetime.utcnow()
             delta = last_update - utcnow
             if delta.total_seconds < 2:
                 return
-            self.old_updates[message.id] = utcnow
+            self.old_updates[chk_id] = utcnow
 
         while self.im_doing_shit is False:
             await asyncio.sleep(0.25)
