@@ -168,8 +168,9 @@ class BluejaryBot(commands.Cog):
         if not board_msg:
             log.info("No board message, making a new one")
             board_msg = await (await self.bot.fetch_channel(board_channel)).send("caching context")
+            # wait two seconds to ensure discord updates
+            await asyncio.sleep(2)
             await self.set_board_message(message, board_msg)
-            await asyncio.sleep(0.5)
 
         try:
             log.info("Updating board")
