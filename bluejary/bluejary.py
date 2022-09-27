@@ -117,6 +117,7 @@ class BluejaryBot(commands.Cog):
                 return
             self.old_updates[chk_id] = utcnow
 
+        log.info(f"Need to wait: {self.im_doing_shit}")
         while self.im_doing_shit is False:
             await asyncio.sleep(0.25)
         self.im_doing_shit = True
@@ -141,20 +142,24 @@ class BluejaryBot(commands.Cog):
         board_msg = await self.get_board_message(message)
 
         if not boarded and board_msg:
+            log.info("Shouldnt be boarded, but we found a board message")
             await board_msg.delete()
             self.im_doing_shit = False
             return
 
         if not board_channel:
+            log.error("No board!")
             self.im_doing_shit = False
             return
 
         if not board_msg:
+            log.info("No board message, making a new one")
             board_msg = await (await self.bot.fetch_channel(board_channel)).send("caching context")
             await self.set_board_message(message, board_msg)
             await asyncio.sleep(0.5)
 
         try:
+            log.info("Updating board")
             await self.update_board_message(message, board_msg, emoji_count)
         except Exception:
             pass
