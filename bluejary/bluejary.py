@@ -72,13 +72,14 @@ class BluejaryBot(commands.Cog):
         map = await cfg.board_map()
         if not map:
             map = {}
-        inf: MessageInfo = map.get(message.id, None)
+        m_id = str(message.id)
+        inf: MessageInfo = map.get(m_id)
         if not inf:
             inf = MessageInfo().set_message(message).set_board_message(board_message)
         else:
             inf.set_board_message(board_message)
-        map[message.id] = inf.to_json()
-        log.info(f"map id {message.id} set to {inf.to_json()}")
+        map[m_id] = inf.to_json()
+        log.info(f"map id {m_id} set to {inf.to_json()}")
         await cfg.board_map.set(map)
 
     async def get_board_message(self, message: Message) -> Union[Message, None]:
@@ -89,7 +90,8 @@ class BluejaryBot(commands.Cog):
             log.info("resetting map, invalid state")
             map = {}
             await cfg.board_map.set(map)
-        inf: MessageInfo = map.get(message.id)
+        m_id = str(message.id)
+        inf: MessageInfo = map.get(m_id)
         if not inf:
             log.info("info not found in map")
             return None
