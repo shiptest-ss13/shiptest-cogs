@@ -193,7 +193,7 @@ class BluejaryBot(commands.Cog):
         embie.add_field(name="Origin", value=f"<#{message.channel.id}> | [Jump To]({message.jump_url})")
         if len(message.attachments):
             embie.url = message.attachments[0].url
-        await board_message.edit(embed=embie)
+        await board_message.edit(embed=embie, content=None)
 
     @commands.Cog.listener("on_raw_reaction_add")
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
