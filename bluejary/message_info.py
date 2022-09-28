@@ -62,6 +62,6 @@ class MessageInfo:
     def from_json(cls, json):
         inf = MessageInfo()
         ret: dict = JSONDecoder().decode(json)
-        for k, v in ret:
-            setattr(inf, k, v)
+        for k in ret.keys():
+            setattr(inf, k, ret[k])
         return inf
