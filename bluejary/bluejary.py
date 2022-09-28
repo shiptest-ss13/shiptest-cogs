@@ -12,7 +12,6 @@ log = logging.getLogger("red.bluejary")
 class BluejaryBot(commands.Cog):
     im_doing_shit = False
     old_updates = {}
-    board_map = {}
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -22,6 +21,7 @@ class BluejaryBot(commands.Cog):
             "id_emoji": None,
             "id_board": None,
             "board_count": None,
+            "board_map": None,
             "allow_board": None,
         }
 
@@ -69,22 +69,34 @@ class BluejaryBot(commands.Cog):
     async def set_board_message(self, message: Message, board_message: Message):
         log.info(f"setting board for guild {message.guild.id}")
         cfg = self.config.guild(message.guild)
+        map = await cfg.board_map()
+        if not map:
+            map = {}
         m_id = str(message.id)
-        inf: MessageInfo = self.board_map.get(m_id)
+        log.info(f"Looking for {m_id}")
+        inf: MessageInfo = map.get(m_id)
         if not inf:
             inf = MessageInfo().set_message(message).set_board_message(board_message)
+            map[m_id] = inf
         else:
             inf.set_board_message(board_message)
         log.info(f"map id {m_id} set to {inf.to_json()}")
+        await cfg.board_map.set(map)
 
     async def get_board_message(self, message: Message) -> Union[Message, None]:
         log.info(f"getting board for guild {message.guild.id}")
+        cfg = self.config.guild(message.guild)
+        map = await cfg.board_map()
+        if not map:
+            log.info("resetting map, invalid state")
+            map = {}
+            await cfg.board_map.set(map)
         m_id = str(message.id)
-        inf: MessageInfo = self.board_map.get(m_id)
+        log.info(f"Looking for {m_id}")
+        inf: MessageInfo = map.get(m_id)
         if not inf:
             log.info("info not found in map")
             return None
-        log.info("info found in map")
         return await inf.get_board_message(self)
 
     async def count_emoji(self, message: Message):
