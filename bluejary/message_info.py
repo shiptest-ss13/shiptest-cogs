@@ -41,7 +41,7 @@ class MessageInfo:
 
     async def get_board_message(self, bot, fetch=False) -> Union[Message, None]:
         try:
-            channel: TextChannel = await bot.fetch_channel(self.board_channel)
+            channel: TextChannel = await bot.bot.fetch_channel(self.board_channel)
             self._board_message = await channel.fetch_message(self.board_id)
         except NotFound:
             return None
