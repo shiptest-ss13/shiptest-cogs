@@ -73,35 +73,28 @@ class BluejaryBot(commands.Cog):
         await ctx.send("reset")
 
     async def set_board_message(self, message: Message, board_message: Message):
-        log.info(f"setting board for guild {message.guild.id}")
         cfg = self.config.guild(message.guild)
         map = await cfg.board_map()
         if not map:
             map = {}
         m_id = str(message.id)
-        log.info(f"Looking for {m_id}")
         inf: MessageInfo = map.get(m_id)
         if not inf:
             inf = MessageInfo().set_message(message).set_board_message(board_message)
         else:
             inf.set_board_message(board_message)
         map[m_id] = inf.to_json()
-        log.info(f"map id {m_id} set to {inf.to_json()}")
         await cfg.board_map.set(map)
 
     async def get_board_message(self, message: Message) -> Union[Message, None]:
-        log.info(f"getting board for guild {message.guild.id}")
         cfg = self.config.guild(message.guild)
         map = await cfg.board_map()
         if not map:
-            log.info("resetting map, invalid state")
             map = {}
             await cfg.board_map.set(map)
         m_id = str(message.id)
-        log.info(f"Looking for {m_id}")
         inf: MessageInfo = map.get(m_id)
         if not inf:
-            log.info("info not found in map")
             return None
         inf = MessageInfo.from_json(inf)
         return await inf.get_board_message(self)
