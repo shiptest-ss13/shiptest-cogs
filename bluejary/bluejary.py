@@ -66,6 +66,12 @@ class BluejaryBot(commands.Cog):
         except Exception:
             await ctx.send("Failed to update value, check your syntax")
 
+    @bluejary.command()
+    @checks.is_owner()
+    async def reset(self, ctx):
+        self.im_doing_shit = False
+        await ctx.send("reset")
+
     async def set_board_message(self, message: Message, board_message: Message):
         log.info(f"setting board for guild {message.guild.id}")
         cfg = self.config.guild(message.guild)
