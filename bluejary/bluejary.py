@@ -97,6 +97,7 @@ class BluejaryBot(commands.Cog):
         if not inf:
             log.info("info not found in map")
             return None
+        inf = MessageInfo.from_json(inf)
         return await inf.get_board_message(self)
 
     async def count_emoji(self, message: Message):
