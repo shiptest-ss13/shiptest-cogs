@@ -38,6 +38,7 @@ class MCMon(commands.Cog):
         default_guild = {"enabled": False, "channel": None, "interval": 300, "servers": []}
         default_server = {"last_online": False, "server_message": None}
         self.config.register_guild(**default_guild)
+        self.config.init_custom("server", 1)
         self.config.register_custom("server", **default_server)
         for guild in self.bot.guilds:
             self.bot.loop.create_task(self.monitor(guild))
