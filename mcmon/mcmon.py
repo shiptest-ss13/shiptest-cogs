@@ -160,8 +160,6 @@ class MCMon(commands.Cog):
                                 embed.add_field(
                                     name="Players", value="\n".join(status.players_list)
                                 )
-                            if status.icon:
-                                embed.set_thumbnail(url=status.icon)
                             await self.config.last_online.set(status.online)
                         else:
                             if last_online:
