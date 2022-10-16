@@ -33,6 +33,7 @@ class MCMon(commands.Cog):
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+        self.bot.add_listener(self.monitor, "on_guild_join")
         self.config = Config.get_conf(self, identifier=1234513213123)
         default_guild = {"enabled": False, "channel": None, "interval": 300, "servers": []}
         default_server = {"last_online": False, "server_message": None}
@@ -44,7 +45,6 @@ class MCMon(commands.Cog):
     def cog_unload(self):
         self.bot.loop.create_task(self.config.clear_all_custom("server"))
 
-    @commands.Bot.listen("on_guild_join")
     async def on_guild_join(self, guild):
         self.bot.loop.create_task(self.monitor(guild))
 
