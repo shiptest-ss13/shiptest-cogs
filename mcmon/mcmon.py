@@ -44,7 +44,7 @@ class MCMon(commands.Cog):
     def cog_unload(self):
         self.bot.loop.create_task(self.config.clear_all_custom("server"))
 
-    @commands.Bot.listen()
+    @commands.Bot.listen("on_guild_join")
     async def on_guild_join(self, guild):
         self.bot.loop.create_task(self.monitor(guild))
 
