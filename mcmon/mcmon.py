@@ -1,6 +1,5 @@
 import asyncio
 from logging import getLogger
-from typing_extensions import Self
 
 import aiohttp
 from discord import Color, Embed, Message, TextChannel
