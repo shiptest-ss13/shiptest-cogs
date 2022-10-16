@@ -1,9 +1,10 @@
 import asyncio
 from logging import getLogger
+from typing_extensions import Self
 
 import aiohttp
 from discord import Color, Embed, Message, TextChannel
-from redbot.core import Config, checks, commands, events
+from redbot.core import Config, checks, commands
 
 log = getLogger("red.mcmon")
 
@@ -44,7 +45,7 @@ class MCMon(commands.Cog):
     def cog_unload(self):
         self.bot.loop.create_task(self.config.clear_all_custom("server"))
 
-    @events.guild_join()
+    @commands.Bot.listen()
     async def on_guild_join(self, guild):
         self.bot.loop.create_task(self.monitor(guild))
 
