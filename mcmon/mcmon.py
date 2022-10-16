@@ -139,7 +139,7 @@ class MCMon(commands.Cog):
         log.info("Starting monitor for %s", guild.name)
         while self is self.bot.get_cog("MCMon"):
             log.info("Checking servers for %s", guild.name)
-            if await self.config.enabled():
+            if await self.config.guild(guild).enabled():
                 log.info("Monitoring enabled for %s", guild.name)
                 servers = await self.config.guild(guild).servers()
                 channel = self.bot.get_channel(await self.config.guild(guild).channel())
