@@ -1,0 +1,10 @@
+{
+    "author": ["ZephyrTFA"],
+    "name": "Minecraft Server Monitor",
+    "short": "Monitors information for a Minecraft server",
+    "description": "Monitors information for a Minecraft server",
+    "permissions" : ["Manage Messages"],
+    "tags": [
+        "Utility", "MC"
+    ]
+}
