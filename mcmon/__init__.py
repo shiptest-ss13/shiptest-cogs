@@ -1,4 +1,4 @@
-from . import MCMon
+from .mcmon import MCMon
 
 
 def setup(bot):
