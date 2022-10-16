@@ -136,11 +136,15 @@ class MCMon(commands.Cog):
 
     async def monitor(self, guild) -> None:
         await self.bot.wait_until_ready()
+        log.info("Starting monitor for %s", guild.name)
         while self is self.bot.get_cog("MCMon"):
+            log.info("Checking servers for %s", guild.name)
             if await self.config.enabled():
+                log.info("Monitoring enabled for %s", guild.name)
                 servers = await self.config.guild(guild).servers()
                 channel = self.bot.get_channel(await self.config.guild(guild).channel())
                 if channel:
+                    log.info("Channel found for %s", guild.name)
                     for server in servers:
                         status = await MCSrvStatus.get_server_status(server)
                         last_online = await self.config.custom("server", server).last_online()
@@ -170,9 +174,11 @@ class MCMon(commands.Cog):
                                 embed = None
                         server_message = await self.config.custom("server", server).server_message()
                         if server_message:
+                            log.info("Server message found for %s", guild.name)
                             message = await channel.fetch_message(server_message)
                             await message.edit(embed=embed)
                         else:
+                            log.info("Server message not found for %s", guild.name)
                             message = await channel.send(embed=embed)
                             await self.config.custom("server", server).server_message.set(message.id)
             await asyncio.sleep(await self.config.guild(guild).interval())
