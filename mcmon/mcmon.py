@@ -17,7 +17,10 @@ class MCSrvStatus:
         self.version = data["version"]
         self.players_online = data["players"]["online"]
         self.players_max = data["players"]["max"]
-        self.players_list = data["players"]["list"]
+        if "list" in data["players"]:
+            self.players_list = data["players"]["list"]
+        else:
+            self.players_list = None
         self.icon = data["icon"]
         self.software = data["software"]
 
@@ -156,10 +159,9 @@ class MCMon(commands.Cog):
                                 f"**Software:** {status.software}",
                                 color=Color.green(),
                             )
-                            if status.players_list:
-                                embed.add_field(
-                                    name="Players", value="\n".join(status.players_list)
-                                )
+                            embed.add_field(
+                                name="Players", value=("\n".join(status.players_list) if status.players_list else "Unknown")
+                            )
                             await self.config.last_online.set(status.online)
                         else:
                             if last_online:
