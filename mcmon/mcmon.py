@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta
 from logging import getLogger
 
 import aiohttp
@@ -156,7 +157,8 @@ class MCMon(commands.Cog):
                                 title=f"{status.hostname}({status.version}) is online",
                                 description=f"**MOTD:** {status.motd}\n"
                                 f"**Players:** {status.players_online}/{status.players_max}\n"
-                                f"**Software:** {status.software}",
+                                f"**Software:** {status.software}"
+                                f"**Last Updated:** <t:{datetime.utcnow().timestamp()}:R>",
                                 color=Color.green(),
                             )
                             embed.add_field(
