@@ -1,6 +1,7 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from logging import getLogger
+from time import mktime
 
 import aiohttp
 from discord import Color, Embed, Message, TextChannel
@@ -153,12 +154,13 @@ class MCMon(commands.Cog):
                         status = await MCSrvStatus.get_server_status(server)
                         last_online = await self.config.custom("server", server).last_online()
                         if status.online:
+                            utctimestamp = mktime(datetime.utcnow().timetuple())
                             embed = Embed(
                                 title=f"{status.hostname}({status.version}) is online",
                                 description=f"**MOTD:** {status.motd}\n"
                                 f"**Players:** {status.players_online}/{status.players_max}\n"
                                 f"**Software:** {status.software}"
-                                f"**Last Updated:** <t:{datetime.utcnow().timestamp()}:R>",
+                                f"**Last Updated:** <t:{utctimestamp}:R>",
                                 color=Color.green(),
                             )
                             embed.add_field(
