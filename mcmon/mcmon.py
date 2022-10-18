@@ -48,9 +48,6 @@ class MCMon(commands.Cog):
         for guild in self.bot.guilds:
             self.bot.loop.create_task(self.monitor(guild))
 
-    def cog_unload(self):
-        self.bot.loop.create_task(self.config.clear_all_custom("server"))
-
     async def on_guild_join(self, guild):
         self.bot.loop.create_task(self.monitor(guild))
 
@@ -164,7 +161,7 @@ class MCMon(commands.Cog):
                                 color=Color.green(),
                             )
                             embed.add_field(
-                                name="Players", value=("\n".join(status.players_list) if status.players_list else "Unknown")
+                                name="Players", value=(("```" + ("\n".join(status.players_list)) + "\n") if status.players_list else "Unknown")
                             )
                             await self.config.last_online.set(status.online)
                         else:
