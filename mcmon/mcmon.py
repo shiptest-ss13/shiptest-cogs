@@ -156,12 +156,12 @@ class MCMon(commands.Cog):
                                 title=f"{status.hostname}({status.version}) is online",
                                 description=f"**MOTD:** {status.motd}\n"
                                 f"**Players:** {status.players_online}/{status.players_max}\n"
-                                f"**Software:** {status.software}"
+                                f"**Software:** {status.software}\n"
                                 f"**Last Updated:** <t:{utctimestamp}:R>",
                                 color=Color.green(),
                             )
                             embed.add_field(
-                                name="Players", value=(("```" + ("\n".join(status.players_list)) + "\n") if status.players_list else "Unknown")
+                                name="Players", value=(("```\n" + ("\n".join(status.players_list)) + "\n```") if status.players_list else "Unknown")
                             )
                             await self.config.last_online.set(status.online)
                         else:
