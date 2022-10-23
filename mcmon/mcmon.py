@@ -1,7 +1,6 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from time import mktime
 
 import aiohttp
 from discord import Color, Embed, Message, TextChannel
@@ -151,7 +150,7 @@ class MCMon(commands.Cog):
                         status = await MCSrvStatus.get_server_status(server)
                         last_online = await self.config.custom("server", server).last_online()
                         if status.online:
-                            utctimestamp = str(datetime.utcnow().timestamp()).split(".")[0]
+                            utctimestamp = str(datetime.now().timestamp()).split(".")[0]
                             embed = Embed(
                                 title=f"{status.hostname}({status.version}) is online",
                                 description=f"**MOTD:** {status.motd}\n"
