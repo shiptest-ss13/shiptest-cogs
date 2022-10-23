@@ -150,7 +150,7 @@ class MCMon(commands.Cog):
                         status = await MCSrvStatus.get_server_status(server)
                         last_online = await self.config.custom("server", server).last_online()
                         if status.online:
-                            update_stamp = str(datetime.now().timestamp()).split(".")[0] + await self.config.guild(guild).interval()
+                            update_stamp = int(str(datetime.now().timestamp()).split(".")[0]) + await self.config.guild(guild).interval()
                             embed = Embed(
                                 title=f"{status.hostname}({status.version}) is online",
                                 description=f"**MOTD:** {status.motd}\n"
