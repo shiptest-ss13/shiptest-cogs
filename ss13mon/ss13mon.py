@@ -32,6 +32,7 @@ class SS13Mon(commands.Cog):
 			"update_hash": None,
 			"channel": None,
 			"address": None,
+			"public_address": None,
 			"port": None,
 			"port_auth": None,
 			"message_id": None,
@@ -79,6 +80,12 @@ class SS13Mon(commands.Cog):
 		cfg = self.config.guild(ctx.guild)
 		await cfg.address.set(value)
 		await ctx.send("Updated the config entry for address.")
+
+	@ss13mon.command()
+	async def public_address(self, ctx, value):
+		cfg = self.config.guild(ctx.guild)
+		await cfg.public_address.set(value)
+		await ctx.send("Updated the config entry for public_address.")
 
 	@ss13mon.command()
 	async def port(self, ctx: commands.Context, value = None):
@@ -150,7 +157,8 @@ class SS13Mon(commands.Cog):
 			update_interval = 0
 		embbie: discord.Embed = discord.Embed(type="rich", color=discord.Colour.blue(), title=servtitle, timestamp=datetime.utcnow())
 
-		value_inf = "Round ID: `{}`\nPlayers: `{}`\nDuration: `{}`\nTIDI: `{}%`\nNext Update: `{}`\nJoin: <byond://{}:{}/>".format(roundid, player_count, duration, time_dilation_avg, ("{}s".format(update_interval), "Disabled")[update_interval == 0], address, port)
+		public_address = await cfg.public_address()
+		value_inf = "Round ID: `{}`\nPlayers: `{}`\nDuration: `{}`\nTIDI: `{}%`\nNext Update: `{}`\nJoin: <byond://{}:{}/>".format(roundid, player_count, duration, time_dilation_avg, ("{}s".format(update_interval), "Disabled")[update_interval == 0], public_address, port)
 		embbie.add_field(name="Server Information", value=value_inf)
 
 		field_visi = "Visible Players ({})".format(len(players))
@@ -174,7 +182,8 @@ class SS13Mon(commands.Cog):
 			return discord.Embed(type="rich", color=discord.Colour.red(), title="Auth Server", timestamp=datetime.utcnow()).add_field(name="Auth Server Offline", value="Last Seen: `{}`".format(last_online))
 		await cfg.last_online_auth.set(time())
 
-		return discord.Embed(type="rich", color=discord.Colour.blue(), title="Auth server", timestamp=datetime.utcnow()).add_field(name="Join", value="<byond://{}:{}/>".format(address, port))
+		public_address = await cfg.public_address()
+		return discord.Embed(type="rich", color=discord.Colour.blue(), title="Auth server", timestamp=datetime.utcnow()).add_field(name="Join", value="<byond://{}:{}/>".format(public_address, port))
 
 	async def query_server(self, game_server:str, game_port:int, querystr="?status" ) -> dict:
 		"""
