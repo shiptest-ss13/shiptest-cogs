@@ -250,9 +250,9 @@ def tgs_repo_update(address, token, instance, req: TgsModel_RepositoryUpdateRequ
     return __tgs_request(address, "/Repository", method="post", headers={"Instance": str(instance)}, token=token, cls=TgsModel_RepositoryResponse, json=req.encode())
 
 
-def tgs_repo_update_tms(address, token, instance):
+def tgs_repo_update_tms(address, token, instance, gh_token = None):
     current = tgs_repo_status(address, token, instance)
-    gh = github.Github()
+    gh = github.Github(gh_token)
     gh_repo = gh.get_repo("{}/{}".format(current.RemoteRepositoryOwner, current.RemoteRepositoryName))
 
     new_tms = list()

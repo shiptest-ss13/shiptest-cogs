@@ -136,9 +136,9 @@ class TGSLink(commands.Cog):
         await ctx.reply("Updated address!")
 
     @config.command()
-    async def gh_token(self, ctx, gh_token):
+    async def token_gh(self, ctx, token_gh):
         cfg = self._config.member(ctx.author)
-        await cfg.gh_token.set(gh_token)
+        await cfg.token_gh.set(token_gh)
         await ctx.reply("Updated your GH Token")
         await self.try_delete(ctx.message)
 
@@ -216,7 +216,7 @@ class TGSLink(commands.Cog):
             if not len(resp.RevisionInformation.ActiveTestMerges):
                 await ctx.send("No TMs active")
                 return
-            gh = Github().get_repo(f"{resp.RemoteRepositoryOwner}/{resp.RemoteRepositoryName}")
+            gh = Github(await self._config.member(ctx.author).token_gh()).get_repo(f"{resp.RemoteRepositoryOwner}/{resp.RemoteRepositoryName}")
             reply = "Active TMs:\n```\n"
             for tm in resp.RevisionInformation.ActiveTestMerges:
                 gh_pr = gh.get_pull(tm.Number)
@@ -230,7 +230,7 @@ class TGSLink(commands.Cog):
     @repo.command()
     async def update_active_tms(self, ctx, instance=1):
         try:
-            if tgs_repo_update_tms(await self.get_address(ctx.guild), await self.get_token(ctx), instance):
+            if tgs_repo_update_tms(await self.get_address(ctx.guild), await self.get_token(ctx), instance, self._config.member(ctx.author).token_gh()):
                 await ctx.reply("Updated all TMs")
             else:
                 await ctx.reply("Failed to update TMs")
