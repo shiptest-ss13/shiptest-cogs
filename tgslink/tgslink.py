@@ -230,7 +230,8 @@ class TGSLink(commands.Cog):
     @repo.command()
     async def update_active_tms(self, ctx, instance=1):
         try:
-            if tgs_repo_update_tms(await self.get_address(ctx.guild), await self.get_token(ctx), instance, self._config.member(ctx.author).token_gh() as str or None):
+            
+            if tgs_repo_update_tms(await self.get_address(ctx.guild), await self.get_token(ctx), instance, await self._config.member(ctx.author).token_gh()):
                 await ctx.reply("Updated all TMs")
             else:
                 await ctx.reply("Failed to update TMs")
