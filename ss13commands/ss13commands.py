@@ -320,5 +320,5 @@ class SS13Commands(commands.Cog):
             log.info(f"Got Answer from Gameserver: {string}")
             return string
 
-        except ConnectionRefusedError:
+        except (ConnectionRefusedError, TimeoutError):
             return None #Server is likely offline
