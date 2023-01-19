@@ -187,7 +187,7 @@ class SS13Commands(commands.Cog):
         """
         string = await self.topic_query_server(querystr="manifest", sender=ctx.author.display_name)
 
-        message = ctx.send("Getting manifest...")
+        message = await ctx.send("Getting manifest...")
 
         if(string):
             data = urllib.parse.parse_qs(string)
@@ -198,7 +198,7 @@ class SS13Commands(commands.Cog):
         else:
             embed = discord.Embed(title="__Crew Manifest:__", description="No crewmembers found! Is the server online?", color=0x26eaea)
         
-        await message.edit(content=None, embed=embed)
+        return await message.edit(content=None, embed=embed)
 
     @commands.guild_only()
     @commands.command()
