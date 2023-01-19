@@ -185,20 +185,21 @@ class SS13Commands(commands.Cog):
         """
         Displays the current crew manifest of the linked SS13 server.
         """
-        string = await self.topic_query_server(querystr="manifest", sender=ctx.author.display_name)
-
         message = await ctx.send("Getting manifest...")
 
-        if(string):
-            data = urllib.parse.parse_qs(string)
-            embed = discord.Embed(title="__Crew Manifest:__", color=0x26eaea)
-            for department in data:
-                entries = [i for i in data[department]]
-                embed.add_field(name=f"{department}",value=f'\n'.join(map(str,entries)),inline=False)
-        else:
-            embed = discord.Embed(title="__Crew Manifest:__", description="No crewmembers found! Is the server online?", color=0x26eaea)
-        
-        return await message.edit(content=None, embed=embed)
+        async with ctx.typing():
+            string = await self.topic_query_server(querystr="manifest", sender=ctx.author.display_name)
+
+            if(string):
+                data = urllib.parse.parse_qs(string)
+                embed = discord.Embed(title="__Crew Manifest:__", color=0x26eaea)
+                for department in data:
+                    entries = [i for i in data[department]]
+                    embed.add_field(name=f"{department}",value=f'\n'.join(map(str,entries)),inline=False)
+            else:
+                embed = discord.Embed(title="__Crew Manifest:__", description="No crewmembers found! Is the server online?", color=0x26eaea)
+            
+            await message.edit(content=None, embed=embed)
 
     @commands.guild_only()
     @commands.command()
