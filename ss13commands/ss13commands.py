@@ -187,15 +187,18 @@ class SS13Commands(commands.Cog):
         """
         string = await self.topic_query_server(querystr="manifest", sender=ctx.author.display_name)
 
+        message = ctx.send("Getting manifest...")
+
         if(string):
             data = urllib.parse.parse_qs(string)
-            embed=discord.Embed(title="__Crew Manifest:__", color=0x26eaea)
+            embed = discord.Embed(title="__Crew Manifest:__", color=0x26eaea)
             for department in data:
                 entries = [i for i in data[department]]
                 embed.add_field(name=f"{department}",value=f'\n'.join(map(str,entries)),inline=False)
         else:
-            embed=discord.Embed(title="__Crew Manifest:__", description="No crewmembers found!", color=0x26eaea)
-        await ctx.send(embed=embed)
+            embed = discord.Embed(title="__Crew Manifest:__", description="No crewmembers found! Is the server online?", color=0x26eaea)
+        
+        await message.edit(content=None, embed=embed)
 
     @commands.guild_only()
     @commands.command()
