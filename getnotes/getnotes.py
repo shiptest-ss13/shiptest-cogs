@@ -189,7 +189,7 @@ class GetNotes(BaseCog):
 
 
     @checks.mod_or_permissions(administrator=True)
-    @commands.command()
+    @commands.hybrid_command()
     async def notes(self, ctx, *, ckey: str):
         """
         Gets the notes for a specific player
@@ -385,7 +385,7 @@ class GetNotes(BaseCog):
 
 
     @checks.mod_or_permissions(administrator=True)
-    @commands.command()
+    @commands.hybrid_command()
     async def findplayer(self, ctx, *, identifier: Union[ipaddress.IPv4Address, int, str] = None):
         """
         Obtains information about a specific player.
@@ -444,7 +444,7 @@ class GetNotes(BaseCog):
             return await message.edit(content="`mysql-connector` requirement not found! Please install this requirement using `pip install mysql-connector`.")
     
     @checks.mod()
-    @commands.command()
+    @commands.hybrid_command()
     async def alts(self, ctx, ckey:str, check_ips:bool = True):
         """
         Search for a list of possible alt accounts

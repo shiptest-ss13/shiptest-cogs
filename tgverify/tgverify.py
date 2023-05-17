@@ -338,7 +338,7 @@ class TGverify(BaseCog):
     @commands.cooldown(6, 60, type=commands.BucketType.guild)
     @commands.max_concurrency(3, per=commands.BucketType.guild, wait=False)
     @commands.guild_only()
-    @commands.command()
+    @commands.hybrid_command()
     async def verify(self, ctx, *, one_time_token: str = None):
         """
         Attempt to verify the user, based on the passed in one time code

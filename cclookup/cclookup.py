@@ -26,7 +26,7 @@ class CCLookup(BaseCog):
         self.bot = bot
         self.api_url = "https://centcom.melonmesa.com"
 
-    @commands.command()
+    @commands.hybrid_command()
     @commands.cooldown(1, 2)
     @commands.max_concurrency(10, wait=True)
     async def centcom(self, ctx, ckey: str, active = False):
@@ -86,7 +86,7 @@ class CCLookup(BaseCog):
         except discord.NotFound:
             pass
     
-    @commands.command()
+    @commands.hybrid_command()
     @commands.cooldown(1, 2)
     @commands.max_concurrency(10, wait=True)
     async def ccservers(self, ctx):

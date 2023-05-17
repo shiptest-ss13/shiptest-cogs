@@ -16,7 +16,7 @@ import logging
 import discord
 
 #Redbot Imports
-from redbot.core import commands, checks, Config, utils
+from redbot.core import app_commands, commands, checks, Config, utils
 
 __version__ = "1.1.0"
 __author__ = "Crossedfall"
@@ -65,7 +65,7 @@ class SS13Status(commands.Cog):
         await ctx.send(f"Listening on port: {port}")
 
     @commands.guild_only()
-    @commands.group()
+    @commands.hybrid_group()
     @checks.admin_or_permissions(administrator=True)
     async def setstatus(self, ctx):
         """
@@ -73,7 +73,7 @@ class SS13Status(commands.Cog):
         """
         pass
     
-    @setstatus.command(aliases=['host'])
+    @setstatus.hybrid_command(aliases=['host'])
     async def server(self, ctx, host: str):
         """
         Sets the server IP used for status checks
@@ -84,7 +84,7 @@ class SS13Status(commands.Cog):
         except (ValueError, KeyError, AttributeError):
             await ctx.send("There was an error setting the host! Please check your entry and try again.")
     
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def port(self, ctx, port: int):
         """
         Sets the port used for the status checks
@@ -98,7 +98,7 @@ class SS13Status(commands.Cog):
         except (ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting your port. Please check to ensure you're attempting to use a port from 1024 to 65535")
 
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def offline(self, ctx, *, msg: str):
         """
         Set a custom message for whenever the server is offline.
@@ -109,7 +109,7 @@ class SS13Status(commands.Cog):
         except (ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting your custom offline message. Please check your entry and try again.")
     
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def byondurl(self, ctx, url: str):
         """
         Set the byond URL for your server (For embeds)
@@ -121,7 +121,7 @@ class SS13Status(commands.Cog):
         except (ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting your server URL. Please check your entry and try again.")
     
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def newroundchannel(self, ctx, text_channel: discord.TextChannel = None):
         """
         Sets the channel for new round notifications. 
@@ -139,7 +139,7 @@ class SS13Status(commands.Cog):
         except(ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting the notification channel. Please check your entry and try again.")
 
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def adminchannel(self, ctx, text_channel: discord.TextChannel = None):
         """
         Set the text channel to display admin notifications.
@@ -157,7 +157,7 @@ class SS13Status(commands.Cog):
         except(ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting the notification channel. Please check your entry and try again.")
 
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def mentorchannel(self, ctx, text_channel: discord.TextChannel = None):
         """
         Set the text channel for mentor notifications.
@@ -176,7 +176,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was a problem setting the notification channel. Please check your entry and try again.")
 
 
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def oocchannel(self, ctx, text_channel: discord.TextChannel = None):
         """
         Set the text channel for ooc reporting.
@@ -195,7 +195,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was a problem setting the notification channel. Please check your entry and try again.")
 
 
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def mentionrole(self, ctx, role: discord.Role = None):
         """
         Sets a role to mention in new round notifications. 
@@ -213,7 +213,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was a problem setting the mention role. Please check your entry and try again.")
 
 
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def commskey(self, ctx, key: str):
         """
         Set the communications key for the server
@@ -229,7 +229,7 @@ class SS13Status(commands.Cog):
         except(ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting your communications key. Please check your entry and try again.")
 
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def listenport(self, ctx, port: int):
         """
         Set the port you'd like the bot to listen on
@@ -244,7 +244,7 @@ class SS13Status(commands.Cog):
         except (ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting your port. Please check to ensure you're attempting to use a port from 1024 to 65535")
 
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def timeout(self, ctx, seconds: int):
         """
         Sets the timeout duration for status checks
@@ -255,7 +255,7 @@ class SS13Status(commands.Cog):
         except(ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting the timeout duration. Please check your input and try again.")
 
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def toggletopic(self, ctx, toggle:bool = None):
         """
         Channel topic status toggle
@@ -283,7 +283,7 @@ class SS13Status(commands.Cog):
         except:
             await ctx.send("I was unable to clear the channel's current topic. You might want to clear it manually.")
 
-    @setstatus.command()
+    @setstatus.hybrid_command()
     async def current(self, ctx):
         """
         Lists the current settings
@@ -310,7 +310,8 @@ class SS13Status(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.guild_only()
-    @commands.command()
+    @commands.hybrid_command()
+    @commands.cooldown(1, 5)
     async def players(self, ctx):
         """
         Lists the current players on the server
@@ -337,7 +338,8 @@ class SS13Status(commands.Cog):
             await ctx.send(embed=discord.Embed(title="__Current Players__ (0):", description="No players current online"))
 
     @commands.guild_only()
-    @commands.command()
+    @commands.hybrid_command()
+    @commands.cooldown(1, 5)
     async def adminwho(self, ctx):
         """
         List the current admins on the server
@@ -364,7 +366,7 @@ class SS13Status(commands.Cog):
             await ctx.send(embed=discord.Embed(title="__Current Admins__ (0):", description="No Admins are current online"))
 
     @commands.guild_only()
-    @commands.command()
+    @commands.hybrid_command()
     @commands.cooldown(1, 5)
     async def status(self, ctx):
         """

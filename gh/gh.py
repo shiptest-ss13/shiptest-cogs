@@ -26,7 +26,7 @@ class GithubPRRetriever(BaseCog):
         }
         self.config.register_guild(**default_guild)
     
-    @commands.command()
+    @commands.hybrid_command()
     @commands.guild_only()
     @checks.admin_or_permissions(administrator=True)
     async def setrepo(self, ctx, new_repo = ""):
@@ -43,7 +43,7 @@ class GithubPRRetriever(BaseCog):
             url = await self.config.guild(ctx.guild).repo()
             await ctx.send(f"The target repo is currently set to: `{url}`")
 
-    @commands.command()
+    @commands.hybrid_command()
     @commands.guild_only()
     async def gh(self, ctx, *, pr: int):
         """

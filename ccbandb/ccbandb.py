@@ -52,7 +52,7 @@ class CCBanDB(BaseCog):
             await ctx.send(f"The global ban databse is currently set to: `{self.config.guild(ctx.guild).bandb()}`")
 
     @checks.mod_or_permissions(administrator=True)
-    @commands.command()
+    @commands.hybrid_command()
     async def cclookup(self, ctx, *, ckey: str):
         """
         Gets the ban results from the configured global ban database

@@ -1,4 +1,4 @@
 from .gh import GithubPRRetriever
 
-def setup(bot):
-    bot.add_cog(GithubPRRetriever(bot))
+async def setup(bot):
+    await bot.add_cog(GithubPRRetriever(bot))
