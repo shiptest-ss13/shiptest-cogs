@@ -71,8 +71,9 @@ class TGDB(BaseCog):
         pass
 
     @commands.guild_only()
-    @commands.group()
+    @commands.hybrid_group()
     @checks.is_owner()
+    @app_commands.default_permissions(administrator=True)
     async def tgdb(self, ctx):
         """
         SS13 Configure the MySQL database connection settings
