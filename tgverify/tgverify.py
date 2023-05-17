@@ -375,7 +375,7 @@ class TGverify(BaseCog):
                 "No verification role is configured for living minutes, configure it with config command"
             )
 
-        if role in ctx.author.roles and verified_role in ctx.author.roles:
+        if await tgdb.discord_link_for_discord_id(ctx, ctx.author.id):
             return await ctx.send("You are already verified")
 
         message = await ctx.send("Attempting to verify you....")
