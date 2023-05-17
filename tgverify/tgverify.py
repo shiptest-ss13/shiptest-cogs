@@ -357,7 +357,7 @@ class TGverify(BaseCog):
         await tgdb.add_discord_link(ctx, ckey, discord_user.id)
 
         if(role):
-            await discord_user.add_roles(role, reason="User has verified in game")
+            await discord_user.add_roles(role, reason="User has been manually verified")
 
         return await message.edit(content=f"User {discord_user.name} manually verified as {ckey}.")
 
