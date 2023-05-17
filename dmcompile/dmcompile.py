@@ -113,23 +113,22 @@ class DMCompile(BaseCog):
         try:
             message = await ctx.send("Compiling....")
             
-            async with ctx.typing():
-                try:
-                    async with httpx.AsyncClient() as client:
-                        r = await client.post(await self.config.listener_url(), json={'code_to_compile':code, 'byond_version':version}, timeout=60)
-                        r = r.json()
-                except (json.JSONDecodeError, httpx.ReadTimeout):
-                    embed = discord.Embed(description=f"There was a problem with the listener. Unable to retrieve any results!", color=0xff0000)
-                    await ctx.send(embed=embed)
-                    return await message.delete()
+            try:
+                async with httpx.AsyncClient() as client:
+                    r = await client.post(await self.config.listener_url(), json={'code_to_compile':code, 'byond_version':version}, timeout=60)
+                    r = r.json()
+            except (json.JSONDecodeError, httpx.ReadTimeout):
+                embed = discord.Embed(description=f"There was a problem with the listener. Unable to retrieve any results!", color=0xff0000)
+                await ctx.send(embed=embed)
+                return await message.delete()
 
-                if 'build_error' in r.keys():
-                    embed = discord.Embed(title="Unable to build image", description=f"{r['exception']}", color=0xff0000)
-                    await ctx.send(embed=embed)
-                    return await message.delete()
+            if 'build_error' in r.keys():
+                embed = discord.Embed(title="Unable to build image", description=f"{r['exception']}", color=0xff0000)
+                await ctx.send(embed=embed)
+                return await message.delete()
 
-                compile_log = r['compile_log']
-                run_log = r['run_log']
+            compile_log = r['compile_log']
+            run_log = r['run_log']
 
             if r['timeout']:
                 embed = discord.Embed(title="Execution timed out (30 seconds)", description=f"Compiler Output:\n{box(escape(compile_log, mass_mentions=True, formatting=True))}\nExecution Output:\n{box(escape(run_log, mass_mentions=True, formatting=True))}", color=0xd3d3d3)
