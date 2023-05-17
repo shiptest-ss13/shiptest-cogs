@@ -388,7 +388,7 @@ class GetNotes(BaseCog):
 
     @checks.mod_or_permissions(administrator=True)
     @commands.hybrid_command()
-    async def findplayer(self, ctx, *, identifier: Union[ipaddress.IPv4Address, int, str] = None):
+    async def findplayer(self, ctx, *, identifier: Union[int, str] = None):
         """
         Obtains information about a specific player.
 
@@ -399,8 +399,8 @@ class GetNotes(BaseCog):
             message = await ctx.send("Looking up player....")
             async with ctx.typing():
 
-                if type(identifier) is ipaddress.IPv4Address:
-                    player = await self.player_search(ctx, ip=identifier)
+                if type(ipaddress.ip_address(identifier)) is ipaddress.IPv4Address:
+                    player = await self.player_search(ctx, ip=ipaddress.ip_address(identifier))
                 elif type(identifier) is int:
                     player = await self.player_search(ctx, cid=identifier)
                 elif type(identifier) is str:
