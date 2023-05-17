@@ -7,7 +7,7 @@ from typing import Union
 import discord
 
 #Redbot Imports
-from redbot.core import commands, checks, Config
+from redbot.core import commands, checks, Config, app_commands
 from redbot.core.utils.chat_formatting import pagify, box, humanize_list, warning
 from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
 
@@ -29,6 +29,7 @@ class GithubPRRetriever(BaseCog):
     @commands.hybrid_command()
     @commands.guild_only()
     @checks.admin_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def setrepo(self, ctx, new_repo = ""):
         """
         Sets or displays the current repo to add PR requests to. 

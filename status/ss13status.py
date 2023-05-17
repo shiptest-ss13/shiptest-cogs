@@ -65,8 +65,9 @@ class SS13Status(commands.Cog):
         await ctx.send(f"Listening on port: {port}")
 
     @commands.guild_only()
-    @commands.group()
+    @commands.hybrid_group()
     @checks.admin_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def setstatus(self, ctx):
         """
         Configuration group for the SS13 status command
