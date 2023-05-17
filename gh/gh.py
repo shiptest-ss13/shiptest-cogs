@@ -51,7 +51,7 @@ class GithubPRRetriever(BaseCog):
         """
         repo = await self.config.guild(ctx.guild).repo()
         if repo:
-            url = f"{repo}/pull/{pr}"
+            url = f"{repo}/issues/{pr}"
             await ctx.send(url)
         else:
             await ctx.send("No repo has been set for this server. Please use `setrepo` to set one.")
