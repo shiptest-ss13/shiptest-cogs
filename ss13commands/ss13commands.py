@@ -190,15 +190,14 @@ class SS13Commands(commands.Cog):
 
         if(string):
             data = urllib.parse.parse_qs(string)
-            embed = discord.Embed(title="__Crew Manifest:__", color=ctx.embed_color())
+            embed = discord.Embed(title="__Crew Manifest:__", color=await ctx.embed_color())
             for department in data:
                 entries = [i for i in data[department]]
                 embed.add_field(name=f"{department}",value=f'\n'.join(map(str,entries)),inline=False)
         else:
-            embed = discord.Embed(title="__Crew Manifest:__", description="No crewmembers found! Is the server online?", color=ctx.embed_color())
+            embed = discord.Embed(title="__Crew Manifest:__", description="No crewmembers found! Is the server online?", color=await ctx.embed_color())
 
-        await message.delete()
-        await ctx.send(embed=embed)
+        await message.edit(embed=embed)
 
     @commands.guild_only()
     @commands.hybrid_command()
@@ -232,9 +231,9 @@ class SS13Commands(commands.Cog):
         info = await self.topic_query_server(querystr=f"namecheck={target}")
         if(info):
             #TODO: Split recieved data into different embed fields
-            await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"{info}", color=ctx.embed_color()))
+            await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"{info}", color=await ctx.embed_color()))
         else:
-            await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"No results found.", color=ctx.embed_color()))
+            await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"No results found.", color=await ctx.embed_color()))
 
     @commands.guild_only()
     @commands.hybrid_command()
