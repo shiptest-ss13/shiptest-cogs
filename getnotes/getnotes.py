@@ -348,7 +348,8 @@ class GetNotes(BaseCog):
             raise
 
 
-    @commands.command(aliases=['ckey'])
+    @commands.hybrid_command(aliases=['ckey'])
+    @app_commands.default_permissions(administrator=True)
     async def playerinfo(self, ctx, *, ckey: str):
         """
         Lookup a player's stats based on their ckey
@@ -388,6 +389,7 @@ class GetNotes(BaseCog):
 
     @checks.mod_or_permissions(administrator=True)
     @commands.hybrid_command()
+    @app_commands.default_permissions(administrator=True)
     async def findplayer(self, ctx, *, identifier: str):
         """
         Obtains information about a specific player.
@@ -447,6 +449,7 @@ class GetNotes(BaseCog):
     
     @checks.mod()
     @commands.hybrid_command()
+    @app_commands.default_permissions(administrator=True)
     async def alts(self, ctx, ckey:str, check_ips:bool = True):
         """
         Search for a list of possible alt accounts
