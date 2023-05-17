@@ -180,7 +180,6 @@ class SS13Commands(commands.Cog):
 
     @commands.guild_only()
     @commands.hybrid_command()
-    @commands.cooldown(1, 10)
     async def manifest(self, ctx):
         """
         Displays the current crew manifest of the linked SS13 server.
@@ -198,8 +197,8 @@ class SS13Commands(commands.Cog):
                     embed.add_field(name=f"{department}",value=f'\n'.join(map(str,entries)),inline=False)
             else:
                 embed = discord.Embed(title="__Crew Manifest:__", description="No crewmembers found! Is the server online?", color=0x26eaea)
-            
-            await message.edit(content=None, embed=embed)
+
+        await message.edit(content=None, embed=embed)
 
     @commands.guild_only()
     @commands.hybrid_command()
