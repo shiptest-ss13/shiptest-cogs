@@ -180,7 +180,7 @@ class SS13Commands(commands.Cog):
 
 
     @commands.guild_only()
-    @commands.command()
+    @commands.hybrid_command()
     @commands.cooldown(1, 10)
     async def manifest(self, ctx):
         """
@@ -203,8 +203,9 @@ class SS13Commands(commands.Cog):
             await message.edit(content=None, embed=embed)
 
     @commands.guild_only()
-    @commands.command()
+    @commands.hybrid_command()
     @checks.admin_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def ccannounce(self, ctx, message:str, sender="Central Command"):
         """
         Sends a specified announcement to the linked SS13 server.
@@ -213,8 +214,9 @@ class SS13Commands(commands.Cog):
         await ctx.send(embed=discord.Embed(title=f"{sender} Update", description=message))
 
     @commands.guild_only()
-    @commands.command()
+    @commands.hybrid_command()
     @checks.admin_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def ahelp(self, ctx, target:str, msg:str):
         """
         Sends an adminhelp to the specified CKEY.
@@ -222,8 +224,9 @@ class SS13Commands(commands.Cog):
         await self.topic_query_server(querystr=f"adminmsg={target}", sender=ctx.author.display_name, params={"msg": msg})
 
     @commands.guild_only()
-    @commands.command()
+    @commands.hybrid_command()
     @checks.admin_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def namecheck(self, ctx, target:str):
         """
         Checks the specified CKEY or player name for information.
@@ -236,8 +239,9 @@ class SS13Commands(commands.Cog):
             await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"No results found.", color=0xff0000))
 
     @commands.guild_only()
-    @commands.command()
+    @commands.hybrid_command()
     @checks.admin_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def restart_server(self, ctx, hard = False):
         """
         Restarts the linked SS13 server if there are no admins online.
