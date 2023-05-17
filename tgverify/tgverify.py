@@ -343,7 +343,7 @@ class TGverify(BaseCog):
         """
         Forcefully verifies a discord user as a specified ckey. Admin only.
         """
-        message = await ctx.send("Verifying....")
+        message = await ctx.send("Verifying...")
 
         tgdb = self.get_tgdb()
         role = await self.config.guild(ctx.guild).verified_role()
@@ -357,7 +357,7 @@ class TGverify(BaseCog):
         await tgdb.add_discord_link(ctx, ckey, discord_user.id)
 
         if(role):
-            await ctx.author.add_roles(role, reason="User has verified in game")
+            await discord_user.add_roles(role, reason="User has verified in game")
 
         return await message.edit(content=f"User {discord_user.name} manually verified as {ckey}.")
 
