@@ -359,6 +359,10 @@ class TGverify(BaseCog):
             )
 
         tgdb.add_discord_link(ctx, ckey, discord_user.id)
+
+        if(role):
+            await ctx.author.add_roles(role, reason="User has verified in game")
+
         return await message.edit(content=f"User {discord_user.nickname} manually verified as {ckey}.")
 
     # Now the only user facing command, so this has rate limiting across the sky
