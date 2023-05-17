@@ -220,6 +220,19 @@ class TGDB(BaseCog):
         parameters = [user_discord_snowflake, one_time_token]
         query = await self.query_database(ctx, query, parameters)
 
+    async def add_discord_link(
+            self, ctx, ckey: str, user_discord_snowflake: str
+    ):
+        """
+        Create a new discord link record to verify someone.
+
+        INSERT INTO `ss13`.`discord_links` (`ckey`, `discord_id`, `timestamp`, `one_time_token`, `valid`) VALUES ('yobrocharlie', '1234567890', '2023-05-17 18:06:28', 'manually-verified', '1');
+        """
+        prefix = await self.config.guild(ctx.guild).mysql_prefix()
+        query = f"INSERT INTO {prefix}discord_links (`ckey`, `discord_id`, `timestamp`, `one_time_token`, `valid`) VALUES (%s, %s, Now(), 'manually-verified', '1');"
+        parameters = [ckey, user_discord_snowflake]
+        query = await self.query_database(ctx, query, parameters)
+
     async def lookup_ckey_by_token(self, ctx, one_time_token: str):
         """
         Given a one time token, search the {prefix}discord_links table for that one time token and return the ckey it's connected to

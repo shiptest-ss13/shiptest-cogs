@@ -335,6 +335,32 @@ class TGverify(BaseCog):
                 content=f"This discord user has no ckey linked"
             )
 
+    @commands.guild_only()
+    @commands.hybrid_command()
+    @checks.mod_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
+    async def admin_verify(self, ctx, discord_user: discord.User, ckey: str):
+        """
+        Forcefully verifies a discord user as a specified ckey. Admin only.
+        """
+        message = await ctx.send("Verifying....")
+
+        tgdb = self.get_tgdb()
+        role = await self.config.guild(ctx.guild).verified_role()
+        role = ctx.guild.get_role(role)
+
+        if not role:
+            raise TGUnrecoverableError(
+                "No verification role is configured, configure it with the config command"
+            )
+        if not verified_role:
+            raise TGUnrecoverableError(
+                "No verification role is configured for living minutes, configure it with config command"
+            )
+
+        tgdb.add_discord_link(ctx, ckey, discord_user.id)
+        return await message.edit(content=f"User {discord_user.nickname} manually verified as {ckey}.")
+
     # Now the only user facing command, so this has rate limiting across the sky
     @commands.cooldown(2, 60, type=commands.BucketType.user)
     @commands.cooldown(6, 60, type=commands.BucketType.guild)
