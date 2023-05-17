@@ -318,7 +318,7 @@ class SS13Status(commands.Cog):
         port = await self.config.game_port()
         try:
             server = socket.gethostbyname(await self.config.server())
-            data = await self.query_server(server,port,"?whoIs")
+            data = await self.query_server(server, port, "?whoIsAll", True)
         except TypeError:
             await ctx.send(f"Failed to get players. Check that you have fully configured this cog using `{ctx.prefix}setstatus`.")
             return
@@ -363,11 +363,54 @@ class SS13Status(commands.Cog):
         else:
             await ctx.send(embed=discord.Embed(title="__Current Admins__ (0):", description="No Admins are current online"))
 
-    async def query_server(self, game_server:str, game_port:int, querystr="?status" ) -> dict:
+    @commands.guild_only()
+    @commands.command()
+    @commands.cooldown(1, 5)
+    async def status(self, ctx):
+        """
+        Gets the current server status and round details
+        """
+        port = await self.config.game_port()        
+        msg = await self.config.offline_message()
+        server_url = await self.config.server_url()
+        try:
+            server = socket.gethostbyname(await self.config.server())
+            data = await self.query_server(server, port)
+        except TypeError:
+            await ctx.send(f"Failed to get the server's status. Check that you have fully configured this cog using `{ctx.prefix}setstatus`.")
+            return 
+
+        if not data: #Server is not responding, send the offline message
+            embed=discord.Embed(title="__Server Status:__", description=f"{msg}", color=0xff0000)
+            await ctx.send(embed=embed)
+
+        else:
+            #Reported time is in seconds, we need to convert that to be easily understood
+            duration = int(*data['round_duration'])
+            duration = time.strftime('%H:%M', time.gmtime(duration))
+            players = int(*data['players'])
+
+            #Might make the embed configurable at a later date
+            embed=discord.Embed(color=0x26eaea)
+            embed.add_field(name="Players", value=players, inline=True)
+            embed.add_field(name="Admins", value=int(*data['admins']), inline=True)
+            embed.add_field(name="Round Duration", value=duration, inline=True)
+            embed.add_field(name="Server Link:", value=f"<{server_url}>", inline=False)
+
+            try:
+                await self.statusmsg.delete()
+                self.statusmsg = await ctx.send(embed=embed)
+            except(discord.DiscordException, AttributeError):
+                self.statusmsg = await ctx.send(embed=embed)
+
+    async def query_server(self, game_server:str, game_port:int, querystr="?status", needskey:bool=False) -> dict:
         """
         Queries the server for information
         """
         conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+
+        if(needskey and await self.config.comms_key()): #Little risky but mnehhh
+            querystr += f"&key={await self.config.comms_key()}"
 
         try:
             query = b"\x00\x83" + struct.pack('>H', len(querystr) + 6) + b"\x00\x00\x00\x00\x00" + querystr.encode() + b"\x00" #Creates a packet for byond according to TG's standard
