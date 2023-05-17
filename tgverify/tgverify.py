@@ -354,7 +354,7 @@ class TGverify(BaseCog):
                 "No verification role is configured, configure it with the config command"
             )
 
-        tgdb.add_discord_link(ctx, ckey, discord_user.id)
+        await tgdb.add_discord_link(ctx, ckey, discord_user.id)
 
         if(role):
             await ctx.author.add_roles(role, reason="User has verified in game")
