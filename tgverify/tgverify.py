@@ -353,10 +353,6 @@ class TGverify(BaseCog):
             raise TGUnrecoverableError(
                 "No verification role is configured, configure it with the config command"
             )
-        if not verified_role:
-            raise TGUnrecoverableError(
-                "No verification role is configured for living minutes, configure it with config command"
-            )
 
         tgdb.add_discord_link(ctx, ckey, discord_user.id)
 
