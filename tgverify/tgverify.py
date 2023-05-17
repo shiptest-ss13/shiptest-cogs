@@ -314,7 +314,9 @@ class TGverify(BaseCog):
     @tgverify.command()
     async def deverify(self, ctx, discord_user: discord.User):
         """
-        Deverifies the ckey linked to this user, all historical verifications will be removed, the user will have to connect to the game
+        Deverifies the ckey linked to this user.
+        
+        All historical verifications will be removed, the user will have to connect to the game
         and generate a new one time token to get their verification role
         """
         tgdb = self.get_tgdb()
@@ -342,7 +344,8 @@ class TGverify(BaseCog):
     @commands.hybrid_command()
     async def verify(self, ctx, *, one_time_token: str = None):
         """
-        Attempt to verify the user, based on the passed in one time code
+        Attempt to verify the user, based on the passed in one time code.
+        
         This command is rated limited to two attempts per user every 60 seconds, and 6 attempts per entire discord every 60 seconds
         """
         # Get the minimum required living minutes

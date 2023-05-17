@@ -178,7 +178,6 @@ class SS13Commands(commands.Cog):
         else:
             await ctx.send("The Discord OOC relay has been disabled.")
 
-
     @commands.guild_only()
     @commands.hybrid_command()
     @commands.cooldown(1, 10)
