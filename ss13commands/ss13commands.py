@@ -16,7 +16,7 @@ from random import randint
 import discord
 
 #Redbot Imports
-from redbot.core import commands, checks, Config, utils
+from redbot.core import commands, checks, Config, utils, app_commands
 import json
 
 __version__ = "1.2.2"
@@ -43,8 +43,9 @@ class SS13Commands(commands.Cog):
         self.config.register_global(**default_global)
 
     @commands.guild_only()
-    @commands.group()
+    @commands.hybrid_group()
     @checks.admin_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def setss13(self, ctx):
         """
         Configuration group for the SS13 status command

@@ -46,8 +46,9 @@ class GetNotes(BaseCog):
     
 
     @commands.guild_only()
-    @commands.group()
+    @commands.hybrid_group()
     @checks.admin_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def setnotes(self,ctx): 
         """
         SS13 MySQL database settings
@@ -189,6 +190,7 @@ class GetNotes(BaseCog):
 
 
     @checks.mod_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     @commands.hybrid_command()
     async def notes(self, ctx, *, ckey: str):
         """

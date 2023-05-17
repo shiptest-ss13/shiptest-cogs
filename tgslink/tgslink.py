@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from math import floor
-from redbot.core import commands, Config, checks
+from redbot.core import commands, Config, checks, app_commands
 import logging
 from discord import Message
 from github import Github
@@ -57,7 +57,8 @@ class TGSLink(commands.Cog):
         except Exception:
             await message.reply("Failed to delete message, you must delete it manually!")
 
-    @commands.group()
+    @commands.hybrid_group()
+    @app_commands.default_permissions(administrator=True)
     async def tgslink(self, ctx):
         pass
 

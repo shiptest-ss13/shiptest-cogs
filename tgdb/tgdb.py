@@ -10,7 +10,7 @@ import logging
 import discord
 
 # Redbot Imports
-from redbot.core import commands, checks, Config
+from redbot.core import commands, checks, Config, app_commands
 from redbot.core.utils.chat_formatting import pagify, box, humanize_list, warning
 from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
 
@@ -61,8 +61,9 @@ class TGDB(BaseCog):
         self.pool = None
 
     @commands.guild_only()
-    @commands.group()
+    @commands.hybrid_group()
     @checks.admin_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def tgdb_config(self, ctx):
         """
         SS13 Configure the MySQL database connection settings

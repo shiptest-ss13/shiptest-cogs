@@ -57,8 +57,9 @@ class TGverify(BaseCog):
         self.config.register_guild(**default_guild)
 
     @commands.guild_only()
-    @commands.group()
+    @commands.hybrid_group()
     @checks.mod_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
     async def tgverify(self, ctx):
         """
         SS13 Configure the settings on the verification cog

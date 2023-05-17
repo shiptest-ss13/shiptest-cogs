@@ -8,7 +8,7 @@ import httpx
 import discord
 
 # Redbot Imports
-from redbot.core import commands, utils
+from redbot.core import commands, utils, app_commands
 from redbot.core.utils.chat_formatting import pagify, box, humanize_list
 from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
 
@@ -29,6 +29,8 @@ class CCLookup(BaseCog):
     @commands.hybrid_command()
     @commands.cooldown(1, 2)
     @commands.max_concurrency(10, wait=True)
+    @app_commands.describe(ckey = "The ckey to search for")
+    @app_commands.describe(active = "Whether or not you'd like to only search through active bans")
     async def centcom(self, ctx, ckey: str, active = False):
         """
         Checks the shared CentCom database for information on a given ckey

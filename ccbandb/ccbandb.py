@@ -8,7 +8,7 @@ from typing import Union
 import discord
 
 #Redbot Imports
-from redbot.core import commands, checks, Config
+from redbot.core import commands, checks, Config, app_commands
 from redbot.core.utils.chat_formatting import pagify, box, humanize_list, warning
 from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
 
@@ -37,6 +37,8 @@ class CCBanDB(BaseCog):
 
     @commands.guild_only()
     @checks.admin_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
+    @commands.hybrid_command()
     async def bandb(self, ctx, ban_db = ""):
         """
         Sets or displays the current global ban API. (Defaults to the Centcom ban DB found here: https://centcom.melonmesa.com/ban/search)
