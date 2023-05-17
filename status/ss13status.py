@@ -74,6 +74,7 @@ class SS13Status(commands.Cog):
         pass
     
     @setstatus.command(aliases=['host'])
+    @checks.admin_or_permissions(administrator=True)
     async def server(self, ctx, host: str):
         """
         Sets the server IP used for status checks
@@ -85,6 +86,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was an error setting the host! Please check your entry and try again.")
     
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def port(self, ctx, port: int):
         """
         Sets the port used for the status checks
@@ -99,6 +101,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was a problem setting your port. Please check to ensure you're attempting to use a port from 1024 to 65535")
 
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def offline(self, ctx, *, msg: str):
         """
         Set a custom message for whenever the server is offline.
@@ -110,6 +113,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was a problem setting your custom offline message. Please check your entry and try again.")
     
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def byondurl(self, ctx, url: str):
         """
         Set the byond URL for your server (For embeds)
@@ -122,6 +126,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was a problem setting your server URL. Please check your entry and try again.")
     
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def newroundchannel(self, ctx, text_channel: discord.TextChannel = None):
         """
         Sets the channel for new round notifications. 
@@ -140,6 +145,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was a problem setting the notification channel. Please check your entry and try again.")
 
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def adminchannel(self, ctx, text_channel: discord.TextChannel = None):
         """
         Set the text channel to display admin notifications.
@@ -158,6 +164,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was a problem setting the notification channel. Please check your entry and try again.")
 
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def mentorchannel(self, ctx, text_channel: discord.TextChannel = None):
         """
         Set the text channel for mentor notifications.
@@ -177,6 +184,7 @@ class SS13Status(commands.Cog):
 
 
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def oocchannel(self, ctx, text_channel: discord.TextChannel = None):
         """
         Set the text channel for ooc reporting.
@@ -196,6 +204,7 @@ class SS13Status(commands.Cog):
 
 
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def mentionrole(self, ctx, role: discord.Role = None):
         """
         Sets a role to mention in new round notifications. 
@@ -214,6 +223,7 @@ class SS13Status(commands.Cog):
 
 
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def commskey(self, ctx, key: str):
         """
         Set the communications key for the server
@@ -230,6 +240,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was a problem setting your communications key. Please check your entry and try again.")
 
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def listenport(self, ctx, port: int):
         """
         Set the port you'd like the bot to listen on
@@ -245,6 +256,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was a problem setting your port. Please check to ensure you're attempting to use a port from 1024 to 65535")
 
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def timeout(self, ctx, seconds: int):
         """
         Sets the timeout duration for status checks
@@ -256,6 +268,7 @@ class SS13Status(commands.Cog):
             await ctx.send("There was a problem setting the timeout duration. Please check your input and try again.")
 
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def toggletopic(self, ctx, toggle:bool = None):
         """
         Channel topic status toggle
@@ -284,6 +297,7 @@ class SS13Status(commands.Cog):
             await ctx.send("I was unable to clear the channel's current topic. You might want to clear it manually.")
 
     @setstatus.command()
+    @checks.admin_or_permissions(administrator=True)
     async def current(self, ctx):
         """
         Lists the current settings
