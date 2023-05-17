@@ -6,7 +6,7 @@ from typing import Union
 import discord
 
 # Redbot Imports
-from redbot.core import commands, checks, Config
+from redbot.core import commands, checks, Config, app_commands
 
 from tgcommon.errors import TGRecoverableError, TGUnrecoverableError
 from tgcommon.util import normalise_to_ckey
