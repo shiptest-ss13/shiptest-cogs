@@ -358,10 +358,9 @@ class GetNotes(BaseCog):
 
         try:
             message = await ctx.send("Looking up player....")
-            async with ctx.typing():
-                embed=discord.Embed(color=await ctx.embed_color())
-                embed.set_author(name=f"Player info for {str(ckey).title()}")
-                player = await self.player_search(ctx, ckey=ckey)
+            embed=discord.Embed(color=await ctx.embed_color())
+            embed.set_author(name=f"Player info for {str(ckey).title()}")
+            player = await self.player_search(ctx, ckey=ckey)
             
             if player is None:
                 raise ValueError
@@ -399,21 +398,20 @@ class GetNotes(BaseCog):
 
         try:
             message = await ctx.send("Looking up player....")
-            async with ctx.typing():
 
-                if type(ipaddress.ip_address(identifier)) is ipaddress.IPv4Address:
-                    player = await self.player_search(ctx, ip=ipaddress.ip_address(identifier))
-                elif identifier.isdecimal():
-                    player = await self.player_search(ctx, cid=int(identifier))
-                elif type(identifier) is str:
-                    identifier = key_to_ckey(identifier)
-                    player = await self.player_search(ctx, ckey=identifier)
-                else:
-                    return await message.edit(content="That doesn't look like an IP, CID, or CKEY. Please check your entry and try again!")
-                    
+            if type(ipaddress.ip_address(identifier)) is ipaddress.IPv4Address:
+                player = await self.player_search(ctx, ip=ipaddress.ip_address(identifier))
+            elif identifier.isdecimal():
+                player = await self.player_search(ctx, cid=int(identifier))
+            elif type(identifier) is str:
+                identifier = key_to_ckey(identifier)
+                player = await self.player_search(ctx, ckey=identifier)
+            else:
+                return await message.edit(content="That doesn't look like an IP, CID, or CKEY. Please check your entry and try again!")
+
             if player is None:
                 raise ValueError
-                
+
             embed=discord.Embed(color=await ctx.embed_color())
             embed.set_author(name=f"Player info for {str(player['ckey']).title()}")
 
@@ -460,19 +458,18 @@ class GetNotes(BaseCog):
             if check_ips == False:
                 await ctx.send(f"{warning('IP check bypassed')}")
             message = await ctx.send("Checking for alts...")
-            async with ctx.typing():
-                alts = await self.get_alts(ctx, ckey, check_ips)
-                if len(alts) > 0:
-                    alts = humanize_list(alts)
-                    if len(alts) < 1800:
-                        await ctx.send(f"Possible alts for {ckey}:\n> {alts}")
-                    else:
-                        await ctx.send(f"Possible alts for {ckey}:")
-                        for page in pagify(alts, delims=[' ']):
-                            await ctx.send(f"> {page}")
+            alts = await self.get_alts(ctx, ckey, check_ips)
+            if len(alts) > 0:
+                alts = humanize_list(alts)
+                if len(alts) < 1800:
+                    await ctx.send(f"Possible alts for {ckey}:\n> {alts}")
                 else:
-                    await ctx.send("No alts detected!")
-                await message.delete() #Deleting over editing since this command can take a while
+                    await ctx.send(f"Possible alts for {ckey}:")
+                    for page in pagify(alts, delims=[' ']):
+                        await ctx.send(f"> {page}")
+            else:
+                await ctx.send("No alts detected!")
+            await message.delete() #Deleting over editing since this command can take a while
 
         except aiomysql.Error  as err:
             embed=discord.Embed(title=f"Error looking up alts", description=f"{format(err)}", color=0xff0000)

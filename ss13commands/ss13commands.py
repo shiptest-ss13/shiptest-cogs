@@ -186,17 +186,16 @@ class SS13Commands(commands.Cog):
         """
         message = await ctx.send("Getting manifest...")
 
-        async with ctx.typing():
-            string = await self.topic_query_server(querystr="manifest", sender=ctx.author.display_name)
+        string = await self.topic_query_server(querystr="manifest", sender=ctx.author.display_name)
 
-            if(string):
-                data = urllib.parse.parse_qs(string)
-                embed = discord.Embed(title="__Crew Manifest:__", color=0x26eaea)
-                for department in data:
-                    entries = [i for i in data[department]]
-                    embed.add_field(name=f"{department}",value=f'\n'.join(map(str,entries)),inline=False)
-            else:
-                embed = discord.Embed(title="__Crew Manifest:__", description="No crewmembers found! Is the server online?", color=0x26eaea)
+        if(string):
+            data = urllib.parse.parse_qs(string)
+            embed = discord.Embed(title="__Crew Manifest:__", color=ctx.embed_color())
+            for department in data:
+                entries = [i for i in data[department]]
+                embed.add_field(name=f"{department}",value=f'\n'.join(map(str,entries)),inline=False)
+        else:
+            embed = discord.Embed(title="__Crew Manifest:__", description="No crewmembers found! Is the server online?", color=ctx.embed_color())
 
         await message.edit(content=None, embed=embed)
 
@@ -232,9 +231,9 @@ class SS13Commands(commands.Cog):
         info = await self.topic_query_server(querystr=f"namecheck={target}")
         if(info):
             #TODO: Split recieved data into different embed fields
-            await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"{info}"))
+            await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"{info}", color=ctx.embed_color()))
         else:
-            await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"No results found.", color=0xff0000))
+            await ctx.send(embed=discord.Embed(title=f"Results for {target}:", description=f"No results found.", color=ctx.embed_color()))
 
     @commands.guild_only()
     @commands.hybrid_command()
