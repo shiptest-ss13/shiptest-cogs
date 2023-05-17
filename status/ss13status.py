@@ -65,7 +65,7 @@ class SS13Status(commands.Cog):
         await ctx.send(f"Listening on port: {port}")
 
     @commands.guild_only()
-    @commands.command_group()
+    @commands.group()
     @checks.admin_or_permissions(administrator=True)
     async def setstatus(self, ctx):
         """
