@@ -197,7 +197,7 @@ class SS13Commands(commands.Cog):
         else:
             embed = discord.Embed(title="__Crew Manifest:__", description="No crewmembers found! Is the server online?", color=await ctx.embed_color())
 
-        await message.edit(embed=embed)
+        await message.edit(content=null, embed=embed)
 
     @commands.guild_only()
     @commands.hybrid_command()
