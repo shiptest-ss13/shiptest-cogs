@@ -495,7 +495,7 @@ class TGverify(BaseCog):
                 "No verification role is configured for living minutes, configure it with config command"
             )
 
-        if await tgdb.discord_link_for_discord_id(interaction, interaction.author.id):
+        if await tgdb.discord_link_for_discord_id(interaction, interaction.user.id):
             return await interaction.response.send_modal("You are already verified!")
 
         if one_time_token:
@@ -506,7 +506,7 @@ class TGverify(BaseCog):
         # they haven't specified a one time token or it didn't match, see if we already have a linked ckey for the user id that is still valid
         if ckey is None:
             discord_link = await tgdb.discord_link_for_discord_id(
-                interaction, interaction.author.id
+                interaction, interaction.user.id
             )
             if discord_link and discord_link.valid > 0:
                 prexisting = True
@@ -520,42 +520,42 @@ class TGverify(BaseCog):
                 # return await message.edit(content=f"Congrats {ctx.author} your verification is complete")
             else:
                 return await interaction.response.send_modal(
-                    f"Sorry {interaction.author} it looks like you don't have a ckey linked to this discord account, go back into game and try generating another! See {instructions_link} for more information. \n\nIf it's still failing after a few tries, ask for support from the verification team, "
+                    f"Sorry {interaction.user} it looks like you don't have a ckey linked to this discord account, go back into game and try generating another! See {instructions_link} for more information. \n\nIf it's still failing after a few tries, ask for support from the verification team, "
                 )
 
         log.info(
-            f"Verification request by {interaction.author.id}, for ckey {ckey}, token was: {one_time_token}"
+            f"Verification request by {interaction.user.id}, for ckey {ckey}, token was: {one_time_token}"
         )
         # Now look for the user based on the ckey
         player = await tgdb.get_player_by_ckey(interaction, ckey)
 
         if player is None:
             return await interaction.response.send_modal(
-                f"Sorry {interaction.author} looks like we couldn't look up your user, ask the verification team for support!"
+                f"Sorry {interaction.user} looks like we couldn't look up your user, ask the verification team for support!"
             )
 
         if not prexisting:
             # clear any/all previous valid links for ckey or the discord id (in case they have decided to make a new ckey)
             await tgdb.clear_all_valid_discord_links_for_ckey(interaction, ckey)
             await tgdb.clear_all_valid_discord_links_for_discord_id(
-                interaction, interaction.author.id
+                interaction, interaction.user.id
             )
             # Record that the user is linked against a discord id
-            await tgdb.update_discord_link(interaction, one_time_token, interaction.author.id)
+            await tgdb.update_discord_link(interaction, one_time_token, interaction.user.id)
 
         successful = False
         if role:
-            await interaction.author.add_roles(role, reason="User has verified in game")
+            await interaction.user.add_roles(role, reason="User has verified in game")
         if player["living_time"] >= min_required_living_minutes:
             successful = True
-            await interaction.author.add_roles(
+            await interaction.user.add_roles(
                 verified_role,
                 reason="User has verified against their in game living minutes",
             )
 
-        fuck = f"Congrats {interaction.author} your verification is complete, but you do not have {min_required_living_minutes} minutes in game as a living crew member (you have {player['living_time']}), so you may not have access to all channels. You can always verify again later by simply doing `?verify` and if you have enough minutes, you will gain access to the remaining channels"
+        fuck = f"Congrats {interaction.user} your verification is complete, but you do not have {min_required_living_minutes} minutes in game as a living crew member (you have {player['living_time']}), so you may not have access to all channels. You can always verify again later by simply doing `?verify` and if you have enough minutes, you will gain access to the remaining channels"
         if successful:
-            fuck = f"Congrats {interaction.author} your verification is complete"
+            fuck = f"Congrats {interaction.user} your verification is complete"
         return await interaction.response.send_modal(fuck)
     
     @verify.error
