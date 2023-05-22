@@ -496,9 +496,9 @@ class TGverify(BaseCog):
             )
 
         if await tgdb.discord_link_for_discord_id(interaction, interaction.user.id):
-            return await interaction.response.send_message("You are already verified!")
+            return await interaction.response.send_message("You are already verified!", ephemeral=True)
 
-        await interaction.response.send_message("Attempting to verify you...")
+        await interaction.response.send_message("Attempting to verify you...", ephemeral=True)
 
         if one_time_token:
             # Attempt to find the user based on the one time token passed in.
