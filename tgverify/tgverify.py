@@ -495,7 +495,7 @@ class TGverify(BaseCog):
                 "No verification role is configured for living minutes, configure it with config command"
             )
 
-        if await tgdb.discord_link_for_discord_id(interaction, ctx.author.id):
+        if await tgdb.discord_link_for_discord_id(interaction, interaction.author.id):
             return await interaction.response.send_modal("You are already verified!")
 
         if one_time_token:
