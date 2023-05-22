@@ -522,7 +522,7 @@ class TGverify(BaseCog):
                 # return await message.edit(content=f"Congrats {ctx.author} your verification is complete")
             else:
                 return await interaction.response.edit_message(
-                    f"Sorry {interaction.user} it looks like you don't have a ckey linked to this discord account, go back into game and try generating another! See {instructions_link} for more information. \n\nIf it's still failing after a few tries, ask for support from the verification team, "
+                    f"Sorry {interaction.user} it looks like you don't have a ckey linked to this discord account, go back into game and try generating another! See {instructions_link} for more information. \n\nIf it's still failing after a few tries, ask for support from the verification team."
                 )
 
         log.info(
