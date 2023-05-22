@@ -468,7 +468,7 @@ class TGverify(BaseCog):
 
     @app_commands.command(name="verify")
     @app_commands.guild_only()
-    async def verify_slash(self, interaction: discord.Interaction)
+    async def verify_slash(self, interaction: discord.Interaction):
         """
         Attempt to verify the user, based on the passed in one time code.
         
