@@ -530,7 +530,7 @@ class TGverify(BaseCog):
         player = await tgdb.get_player_by_ckey(ctx, ckey)
 
         if player is None:
-            return await await interaction.response.send_modal(
+            return await interaction.response.send_modal(
                 f"Sorry {ctx.author} looks like we couldn't look up your user, ask the verification team for support!"
             )
 
