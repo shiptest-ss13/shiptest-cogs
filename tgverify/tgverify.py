@@ -366,7 +366,7 @@ class TGverify(BaseCog):
     @commands.cooldown(6, 60, type=commands.BucketType.guild)
     @commands.max_concurrency(3, per=commands.BucketType.guild, wait=False)
     @commands.guild_only()
-    @commands.hybrid_command()
+    @commands.command()
     async def verify(self, ctx, *, one_time_token: str = None):
         """
         Attempt to verify the user, based on the passed in one time code.
@@ -466,6 +466,98 @@ class TGverify(BaseCog):
             fuck = f"Congrats {ctx.author} your verification is complete"
         return await message.edit(content=fuck, color=0xFF0000)
 
+    @app_commands.command(name="verify")
+    @app_commands.guild_only()
+    async def verify_slash(self, interaction: discord.Interaction)
+        """
+        Attempt to verify the user, based on the passed in one time code.
+        
+        This command is rated limited to two attempts per user every 60 seconds, and 6 attempts per entire discord every 60 seconds
+        """
+        # Get the minimum required living minutes
+        min_required_living_minutes = await self.config.guild(
+            ctx.guild
+        ).min_living_minutes()
+        instructions_link = await self.config.guild(ctx.guild).instructions_link()
+        role = await self.config.guild(ctx.guild).verified_role()
+        verified_role = await self.config.guild(ctx.guild).verified_living_role()
+        role = ctx.guild.get_role(role)
+        verified_role = ctx.guild.get_role(verified_role)
+        tgdb = self.get_tgdb()
+        ckey = None
+
+        if not role:
+            raise TGUnrecoverableError(
+                "No verification role is configured, configure it with the config command"
+            )
+        if not verified_role:
+            raise TGUnrecoverableError(
+                "No verification role is configured for living minutes, configure it with config command"
+            )
+
+        if await tgdb.discord_link_for_discord_id(ctx, ctx.author.id):
+            return await interaction.response.send_modal("You are already verified!")
+
+        if one_time_token:
+            # Attempt to find the user based on the one time token passed in.
+            ckey = await tgdb.lookup_ckey_by_token(ctx, one_time_token)
+
+        prexisting = False
+        # they haven't specified a one time token or it didn't match, see if we already have a linked ckey for the user id that is still valid
+        if ckey is None:
+            discord_link = await tgdb.discord_link_for_discord_id(
+                ctx, ctx.author.id
+            )
+            if discord_link and discord_link.valid > 0:
+                prexisting = True
+                ckey = discord_link.ckey
+                # Now look for the user based on the ckey
+                # player = await tgdb.get_player_by_ckey(ctx, discord_link.ckey)
+                # if player and player['living_time'] >= min_required_living_minutes:
+                #    await ctx.author.add_roles(verified_role, reason="User has verified against their in game living minutes")
+                # we have a fast path, just reapply the linked role and bail
+                # await ctx.author.add_roles(role, reason="User has verified in game")
+                # return await message.edit(content=f"Congrats {ctx.author} your verification is complete")
+            else:
+                return await interaction.response.send_modal(
+                    f"Sorry {ctx.author} it looks like you don't have a ckey linked to this discord account, go back into game and try generating another! See {instructions_link} for more information. \n\nIf it's still failing after a few tries, ask for support from the verification team, "
+                )
+
+        log.info(
+            f"Verification request by {ctx.author.id}, for ckey {ckey}, token was: {one_time_token}"
+        )
+        # Now look for the user based on the ckey
+        player = await tgdb.get_player_by_ckey(ctx, ckey)
+
+        if player is None:
+            return await await interaction.response.send_modal(
+                f"Sorry {ctx.author} looks like we couldn't look up your user, ask the verification team for support!"
+            )
+
+        if not prexisting:
+            # clear any/all previous valid links for ckey or the discord id (in case they have decided to make a new ckey)
+            await tgdb.clear_all_valid_discord_links_for_ckey(ctx, ckey)
+            await tgdb.clear_all_valid_discord_links_for_discord_id(
+                ctx, ctx.author.id
+            )
+            # Record that the user is linked against a discord id
+            await tgdb.update_discord_link(ctx, one_time_token, ctx.author.id)
+
+        successful = False
+        if role:
+            await ctx.author.add_roles(role, reason="User has verified in game")
+        if player["living_time"] >= min_required_living_minutes:
+            successful = True
+            await ctx.author.add_roles(
+                verified_role,
+                reason="User has verified against their in game living minutes",
+            )
+
+        fuck = f"Congrats {ctx.author} your verification is complete, but you do not have {min_required_living_minutes} minutes in game as a living crew member (you have {player['living_time']}), so you may not have access to all channels. You can always verify again later by simply doing `?verify` and if you have enough minutes, you will gain access to the remaining channels"
+        if successful:
+            fuck = f"Congrats {ctx.author} your verification is complete"
+        return await interaction.response.send_modal(fuck)
+    
     @verify.error
     async def verify_error(self, ctx, error):
         # Our custom, something recoverable went wrong error type
