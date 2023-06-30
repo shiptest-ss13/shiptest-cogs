@@ -1,14 +1,10 @@
 #Standard Imports
 import asyncio
-import json
-import ipaddress
 import struct
-import select
 import socket
 import urllib.parse
 import html.parser as htmlparser
 import time
-import textwrap
 from datetime import datetime
 import logging
 
@@ -392,12 +388,14 @@ class SS13Status(commands.Cog):
             duration = int(*data['round_duration'])
             duration = time.strftime('%H:%M', time.gmtime(duration))
             players = int(*data['players'])
+            time_dilation = f"{str(*data['time_dilation_current'])}% ({str(*data['time_dilation_avg'])}% avg.)"
 
             #Might make the embed configurable at a later date
             embed=discord.Embed(color=0x26eaea)
             embed.add_field(name="Players", value=players, inline=True)
             embed.add_field(name="Admins", value=int(*data['admins']), inline=True)
             embed.add_field(name="Round Duration", value=duration, inline=True)
+            embed.add_field(name="Time Dilation", value=time_dilation, inline=True)
             embed.add_field(name="Server Link:", value=f"<{server_url}>", inline=False)
 
             try:
