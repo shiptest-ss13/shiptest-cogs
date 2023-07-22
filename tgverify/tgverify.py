@@ -522,7 +522,7 @@ class TGverify(BaseCog):
                 # return await message.edit(content=f"Congrats {ctx.author} your verification is complete")
             else:
                 return await interaction.edit_original_response(
-                    content=f"Sorry {interaction.user} it looks like you don't have a ckey linked to this discord account, go back into game and try generating another! See {instructions_link} for more information. \n\nIf it's still failing after a few tries, ask for support from the verification team."
+                    content=f"Sorry {interaction.user.name} it looks like you don't have a ckey linked to this discord account, go back into game and try generating another! See {instructions_link} for more information. \n\nIf it's still failing after a few tries, ask for support from the verification team."
                 )
 
         log.info(
@@ -533,7 +533,7 @@ class TGverify(BaseCog):
 
         if player is None:
             return await interaction.edit_original_response(
-                content=f"Sorry {interaction.user} looks like we couldn't look up your user, ask the verification team for support!"
+                content=f"Sorry {interaction.user.name} looks like we couldn't look up your user, ask the verification team for support!"
             )
 
         if not prexisting:
@@ -555,9 +555,9 @@ class TGverify(BaseCog):
                 reason="User has verified against their in game living minutes",
             )
 
-        fuck = f"Congrats {interaction.user} your verification is complete, but you do not have {min_required_living_minutes} minutes in game as a living crew member (you have {player['living_time']}), so you may not have access to all channels. You can always verify again later by simply doing `?verify` and if you have enough minutes, you will gain access to the remaining channels"
+        fuck = f"Congrats {interaction.user.name} your verification is complete, but you do not have {min_required_living_minutes} minutes in game as a living crew member (you have {player['living_time']}), so you may not have access to all channels. You can always verify again later by simply doing `?verify` and if you have enough minutes, you will gain access to the remaining channels"
         if successful:
-            fuck = f"Congrats {interaction.user} your verification is complete"
+            fuck = f"Congrats {interaction.user.name} your verification is complete"
         return await interaction.edit_original_response(content=fuck)
     
     @verify.error
