@@ -555,62 +555,13 @@ class TGverify(BaseCog):
                 reason="User has verified against their in game living minutes",
             )
 
-        fuck = f"Congrats {interaction.user.name} your verification is complete, but you do not have {min_required_living_minutes} minutes in game as a living crew member (you have {player['living_time']}), so you may not have access to all channels. You can always verify again later by simply doing `?verify` and if you have enough minutes, you will gain access to the remaining channels"
         if successful:
-            fuck = f"Congrats {interaction.user.name} your verification is complete"
-        return await interaction.edit_original_response(content=fuck)
+            return await interaction.edit_original_response(content=f"Congrats {interaction.user.name} your verification is complete")
+        
+        return await interaction.edit_original_response(
+            content=f"Congrats {interaction.user.name} your verification is complete, but you do not have {min_required_living_minutes} minutes in game as a living crew member (you have {player['living_time']}), so you may not have access to all channels. You can always verify again later by simply doing `?verify` and if you have enough minutes, you will gain access to the remaining channels"
+        )
     
-    @verify.error
-    async def verify_error(self, ctx, error):
-        # Our custom, something recoverable went wrong error type
-        if isinstance(error, TGRecoverableError):
-            embed = discord.Embed(
-                title=f"Error attempting to verify you:",
-                description=f"{format(error)}",
-                color=0xFF0000,
-            )
-            await ctx.send(content=f"", embed=embed)
-
-        elif isinstance(error, commands.MaxConcurrencyReached):
-            embed = discord.Embed(
-                title=f"There are too many verifications in process, try again in 30 seconds:",
-                description=f"{format(error)}",
-                color=0xFF0000,
-            )
-            await ctx.send(content=f"", embed=embed)
-            log.exception(
-                f"Too many users attempting to verify concurrently, db wait hit?"
-            )
-
-        elif isinstance(error, commands.CommandOnCooldown):
-            embed = discord.Embed(
-                title=f"Hey slow down buddy:",
-                description=f"{format(error)}",
-                color=0xFF0000,
-            )
-            await ctx.send(content=f"", embed=embed)
-            log.warning(
-                f"Verification limit hit, user is being bad {ctx.author}, discord id {ctx.author.id}"
-            )
-
-        elif isinstance(error, commands.NoPrivateMessage):
-            embed = discord.Embed(
-                title=f"Wrong channel, bud, leather club is 3 blocks down:",
-                description=f"{format(error)}",
-                color=0xFF0000,
-            )
-            await ctx.send(content=f"", embed=embed)
-        else:
-            # Something went badly wrong, log to the console
-            log.exception("Internal error while verifying a user")
-            # now pretend everything is fine to the user :>
-            embed = discord.Embed(
-                title=f"System error occurred",
-                description=f"Contact the server admins for assistance",
-                color=0xFF0000,
-            )
-            await ctx.send(content=f"", embed=embed)
-
     @tgverify.command()
     async def test(self, ctx, discord_user: discord.User):
         """
