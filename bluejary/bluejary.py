@@ -19,10 +19,6 @@ class BluejaryBot(commands.Cog):
 
         def_cfg = {
             "id_emoji": None,
-            "id_board": None,
-            "board_count": None,
-            "board_map": None,
-            "allow_board": None,
         }
 
         self.config.register_guild(**def_cfg)
