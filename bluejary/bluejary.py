@@ -42,7 +42,7 @@ class BluejaryBot(commands.Cog):
         if not message.guild or message.author.bot:
             return
         if "tail" in message.content.lower():
-            await message.ctx.reply("tail????", mention_author=False)
+            await message.channel.send("tail????", reference=message)
         emoji = await message.guild.fetch_emoji(await self.config.guild(message.guild).id_emoji())
         if emoji.name in message.content:
             await message.add_reaction(emoji)
