@@ -19,7 +19,8 @@ class BluejaryBot(commands.Cog):
 
         def_cfg = {
             "id_emoji": None,
-            "id_emoji_tail": None
+            "id_emoji_tail": None,
+            "id_emoji_stuff": None,
         }
 
         self.config.register_guild(**def_cfg)
@@ -47,6 +48,15 @@ class BluejaryBot(commands.Cog):
         except Exception:
             await ctx.send("Failed to update value, check your syntax")
 
+    @bluejary.command()
+    async def id_emoji_stuff(self, ctx: commands.Context, value):
+        cfg = self.config.guild(ctx.guild)
+        try:
+            await cfg.id_emoji_stuff.set(int(value))
+            await ctx.send("Updated value")
+        except Exception:
+            await ctx.send("Failed to update value, check your syntax")
+
     @commands.Cog.listener("on_message")
     async def on_message(self, message: Message):
         if not message.guild or message.author.bot:
@@ -54,6 +64,9 @@ class BluejaryBot(commands.Cog):
         if "tail" in message.content.lower():
             emoji2 = await message.guild.fetch_emoji(await self.config.guild(message.guild).id_emoji_tail())
             await message.add_reaction(emoji2)
+        if "m stuff" in message.content.lower():
+            emoji3 = await message.guild.fetch_emoji(await self.config.guild(message.guild).id_emoji_stuff())
+            await message.add_reaction(emoji3)
         emoji = await message.guild.fetch_emoji(await self.config.guild(message.guild).id_emoji())
         if emoji.name in message.content:
             await message.add_reaction(emoji)
