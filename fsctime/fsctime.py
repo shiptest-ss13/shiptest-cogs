@@ -6,7 +6,7 @@ from math import floor
 
 import discord
 
-from redbot.core import app_commands, commands, checks, Config, utils
+from redbot.core import commands, checks, Config
 
 __version__ = "1.0.0"
 __author__ = "MarkSuckerberg"
@@ -48,14 +48,14 @@ class FSCTime(commands.Cog):
         self.time_loop = bot.loop.create_task(self.time_update_loop())
     
     def cog_unload(self):
-        self.serv.cancel()
+        self.time_loop.cancel()
 
     @commands.hybrid_command()
     async def fsctime(self, ctx):
         """
         Displays the current time in FSC
         """
-        await ctx.send(await self.get_date())
+        await ctx.send(self.get_date())
 
     @commands.hybrid_command()
     @checks.admin_or_permissions(manage_guild=True)
@@ -100,11 +100,11 @@ class FSCTime(commands.Cog):
                     cached = await channel.send("caching initial context")
                     await cfg.message_id.set(cached.id)
 
-            await cached.edit(content=await self.get_date())
+            await cached.edit(content=self.get_date())
         
         await asyncio.sleep(60)
 
-    async def get_date():
+    def get_date():
         timestamp = datetime.utcnow().timestamp()
         days = floor(timestamp / UNIX_DAYS)
         years = floor(days / 365) + 481
