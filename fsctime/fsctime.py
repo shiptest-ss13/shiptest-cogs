@@ -58,7 +58,7 @@ class FSCTime(commands.Cog):
         """
         date = self.get_date()
         time = datetime.utcnow().strftime("%H:%M")
-        await ctx.send(f"{time}, {date}")
+        await ctx.send(content=None, embed=self.generate_embed())
 
     @commands.hybrid_command()
     @checks.admin_or_permissions(manage_guild=True)
@@ -108,9 +108,13 @@ class FSCTime(commands.Cog):
                         cached = await channel.send("caching initial context")
                         await cfg.message_id.set(cached.id)
 
-                await cached.edit(content=self.get_date())
+                await cached.edit(content=None, embed=self.generate_embed())
 
             await asyncio.sleep(60)
+
+    def generate_embed(self):
+        embed = discord.Embed(title="Current Sector Time", description=self.get_date())
+        return embed
 
     def get_date(self):
         timestamp = datetime.utcnow().timestamp() - BYOND_EPOCH #I hate this
