@@ -52,10 +52,14 @@ class FSCTime(commands.Cog):
         self.time_loop.cancel()
 
     @commands.hybrid_command()
-    async def fsctime(self, ctx, time = datetime.utcnow()):
+    async def fsctime(self, ctx, timestamp: int = None):
         """
         Displays the current time in FSC
         """
+        if(timestamp == None):
+            time = datetime.utcnow()
+        else:
+            time = datetime.fromtimestamp(timestamp)
         await ctx.send(content=None, embed=self.generate_embed(time))
 
     @commands.guild_only()
@@ -100,33 +104,32 @@ class FSCTime(commands.Cog):
         channel = await cfg.channel_id()
         await ctx.send(f"Channel: {channel}\nMessage: {message}")
 
+    @discord.ext.tasks.loop(minutes=1)
     async def time_update_loop(self):
-        while self == self.bot.get_cog("FSCTime"):
-            for guild in self.bot.guilds:
-                cfg = self.config.guild(guild)
+        for guild in self.bot.guilds:
+            cfg = self.config.guild(guild)
 
-                message = await cfg.message_id()
-                channel = await cfg.channel_id()
-                cached: discord.Message
+            message = await cfg.message_id()
+            channel = await cfg.channel_id()
+            cached: discord.Message
 
-                if(channel == None):
-                    continue
+            if(channel == None):
+                continue
 
-                if(message == None):
-                    if(isinstance(message, str)): 
-                        message = int(message)
+            if(message == None):
+                if(isinstance(message, str)): 
+                    message = int(message)
+                cached = await channel.send("caching initial context")
+                await cfg.message_id.set(cached.id)
+            else:
+                try:
+                    cached = await channel.fetch_message(message)
+                except(discord.NotFound):
                     cached = await channel.send("caching initial context")
                     await cfg.message_id.set(cached.id)
-                else:
-                    try:
-                        cached = await channel.fetch_message(message)
-                    except(discord.NotFound):
-                        cached = await channel.send("caching initial context")
-                        await cfg.message_id.set(cached.id)
 
-                await cached.edit(content=None, embed=self.generate_embed())
-
-            await asyncio.sleep(60)
+            await cached.edit(content=None, embed=self.generate_embed())
+            await channel.send("Updated time!")
 
     def generate_embed(self, time = datetime.utcnow()):
         embed = discord.Embed(title="Current Sector Time", description=f"{time.strftime('%H:%M')} {self.get_date(time)}")
