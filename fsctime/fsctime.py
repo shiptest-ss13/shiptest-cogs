@@ -107,12 +107,14 @@ class FSCTime(commands.Cog):
     def get_date(self):
         timestamp = datetime.utcnow().timestamp()
         days = floor(timestamp / UNIX_DAYS)
-        years = floor(days / 365) + 481
+        years = floor(days / 365) + 451
 
         day_of_year = days % 365 + 1
         month_of_year = floor(day_of_year / 28)
 
         day_of_month = day_of_year % 28 + 1
         month_name = MONTH_NAMES[month_of_year]
+
+        return f"{days} days, {day_of_year} days into {month_name} {month_of_year}, {day_of_month} {years} FSC"
 
         return f"{month_name} {day_of_month}, {years} FSC"
