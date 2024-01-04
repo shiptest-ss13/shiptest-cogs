@@ -137,7 +137,7 @@ class FSCTime(commands.Cog):
     def generate_embed(self, time = None):
         if(time == None):
             time = datetime.utcnow()
-        embed = discord.Embed(title="Current Sector Time", description=f"{time.strftime('%H:%M')} {self.get_date(time)}")
+        embed = discord.Embed(title="Current Sector Time", description=f"{time.strftime('%H:%M')} {self.get_date(time)}", timestamp=time, color=0x00ff00)
         return embed
 
     def get_date(self, time = None):
