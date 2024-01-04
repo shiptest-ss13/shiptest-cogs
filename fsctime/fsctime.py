@@ -6,7 +6,7 @@ from math import floor
 
 import discord
 
-from redbot.core import commands, checks, Config
+from redbot.core import commands, checks, Config, app_commands
 
 __version__ = "1.0.0"
 __author__ = "MarkSuckerberg"
@@ -58,8 +58,17 @@ class FSCTime(commands.Cog):
         """
         await ctx.send(content=None, embed=self.generate_embed())
 
-    @commands.hybrid_command()
-    @checks.admin_or_permissions(manage_guild=True)
+    @commands.guild_only()
+    @commands.hybrid_group()
+    @checks.admin_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
+    async def setfsctime(self, ctx):
+        """
+        Configuration group for the SS13 status command
+        """
+        pass
+
+    @fsctime.command()
     async def setchannel(self, ctx, channel: discord.TextChannel):
         """
         Sets the channel to post the time in
@@ -72,8 +81,7 @@ class FSCTime(commands.Cog):
         await cfg.channel_id.set(channel.id)
         await ctx.send("Channel set!")
 
-    @commands.hybrid_command()
-    @checks.admin_or_permissions(manage_guild=True)
+    @fsctime.command()
     async def setmessage(self, ctx, message: discord.Message):
         """
         Sets the message to update
@@ -82,8 +90,7 @@ class FSCTime(commands.Cog):
         await cfg.message_id.set(message.id)
         await ctx.send("Message set!")
 
-    @commands.hybrid_command()
-    @checks.admin_or_permissions(manage_guild=True)
+    @fsctime.command()
     async def current(self, ctx):
         """
         Shows the current settings
