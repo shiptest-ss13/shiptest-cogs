@@ -57,8 +57,8 @@ class FSCTime(commands.Cog):
         Displays the current time in FSC
         """
         date = self.get_date()
-        time = datetime.utcnow().strftime("%H:%M:%S")
-        await ctx.send(f"{date} {time}")
+        time = datetime.utcnow().strftime("%H:%M")
+        await ctx.send(f"{time}, {date}")
 
     @commands.hybrid_command()
     @checks.admin_or_permissions(manage_guild=True)
@@ -67,6 +67,10 @@ class FSCTime(commands.Cog):
         Sets the channel to post the time in
         """
         cfg = self.config.guild(ctx.guild)
+        
+        message = await channel.send("caching initial context")
+        await cfg.message_id.set(message.id)
+
         await cfg.channel_id.set(channel.id)
         await ctx.send("Channel set!")
 
@@ -105,7 +109,7 @@ class FSCTime(commands.Cog):
 
             await cached.edit(content=self.get_date())
 
-        await asyncio.sleep(60)
+        await asyncio.sleep(10)
 
     def get_date(self):
         timestamp = datetime.utcnow().timestamp() - BYOND_EPOCH #I hate this
