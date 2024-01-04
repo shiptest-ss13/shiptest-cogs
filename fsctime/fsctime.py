@@ -157,13 +157,13 @@ class FSCTime(commands.Cog):
         days = floor(timestamp / UNIX_DAYS)
         years = floor(days / 365) + 481
 
-        day_of_year = days % 365 + 1
+        day_of_year = days % 365
         month_of_year = floor(day_of_year / 28)
 
-        day_of_month = day_of_year % 28
+        day_of_month = day_of_year % 28 + 1
         month_name = MONTH_NAMES[month_of_year]
 
-        weekday = floor(day_of_year / 7) % 7
+        weekday = day_of_year % 7
         weekday_name = WEEKDAY_NAMES[weekday]
 
         return f"{weekday_name} {month_name} {day_of_month}, {years} FSC"
