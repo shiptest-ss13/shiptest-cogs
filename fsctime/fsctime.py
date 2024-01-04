@@ -104,34 +104,35 @@ class FSCTime(commands.Cog):
         channel = await cfg.channel_id()
         await ctx.send(f"Channel: {channel}\nMessage: {message}")
 
-    @discord.ext.tasks.loop(minutes=1)
     async def time_update_loop(self):
-        for guild in self.bot.guilds:
-            cfg = self.config.guild(guild)
+        while True:
+            for guild in self.bot.guilds:
+                cfg = self.config.guild(guild)
 
-            message = await cfg.message_id()
-            channel = await cfg.channel_id()
+                message = await cfg.message_id()
+                channel = await cfg.channel_id()
 
-            if(channel == None):
-                continue
+                if(channel == None):
+                    continue
 
-            channel: discord.TextChannel = guild.get_channel(channel)
-            cached: discord.Message = None
+                channel: discord.TextChannel = guild.get_channel(channel)
+                cached: discord.Message = None
 
-            if(message == None):
-                if(isinstance(message, str)): 
-                    message = int(message)
-                cached = await channel.send("caching initial context")
-                await cfg.message_id.set(cached.id)
-            else:
-                try:
-                    cached = await channel.fetch_message(message)
-                except(discord.NotFound):
+                if(message == None):
+                    if(isinstance(message, str)): 
+                        message = int(message)
                     cached = await channel.send("caching initial context")
                     await cfg.message_id.set(cached.id)
+                else:
+                    try:
+                        cached = await channel.fetch_message(message)
+                    except(discord.NotFound):
+                        cached = await channel.send("caching initial context")
+                        await cfg.message_id.set(cached.id)
 
-            await cached.edit(content=None, embed=self.generate_embed())
-            await channel.send("Updated time!")
+                await cached.edit(content=None, embed=self.generate_embed())
+
+            await asyncio.sleep(60)
 
     def generate_embed(self, time = datetime.utcnow()):
         embed = discord.Embed(title="Current Sector Time", description=f"{time.strftime('%H:%M')} {self.get_date(time)}")
