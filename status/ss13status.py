@@ -613,7 +613,7 @@ class SS13Status(commands.Cog):
         now = datetime.utcnow()
         while self == self.bot.get_cog("SS13Status"):
             log.debug("Starting server checks")
-                     
+
             channel = self.bot.get_channel(await self.config.new_round_channel())
             toggle = await self.config.topic_toggle()
             server = await self.config.server()

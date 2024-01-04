@@ -1,4 +1,4 @@
-from .ss13mon import SS13Mon
+from .ss13mon import FSCTime
 
 def setup(bot):
-    bot.add_cog(SS13Mon(bot))
+    bot.add_cog(FSCTime(bot))
