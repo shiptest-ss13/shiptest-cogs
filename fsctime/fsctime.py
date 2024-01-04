@@ -55,7 +55,7 @@ class FSCTime(commands.Cog):
         """
         Displays the current time in FSC
         """
-        await ctx.send(await get_date())
+        await ctx.send(await self.get_date())
 
     @commands.hybrid_command()
     @checks.admin_or_permissions(manage_guild=True)
@@ -85,6 +85,9 @@ class FSCTime(commands.Cog):
             channel = await cfg.channel_id()
             cached: discord.Message
 
+            if(channel == None):
+                continue
+
             if(message == None):
                 if(isinstance(message, str)): 
                     message = int(message)
@@ -97,7 +100,9 @@ class FSCTime(commands.Cog):
                     cached = await channel.send("caching initial context")
                     await cfg.message_id.set(cached.id)
 
-            await cached.edit(content=await get_date())
+            await cached.edit(content=await self.get_date())
+        
+        await asyncio.sleep(60)
 
     async def get_date():
         timestamp = datetime.utcnow().timestamp()
