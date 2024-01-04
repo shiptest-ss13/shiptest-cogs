@@ -130,16 +130,19 @@ class FSCTime(commands.Cog):
                         cached = await channel.send("caching initial context")
                         await cfg.message_id.set(cached.id)
 
-                await cached.edit(content=None, embed=self.generate_embed())
-                await channel.send(f"Updated {datetime.utcnow().strftime('%H:%M')}!")
+                await cached.edit(content=None, embed=self.generate_embed(datetime.utcnow()))
 
-            await asyncio.sleep(30)
+            await asyncio.sleep(60)
 
-    def generate_embed(self, time = datetime.utcnow()):
+    def generate_embed(self, time = None):
+        if(time == None):
+            time = datetime.utcnow()
         embed = discord.Embed(title="Current Sector Time", description=f"{time.strftime('%H:%M')} {self.get_date(time)}")
         return embed
 
-    def get_date(self, time = datetime.utcnow()):
+    def get_date(self, time = None):
+        if(time == None):
+            time = datetime.utcnow()
         timestamp = time.timestamp() - BYOND_EPOCH #I hate this
         days = floor(timestamp / UNIX_DAYS)
         years = floor(days / 365) + 481
