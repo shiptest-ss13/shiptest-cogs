@@ -1,4 +1,4 @@
-from .fsctime import fsctime
+from .fsctime import FSCTime
 
 def setup(bot):
-    bot.add_cog(SS13Mon(bot))
+    bot.add_cog(FSCTime(bot))
