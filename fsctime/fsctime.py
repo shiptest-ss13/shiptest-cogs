@@ -105,7 +105,7 @@ class FSCTime(commands.Cog):
         await ctx.send(f"Channel: {channel}\nMessage: {message}")
 
     async def time_update_loop(self):
-        while True:
+        while self == self.bot.get_cog("FSCTime"):
             for guild in self.bot.guilds:
                 cfg = self.config.guild(guild)
 
@@ -131,6 +131,7 @@ class FSCTime(commands.Cog):
                         await cfg.message_id.set(cached.id)
 
                 await cached.edit(content=None, embed=self.generate_embed())
+                await channel.send("Updated!")
 
             await asyncio.sleep(60)
 
