@@ -15,20 +15,20 @@ log = logging.getLogger("red.SS13Status")
 
 UNIX_DAYS = 60 * 60 * 24
 MONTH_NAMES = {
-    1: "January",
-    2: "February",
-    3: "March",
-    4: "April",
-    5: "May",
-    6: "June",
-    7: "Sol",
-    8: "July",
-    9: "August",
-    10: "September",
-    11: "October",
-    12: "November",
-    13: "December",
-    14: "Year Day"
+    0: "January",
+    1: "February",
+    2: "March",
+    3: "April",
+    4: "May",
+    5: "June",
+    6: "Sol",
+    7: "July",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December",
+    13: "Year Day"
 }
 
 class FSCTime(commands.Cog):
