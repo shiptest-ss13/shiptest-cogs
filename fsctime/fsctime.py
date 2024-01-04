@@ -104,7 +104,7 @@ class FSCTime(commands.Cog):
         
         await asyncio.sleep(60)
 
-    def get_date():
+    def get_date(self):
         timestamp = datetime.utcnow().timestamp()
         days = floor(timestamp / UNIX_DAYS)
         years = floor(days / 365) + 481
