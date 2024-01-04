@@ -56,8 +56,6 @@ class FSCTime(commands.Cog):
         """
         Displays the current time in FSC
         """
-        date = self.get_date()
-        time = datetime.utcnow().strftime("%H:%M")
         await ctx.send(content=None, embed=self.generate_embed())
 
     @commands.hybrid_command()
@@ -113,7 +111,7 @@ class FSCTime(commands.Cog):
             await asyncio.sleep(60)
 
     def generate_embed(self):
-        embed = discord.Embed(title="Current Sector Time", description=self.get_date())
+        embed = discord.Embed(title="Current Sector Time", description=f"{datetime.utcnow().strftime('%H:%M')} {self.get_date()}")
         return embed
 
     def get_date(self):
