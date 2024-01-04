@@ -66,7 +66,7 @@ class FSCTime(commands.Cog):
         """
         cfg = self.config.guild(ctx.guild)
         
-        message = await channel.send("caching initial context")
+        message = await channel.send(content=None, embed=self.generate_embed())
         await cfg.message_id.set(message.id)
 
         await cfg.channel_id.set(channel.id)
