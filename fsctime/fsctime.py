@@ -111,10 +111,12 @@ class FSCTime(commands.Cog):
 
             message = await cfg.message_id()
             channel = await cfg.channel_id()
-            cached: discord.Message
 
             if(channel == None):
                 continue
+
+            channel: discord.TextChannel = guild.get_channel(channel)
+            cached: discord.Message = None
 
             if(message == None):
                 if(isinstance(message, str)): 
