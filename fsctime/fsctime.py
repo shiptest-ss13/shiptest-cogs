@@ -131,9 +131,9 @@ class FSCTime(commands.Cog):
                         await cfg.message_id.set(cached.id)
 
                 await cached.edit(content=None, embed=self.generate_embed())
-                await channel.send("Updated!")
+                await channel.send(f"Updated {datetime.utcnow().strftime('%H:%M')}!")
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(30)
 
     def generate_embed(self, time = datetime.utcnow()):
         embed = discord.Embed(title="Current Sector Time", description=f"{time.strftime('%H:%M')} {self.get_date(time)}")
