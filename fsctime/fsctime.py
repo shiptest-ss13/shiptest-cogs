@@ -160,7 +160,7 @@ class FSCTime(commands.Cog):
         day_of_year = days % 365 + 1
         month_of_year = floor(day_of_year / 28)
 
-        day_of_month = day_of_year % 28 + 1
+        day_of_month = day_of_year % 28
         month_name = MONTH_NAMES[month_of_year]
 
         weekday = floor(day_of_year / 7) % 7
