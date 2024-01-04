@@ -56,7 +56,9 @@ class FSCTime(commands.Cog):
         """
         Displays the current time in FSC
         """
-        await ctx.send(self.get_date())
+        date = self.get_date()
+        time = datetime.utcnow().strftime("%H:%M:%S")
+        await ctx.send(f"{date} {time}")
 
     @commands.hybrid_command()
     @checks.admin_or_permissions(manage_guild=True)
@@ -106,7 +108,7 @@ class FSCTime(commands.Cog):
         await asyncio.sleep(60)
 
     def get_date(self):
-        timestamp = datetime.utcnow().timestamp() - BYOND_EPOCH
+        timestamp = datetime.utcnow().timestamp() - BYOND_EPOCH #I hate this
         days = floor(timestamp / UNIX_DAYS)
         years = floor(days / 365) + 481
 
