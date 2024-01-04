@@ -52,11 +52,11 @@ class FSCTime(commands.Cog):
         self.time_loop.cancel()
 
     @commands.hybrid_command()
-    async def fsctime(self, ctx):
+    async def fsctime(self, ctx, time = datetime.utcnow()):
         """
         Displays the current time in FSC
         """
-        await ctx.send(content=None, embed=self.generate_embed())
+        await ctx.send(content=None, embed=self.generate_embed(time))
 
     @commands.guild_only()
     @commands.hybrid_group()
@@ -128,12 +128,12 @@ class FSCTime(commands.Cog):
 
             await asyncio.sleep(60)
 
-    def generate_embed(self):
-        embed = discord.Embed(title="Current Sector Time", description=f"{datetime.utcnow().strftime('%H:%M')} {self.get_date()}")
+    def generate_embed(self, time = datetime.utcnow()):
+        embed = discord.Embed(title="Current Sector Time", description=f"{time.strftime('%H:%M')} {self.get_date(time)}")
         return embed
 
-    def get_date(self):
-        timestamp = datetime.utcnow().timestamp() - BYOND_EPOCH #I hate this
+    def get_date(self, time = datetime.utcnow()):
+        timestamp = time.timestamp() - BYOND_EPOCH #I hate this
         days = floor(timestamp / UNIX_DAYS)
         years = floor(days / 365) + 481
 
