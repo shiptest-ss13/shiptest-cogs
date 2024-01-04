@@ -15,22 +15,31 @@ log = logging.getLogger("red.SS13Status")
 
 UNIX_DAYS = 60 * 60 * 24
 BYOND_EPOCH = datetime(2000, 1, 1, 0, 0, 0, 0).timestamp()
-MONTH_NAMES = {
-    0: "January",
-    1: "February",
-    2: "March",
-    3: "April",
-    4: "May",
-    5: "June",
-    6: "Sol",
-    7: "July",
-    8: "August",
-    9: "September",
-    10: "October",
-    11: "November",
-    12: "December",
-    13: "Year Day"
-}
+MONTH_NAMES = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "Sol",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+    "Year Day"
+]
+WEEKDAY_NAMES = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+]
 
 class FSCTime(commands.Cog):
 
@@ -132,12 +141,13 @@ class FSCTime(commands.Cog):
 
                 await cached.edit(content=None, embed=self.generate_embed(datetime.utcnow()))
 
-            await asyncio.sleep(60)
+            # Sleep until the next minute
+            await asyncio.sleep(61 - datetime.utcnow().second)
 
     def generate_embed(self, time = None):
         if(time == None):
             time = datetime.utcnow()
-        embed = discord.Embed(title="Current Sector Time", description=f"{time.strftime('%H:%M')} {self.get_date(time)}", timestamp=time, color=0x00ff00)
+        embed = discord.Embed(title="Current Sector Time", description=f"{time.strftime('%H:%M')}\n{self.get_date(time)}", timestamp=time, color=0x00ff00)
         return embed
 
     def get_date(self, time = None):
@@ -153,4 +163,7 @@ class FSCTime(commands.Cog):
         day_of_month = day_of_year % 28 + 1
         month_name = MONTH_NAMES[month_of_year]
 
-        return f"{month_name} {day_of_month}, {years} FSC"
+        weekday = floor(day_of_year / 7) % 7
+        weekday_name = WEEKDAY_NAMES[weekday]
+
+        return f"{weekday_name} {month_name} {day_of_month}, {years} FSC"
