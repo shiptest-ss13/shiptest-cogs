@@ -68,7 +68,7 @@ class FSCTime(commands.Cog):
         """
         pass
 
-    @fsctime.command()
+    @setfsctime.command()
     async def setchannel(self, ctx, channel: discord.TextChannel):
         """
         Sets the channel to post the time in
@@ -81,7 +81,7 @@ class FSCTime(commands.Cog):
         await cfg.channel_id.set(channel.id)
         await ctx.send("Channel set!")
 
-    @fsctime.command()
+    @setfsctime.command()
     async def setmessage(self, ctx, message: discord.Message):
         """
         Sets the message to update
@@ -90,7 +90,7 @@ class FSCTime(commands.Cog):
         await cfg.message_id.set(message.id)
         await ctx.send("Message set!")
 
-    @fsctime.command()
+    @setfsctime.command()
     async def current(self, ctx):
         """
         Shows the current settings
