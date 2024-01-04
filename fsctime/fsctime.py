@@ -85,31 +85,32 @@ class FSCTime(commands.Cog):
         await ctx.send("Message set!")
 
     async def time_update_loop(self):
-        for guild in self.bot.guilds:
-            cfg = self.config.guild(guild)
+        while True:
+            for guild in self.bot.guilds:
+                cfg = self.config.guild(guild)
 
-            message = await cfg.message_id()
-            channel = await cfg.channel_id()
-            cached: discord.Message
+                message = await cfg.message_id()
+                channel = await cfg.channel_id()
+                cached: discord.Message
 
-            if(channel == None):
-                continue
+                if(channel == None):
+                    continue
 
-            if(message == None):
-                if(isinstance(message, str)): 
-                    message = int(message)
-                cached = await channel.send("caching initial context")
-                await cfg.message_id.set(cached.id)
-            else:
-                try:
-                    cached = await channel.fetch_message(message)
-                except(discord.NotFound):
+                if(message == None):
+                    if(isinstance(message, str)): 
+                        message = int(message)
                     cached = await channel.send("caching initial context")
                     await cfg.message_id.set(cached.id)
+                else:
+                    try:
+                        cached = await channel.fetch_message(message)
+                    except(discord.NotFound):
+                        cached = await channel.send("caching initial context")
+                        await cfg.message_id.set(cached.id)
 
-            await cached.edit(content=self.get_date())
+                await cached.edit(content=self.get_date())
 
-        await asyncio.sleep(10)
+            await asyncio.sleep(60)
 
     def get_date(self):
         timestamp = datetime.utcnow().timestamp() - BYOND_EPOCH #I hate this
