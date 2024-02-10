@@ -42,7 +42,6 @@ class GetNotes(BaseCog):
             "mysql_password": "password",
             "mysql_db": "feedback",
             "mysql_prefix": "",
-            "currency_name": "Currency",
             "admin_ckey": {},  # Future thing, not currently used
         }
 
@@ -185,24 +184,6 @@ class GetNotes(BaseCog):
             await ctx.send("There was a problem setting your database prefix")
 
     @setnotes.command()
-    @checks.is_owner()
-    async def currencyname(self, ctx, name: str = None):
-        """
-        Set the name of your meta currency
-
-        Leave blank to reset this option back to the default
-        """
-        try:
-            if name is None:
-                await self.config.guild(ctx.guild).currency_name.set("Currency")
-                await ctx.send("Metacurrency name reset to `Currency`")
-            else:
-                await self.config.guild(ctx.guild).currency_name.set(str(name).title())
-                await ctx.send(f"Metacurrency name set to: `{name}`")
-        except (ValueError, KeyError, AttributeError):
-            await ctx.send("There was a problem setting your currency's name")
-
-    @setnotes.command()
     async def current(self, ctx):
         """
         Gets the current settings for the notes database
@@ -338,21 +319,6 @@ class GetNotes(BaseCog):
 
         results["total_time"] = results["living_time"] + results["ghost_time"]
 
-        # Obtain metacoins and antag tokens (if avaialble).
-        query = f"SELECT metacoins FROM {prefix}player WHERE ckey=%s"
-        try:
-            query = await self.query_database(ctx.guild, query, results["ckey"])
-            results["metacoins"] = (query[0])["metacoins"]
-        except aiomysql.Error:
-            pass
-
-        query = f"SELECT antag_tokens FROM {prefix}player WHERE ckey=%s"
-        try:
-            query = await self.query_database(ctx.guild, query, results["ckey"])
-            results["antag_tokens"] = (query[0])["antag_tokens"]
-        except aiomysql.Error:
-            pass
-
         # Obtain the number of bans and, if applicable, the last ban
         query = f"SELECT bantime FROM {prefix}ban WHERE ckey=%s GROUP BY bantime ORDER BY bantime DESC"
         query = await self.query_database(ctx.guild, query, results["ckey"])
@@ -398,11 +364,6 @@ class GetNotes(BaseCog):
                 f"**Playtime**: {player['total_time']}h ({player['living_time']}h/{player['ghost_time']}h)\n"
                 f"**Deaths per Hour**: {player['deaths_per_hour']}"
             )
-
-            if "metacoins" in player.keys():
-                player_stats += f"\n**{await self.config.guild(ctx.guild).currency_name()}**: {player['metacoins']}"
-            if "antag_tokens" in player.keys():
-                player_stats += f"\n**Antag Tokens**: {player['antag_tokens']}"
 
             embed.add_field(name="__Player Statistics__:", value=player_stats, inline=False)
             embed.add_field(
@@ -462,11 +423,6 @@ class GetNotes(BaseCog):
                 f"**Playtime**: {player['total_time']}h ({player['living_time']}h/{player['ghost_time']}h)\n"
                 f"**Deaths per Hour**: {player['deaths_per_hour']}"
             )
-
-            if "metacoins" in player.keys():
-                player_stats += f"\n**{await self.config.guild(ctx.guild).currency_name()}**: {player['metacoins']}"
-            if "antag_tokens" in player.keys():
-                player_stats += f"\n**Antag Tokens**: {player['antag_tokens']}"
 
             embed.add_field(
                 name="__Identity:__",
