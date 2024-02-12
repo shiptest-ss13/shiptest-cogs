@@ -81,4 +81,5 @@ class Report(commands.Cog):
         channel_id = await self.config.guild(message.guild).reports_channel()
         if message.channel.id != channel_id:
             return
-        await self.report()
+        await self.send_report(message.content, True)
+        await message.delete()
