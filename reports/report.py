@@ -36,14 +36,14 @@ class Report(commands.Cog):
     async def reports_channel(self, ctx: commands.Context, new_channel: discord.TextChannel):
         try:
             if new_channel is not None:
-                await self.config.admin_channel.set(new_channel.id)
+                await self.config.reports_channel.set(new_channel.id)
                 await ctx.send(f"Reports will be recorded from: {new_channel.mention}")
             else:
-                await self.config.admin_channel.set(None)
+                await self.config.reports_channel.set(None)
                 await ctx.send("I will no longer relay reports.")
 
         except(ValueError, KeyError, AttributeError):
-            await ctx.send("There was a problem setting the admin channel. Please check your entry and try again.")
+            await ctx.send("There was a problem setting the reports channel. Please check your entry and try again.")
 
     @commands.command()
     @commands.cooldown(1, 240, type=commands.BucketType.user)
