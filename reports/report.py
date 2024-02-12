@@ -1,18 +1,10 @@
-import asyncio
-from datetime import datetime
-import logging
-from typing import Union
-
 from redbot.core import commands, Config, checks, app_commands
 import discord
 
 class Report(commands.Cog):
-    im_doing_shit = False
-    old_updates = {}
-
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.config = Config.get_conf(self, 3257141233294, force_registration=True)
+        self.config = Config.get_conf(self, 3252041233294, force_registration=True)
 
         default_global = {
             "admin_channel": None,
@@ -22,11 +14,13 @@ class Report(commands.Cog):
         self.config.register_global(**default_global)
 
     @commands.hybrid_group()
-    async def setReports(self, ctx: commands.Context):
+    @checks.mod_or_permissions(administrator=True)
+    @app_commands.default_permissions(administrator=True)
+    async def set_reports(self, ctx: commands.Context):
         pass
 
-    @setReports.command()
-    async def adminChannel(self, ctx: commands.Context, newChannel: discord.TextChannel):
+    @set_reports.command()
+    async def admin_channel(self, ctx: commands.Context, newChannel: discord.TextChannel):
         try:
             if newChannel is not None:
                 await self.config.admin_channel.set(newChannel.id)
@@ -38,8 +32,8 @@ class Report(commands.Cog):
         except(ValueError, KeyError, AttributeError):
             await ctx.send("There was a problem setting the admin channel. Please check your entry and try again.")
 
-    @setReports.command()
-    async def reportsChannel(self, ctx: commands.Context, newChannel: discord.TextChannel):
+    @set_reports.command()
+    async def reports_channel(self, ctx: commands.Context, newChannel: discord.TextChannel):
         try:
             if newChannel is not None:
                 await self.config.admin_channel.set(newChannel.id)
@@ -53,11 +47,12 @@ class Report(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 240, type=commands.BucketType.user)
-    async def report(self, ctx: commands.Context, message: str = "", anonymous: bool = True):
+    async def report(self, ctx: commands.Context, *args):
         """
-        Send a(n optionally anonymous) report to admins about staff behaviour.
+        Send an anonymous report to admins about staff behaviour. The slash command is preferred.
         """
-        await self.sendReport(message, anonymous, ctx.author.name)
+        message = " ".join(args)
+        await self.sendReport(message, True, ctx.author.name)
         await ctx.message.delete()
 
     @app_commands.command(name="report", description="Send a report to the staff.")
@@ -69,7 +64,7 @@ class Report(commands.Cog):
         await self.sendReport(message, anonymous, interaction.user.name)
         await interaction.response.send_message("Report sent.", ephemeral=True)
 
-    async def sendReport(self, message: str, anonymous: bool = True, username: str = None):
+    async def send_report(self, message: str, anonymous: bool = True, username: str = None):
         channel = self.bot.get_channel(await self.config.admin_channel())
 
         name = "anonymous"
