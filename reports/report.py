@@ -46,7 +46,6 @@ class Report(commands.Cog):
             await ctx.send("There was a problem setting the reports channel. Please check your entry and try again.")
 
     @commands.command()
-    @commands.cooldown(1, 240, type=commands.BucketType.user)
     async def report(self, ctx: commands.Context, *args):
         """
         Send an anonymous report to admins about staff behaviour. The slash command is preferred.
