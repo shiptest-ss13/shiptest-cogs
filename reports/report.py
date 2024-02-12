@@ -20,11 +20,11 @@ class Report(commands.Cog):
         pass
 
     @set_reports.command()
-    async def admin_channel(self, ctx: commands.Context, newChannel: discord.TextChannel):
+    async def admin_channel(self, ctx: commands.Context, new_channel: discord.TextChannel):
         try:
-            if newChannel is not None:
-                await self.config.admin_channel.set(newChannel.id)
-                await ctx.send(f"Reports will be sent to: {newChannel.mention}")
+            if new_channel is not None:
+                await self.config.admin_channel.set(new_channel.id)
+                await ctx.send(f"Reports will be sent to: {new_channel.mention}")
             else:
                 await self.config.admin_channel.set(None)
                 await ctx.send("I will no longer relay reports.")
@@ -33,11 +33,11 @@ class Report(commands.Cog):
             await ctx.send("There was a problem setting the admin channel. Please check your entry and try again.")
 
     @set_reports.command()
-    async def reports_channel(self, ctx: commands.Context, newChannel: discord.TextChannel):
+    async def reports_channel(self, ctx: commands.Context, new_channel: discord.TextChannel):
         try:
-            if newChannel is not None:
-                await self.config.admin_channel.set(newChannel.id)
-                await ctx.send(f"Reports will be recorded from: {newChannel.mention}")
+            if new_channel is not None:
+                await self.config.admin_channel.set(new_channel.id)
+                await ctx.send(f"Reports will be recorded from: {new_channel.mention}")
             else:
                 await self.config.admin_channel.set(None)
                 await ctx.send("I will no longer relay reports.")
