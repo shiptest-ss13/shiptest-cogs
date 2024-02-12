@@ -1,0 +1,15 @@
+{
+    "author": ["marksuckerberg"],
+    "install_msg": "Thank you for installing this report cog.",
+    "name": "Automated Staff Report System",
+    "short": "Staff Reports",
+    "description": "Allows users to send optionally anonymous reports to staff members. Reports are sent to a specified channel and can be viewed by staff members. This cog is designed for use on Space Station 13 servers, but can be used on any server.",
+    "permissions" : ["Manage Messages"],
+    "tags": [
+        "Space Station 13",
+        "Game",
+        "Administration",
+        "Utility",
+        "SS13"
+    ]
+}
