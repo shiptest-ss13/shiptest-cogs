@@ -71,7 +71,12 @@ class Report(commands.Cog):
 
     async def sendReport(self, message: str, anonymous: bool = True, username: str = None):
         channel = self.bot.get_channel(await self.config.admin_channel())
-        embed = discord.Embed(title=f"Staff Feedback ({"anonymous" if anonymous else username})", description=f"{message}")
+
+        name = "anonymous"
+        if not anonymous:
+            name = username
+
+        embed = discord.Embed(title=f"Staff Feedback ({name})", description=f"{message}")
         await channel.send(embed=embed)
 
     @commands.Cog.listener("on_message")
