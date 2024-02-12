@@ -52,7 +52,7 @@ class Report(commands.Cog):
         Send an anonymous report to admins about staff behaviour. The slash command is preferred.
         """
         message = " ".join(args)
-        await self.sendReport(message, True, ctx.author.name)
+        await self.send_report(message, True, ctx.author.name)
         await ctx.message.delete()
 
     @app_commands.command(name="report", description="Send a report to the staff.")
@@ -61,7 +61,7 @@ class Report(commands.Cog):
         """
         Send a(n optionally anonymous) report to admins about staff behaviour.
         """
-        await self.sendReport(message, anonymous, interaction.user.name)
+        await self.send_report(message, anonymous, interaction.user.name)
         await interaction.response.send_message("Report sent.", ephemeral=True)
 
     async def send_report(self, message: str, anonymous: bool = True, username: str = None):
