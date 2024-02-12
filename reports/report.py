@@ -57,7 +57,7 @@ class Report(commands.Cog):
 
     @app_commands.command(name="report", description="Send a report to the staff.")
     @app_commands.guild_only()
-    async def report(self, interaction: discord.Interaction, message: str = "", anonymous: bool = True):
+    async def slash_report(self, interaction: discord.Interaction, message: str = "", anonymous: bool = True):
         """
         Send a(n optionally anonymous) report to admins about staff behaviour.
         """
