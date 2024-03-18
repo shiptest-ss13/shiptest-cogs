@@ -329,7 +329,13 @@ class TGverify(BaseCog):
             await tgdb.clear_all_valid_discord_links_for_ckey(
                 ctx, discord_link.ckey
             )
-            message = await message.edit(content=f"User has been devalidated")
+            member = ctx.guild.get_member(discord_user.id)
+            role = await self.config.guild(ctx.guild).verified_role()
+            role = ctx.guild.get_role(role)
+            if(role):
+                await member.remove_roles(role, reason="User has been deverified")
+
+            message = await message.edit(content=f"User has been deverified")
         else:
             message = await message.edit(
                 content=f"This discord user has no ckey linked"
