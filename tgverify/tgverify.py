@@ -346,6 +346,7 @@ class TGverify(BaseCog):
         message = await ctx.send("Verifying...")
 
         tgdb = self.get_tgdb()
+        discord_member: discord.Member = ctx.guild.get_member(discord_user.id)
         role = await self.config.guild(ctx.guild).verified_role()
         role = ctx.guild.get_role(role)
 
@@ -357,7 +358,7 @@ class TGverify(BaseCog):
         await tgdb.add_discord_link(ctx, ckey, discord_user.id)
 
         if(role):
-            await discord_user.add_roles(role, reason="User has been manually verified")
+            await discord_member.add_roles(role, reason="User has been manually verified")
 
         return await message.edit(content=f"User {discord_user.name} manually verified as {ckey}.")
 
@@ -367,7 +368,7 @@ class TGverify(BaseCog):
     @commands.max_concurrency(3, per=commands.BucketType.guild, wait=False)
     @commands.guild_only()
     @commands.command()
-    async def verify(self, ctx, *, one_time_token: str = None):
+    async def verify(self, ctx: commands.context, *, one_time_token: str = None):
         """
         Attempt to verify the user, based on the passed in one time code.
         
