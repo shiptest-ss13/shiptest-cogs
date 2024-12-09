@@ -74,7 +74,7 @@ class Birds(commands.Cog):
         entity = data["entities"][0]
 
         embed = discord.Embed(
-            title=f"{entity["name"]} (*{entity["sciName"]}*)",
+            title=f"{entity['name']} (*{entity['sciName']}*)",
             color=0x2B74AB,
         )
 
