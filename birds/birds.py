@@ -36,8 +36,9 @@ class Birds(commands.Cog):
         await self.config.guild(self.config.guild).api_key.set(api_key)
         await interaction.response.send_message("API key set!", ephemeral=True)
 
-    @commands.hybrid_command()
+    @commands.guild_only()
     @commands.cooldown(2, 10)
+    @commands.hybrid_command()
     async def bird(self, ctx, bird_name: Optional[str]):
         """
         Get information about a bird.
