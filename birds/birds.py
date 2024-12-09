@@ -26,14 +26,16 @@ class Birds(commands.Cog):
         self.random_total = 361
 
     @app_commands.guild_only()
-    @app_commands.command(name="birdset", description="Set the API key for the birds cog.")
+    @app_commands.command(
+        name="birdset", description="Set the API key for the birds cog."
+    )
     @checks.admin_or_permissions(administrator=True)
     @app_commands.default_permissions(administrator=True)
     async def birdset(self, interaction: discord.Interaction, api_key: str):
         """
         Set your API key for the Birds API.
         """
-        await self.config.guild(self.config.guild).api_key.set(api_key)
+        await self.config.guild(interaction.guild).api_key.set(api_key)
         await interaction.response.send_message("API key set!", ephemeral=True)
 
     @commands.guild_only()
