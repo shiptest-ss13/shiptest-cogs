@@ -82,7 +82,7 @@ class Birds(commands.Cog):
         embed.add_field(name="Order", value=entity["order"], inline=True)
         embed.add_field(name="Family", value=entity["family"], inline=True)
         embed.add_field(name="Conservation Status", value=entity["status"], inline=True)
-        embed.add_field(name="Regions", value=", ".join(entity["regions"]), inline=True)
+        embed.add_field(name="Regions", value=", ".join(entity["region"]), inline=True)
 
         imageCount = len(entity["images"])
         if imageCount > 0:
