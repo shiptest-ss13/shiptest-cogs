@@ -74,15 +74,14 @@ class Birds(commands.Cog):
         entity = data["entities"][0]
 
         embed = discord.Embed(
-            title=entity["name"],
+            title=f"{entity["name"]} (*{entity["sciName"]}*)",
             color=0x2B74AB,
         )
 
-        embed.add_field(name="Scientific Name", value=entity["sciName"], inline=True)
         embed.add_field(name="Order", value=entity["order"], inline=True)
         embed.add_field(name="Family", value=entity["family"], inline=True)
         embed.add_field(name="Conservation Status", value=entity["status"], inline=True)
-        embed.add_field(name="Regions", value=", ".join(entity["region"]), inline=True)
+        embed.add_field(name="Region", value=", ".join(entity["region"]), inline=True)
 
         imageCount = len(entity["images"])
         if imageCount > 0:
