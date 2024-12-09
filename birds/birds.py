@@ -75,7 +75,9 @@ class Birds(commands.Cog):
 
         embed = discord.Embed(
             title=f"{entity['name']} (*{entity['sciName']}*)",
+            description="Data provided by the [Nuthatch API](https://nuthatch.lastelm.software/)",
             color=0x2B74AB,
+            url=f"https://www.allaboutbirds.org/guide/{entity['name'].replace(' ', '_')}",
         )
 
         embed.add_field(name="Order", value=entity["order"], inline=True)
