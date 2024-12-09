@@ -1,5 +1,5 @@
 from .mcmon import MCMon
 
 
-def setup(bot):
+async def setup(bot):
     bot.add_cog(MCMon(bot))
