@@ -86,6 +86,6 @@ class Birds(commands.Cog):
 
         imageCount = len(entity["images"])
         if imageCount > 0:
-            embed.set_image(url=entity["images"][randint(0, imageCount - 1)]["url"])
+            embed.set_image(url=entity["images"][randint(0, imageCount - 1)])
 
         await ctx.send(embed=embed)
