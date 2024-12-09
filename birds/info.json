@@ -1,0 +1,10 @@
+{
+    "author": ["Mark Suckerberg"],
+    "name": "Random Bird Poster",
+    "short": "Randomly bird images.",
+    "description": "Posts an embed containing an image of a bird along with basic information about it. Uses the Nuthatch API (https://nuthatch.lastelm.software/).",
+    "permissions" : [],
+    "tags": [
+        "Birds"
+    ]
+}
