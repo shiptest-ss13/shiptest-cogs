@@ -63,11 +63,11 @@ class Report(commands.Cog):
         await self.send_report(message, anonymous, interaction.user.name)
         await interaction.response.send_message("Report sent.", ephemeral=True)
 
-    async def send_report(self, message: str, anonymous: bool = True, username: str = None):
+    async def send_report(self, message: str, anonymous: bool = True, username: str|None = None):
         channel = self.bot.get_channel(await self.config.admin_channel())
 
         name = "anonymous"
-        if not anonymous:
+        if not anonymous and username:
             name = username
 
         embed = discord.Embed(title=f"Staff Feedback ({name})", description=f"{message}")
@@ -77,7 +77,7 @@ class Report(commands.Cog):
     async def on_message(self, message: discord.Message):
         if not message.guild or message.author.bot:
             return
-        channel_id = await self.config.guild(message.guild).reports_channel()
+        channel_id = await self.config.reports_channel()
         if message.channel.id != channel_id:
             return
         await self.send_report(message.content, True)
